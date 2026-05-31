@@ -195,7 +195,7 @@ map({ "n" }, "\\bc", function()
 end, { desc = "Close all unmodified buffers." })
 
 -- jumping out of terminal mode
-map({ "t" }, "<C-n>", function()
+map({ "t" }, "<C-b>", function()
   vim.cmd.stopinsert()
 end, { desc = "Jumping out of terminal mode." })
 
