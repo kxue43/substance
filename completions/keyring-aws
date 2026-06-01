@@ -1,0 +1,56 @@
+_only_missing_arg() {
+  if [[ ${COMP_WORDS[1]} == "get" ]] && ((COMP_CWORD == 2)); then
+    return 0
+  elif [[ ${COMP_WORDS[1]} == "save" ]] && ((COMP_CWORD == 6)) && [[ "${COMP_WORDS[2]}${COMP_WORDS[4]}" == @(-i-k|-k-i) ]]; then
+    return 0
+  fi
+
+  return 1
+}
+
+_keyring_aws() {
+  local -a opts
+  opts=("'-h  (Show help message)'" "'save (Save to Keychain)'" "'get  (Perform AWS credential process)'")
+
+  if ((COMP_CWORD == 1)) && [[ $2 == "" ]]; then
+    compgen -V COMPREPLY -W "${opts[*]}"
+
+    return 0
+  elif ((COMP_CWORD == 1)) && [[ $2 =~ ^-(h)?$ ]]; then
+    COMPREPLY=("-h")
+
+    return 0
+  elif ((COMP_CWORD == 1)) && ! [[ $2 =~ ^- ]]; then
+    compgen -V COMPREPLY -W "save get" -- "$2"
+
+    return 0
+  elif [[ ${COMP_WORDS[1]} == "get" ]] && ((COMP_CWORD == 2)) && [[ $2 == @(-|-h) ]]; then
+    COMPREPLY=("-h")
+
+    return 0
+  elif [[ ${COMP_WORDS[1]} == "save" ]] && ((COMP_CWORD == 2)) && [[ $2 == @(|-|-[hik]) ]]; then
+    compgen -V COMPREPLY -W "-h -i -k" -- "$2"
+
+    return 0
+  elif [[ ${COMP_WORDS[1]} == "save" ]] && ((COMP_CWORD == 4)) && [[ $2 == @(|-|-[ik]) ]]; then
+    compgen -V COMPREPLY -W "-i -k" -X "${COMP_WORDS[2]}" -- "$2"
+
+    return 0
+  fi
+
+  if ! _only_missing_arg; then
+    return 0
+  fi
+
+  local -a profiles
+  mapfile -t profiles < <(grep "^\[profile " ~/.aws/config)
+
+  profiles=("${profiles[@]/#\[profile /}")
+  profiles=("${profiles[@]/%\]/}")
+
+  compgen -V COMPREPLY -W "${profiles[*]}" -- "$2"
+
+  return 0
+} && complete -o bashdefault -F _keyring_aws keyring-aws
+
+# vim: set ft=sh :

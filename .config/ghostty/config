@@ -1,0 +1,22 @@
+command = /usr/local/bin/bash -l -i
+
+font-size = 16
+font-feature = -calt
+font-thicken = true
+font-thicken-strength = 150
+
+shell-integration = bash
+shell-integration-features = no-cursor
+
+cursor-style = block
+cursor-style-blink = false
+
+theme = Gruvbox Dark
+
+window-save-state = never
+
+macos-option-as-alt = left
+
+keybind = global:alt+f9=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-size = 70%

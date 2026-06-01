@@ -1,0 +1,9 @@
+# The hard part of a completion functin is in fact the flow diagram - when to provide what completions.
+# Get it nailed down before writing the completion code.
+_tn() {
+  compgen -V COMPREPLY -d -- "$2"
+
+  return 0
+} && complete -o bashdefault -F _tn tn
+
+# vim: set ft=sh :

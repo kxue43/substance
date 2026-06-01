@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/godaddy/tartufo
+    rev: "v6.0.0"
+    hooks:
+      - id: tartufo
+
+  - repo: https://github.com/kxue43/shell-cmd-on-change
+    rev: "2.0.0"
+    hooks:
+      - id: shell-cmd-on-change
+        name: set-up
+        args:
+          - "-P.keep"
+          - "~/.config/dotfiles/set-up.sh"
+        stages: [post-merge]
+        always_run: true
+        verbose: true

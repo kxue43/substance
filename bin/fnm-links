@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../utils.sh"
+
+_clean() {
+  if [[ "$(uname -s)" != "Darwin" ]]; then
+    kxue43::log_error "Only use this function on macOS."
+
+    return 1
+  fi
+
+  if [[ -n "${FNM_MULTISHELL_PATH:+x}" ]]; then
+    kxue43::log_info "Cleaning up the $HOME/.local/state/fnm_multishells directory of symlinks older than ${1}."
+
+    find "$(dirname "${FNM_MULTISHELL_PATH}")/" -type l -name '*_*' -mtime "+${1}" -exec rm {} +
+  fi
+}
+
+_count() {
+  local fnm_multishell_dir
+  fnm_multishell_dir="$(dirname "$FNM_MULTISHELL_PATH"/)"
+
+  [[ -d "$fnm_multishell_dir" ]] && find "$fnm_multishell_dir" -type l | wc -l
+}
+
+_list() {
+  if [[ -z "${FNM_MULTISHELL_PATH:+x}" || ! -d "$(dirname "$FNM_MULTISHELL_PATH")" ]]; then
+    kxue43::log_error "The FNM_MULTISHELL_PATH environment variable does not have a valid value."
+
+    return 1
+  fi
+
+  if [[ "$1" =~ ^-[[:digit:]]+$ ]]; then
+    # shellcheck disable=SC2012
+    ls -al "$(dirname "$FNM_MULTISHELL_PATH")" | tail "$1"
+  else
+    ls -al "$(dirname "$FNM_MULTISHELL_PATH")"
+  fi
+}
+
+main() {
+  if (($# == 0)) || [[ $1 == "-h" ]]; then
+    cat <<EOF
+USAGE: fnm-links [-h] [SUBCOMMAND] [-N] [DURATION]
+
+SUBCOMMANDS:
+    list  [-N]          List existing symlinks. If N is an integer, list the newest N links.
+    count               Count the number of existing symlinks for fnm.
+    clean [DURATION]    Clean up fnm symlinks older than DURATION. Defaults to 1d.
+
+OPTIONS:
+    -h                  Show this help message
+EOF
+
+    return 0
+  fi
+
+  case "$1" in
+  count)
+    _count
+    ;;
+  clean)
+    _clean "${2:-1d}"
+    ;;
+  list | ls)
+    shift 1
+
+    _list "$@"
+    ;;
+  *)
+    kxue43::log_info "fnm-links requires a subcommand - list, count or clean."
+
+    return 1
+    ;;
+  esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

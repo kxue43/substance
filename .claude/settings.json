@@ -1,0 +1,19 @@
+{
+  "enabledPlugins": {
+    "deploy-on-aws@agent-plugins-for-aws": true
+  },
+  "extraKnownMarketplaces": {
+    "agent-plugins-for-aws": {
+      "source": {
+        "source": "github",
+        "repo": "awslabs/agent-plugins"
+      }
+    }
+  },
+  "autoUpdatesChannel": "stable",
+  "minimumVersion": "2.1.84",
+  "tui": "default",
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
+  "autoCompactEnabled": true
+}

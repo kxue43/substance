@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../utils.sh"
+
+# Args:
+# * $1 - AWS profile name
+# Returns:
+#   JSON string {"AccessKeyId": "***", "SecretAccessKey": "***"}
+_read_secret() {
+  local os
+  os="$(uname -s)"
+
+  case $os in
+  Darwin)
+    base64 -d < <(security find-generic-password -s "aws-$1" -a "access-key" -w)
+    ;;
+  Linux)
+    base64 -d < <(secret-tool lookup service "aws-$1" username "access-key")
+    ;;
+  *)
+    kxue43::log_error "Only macOS and Linux are supported."
+
+    return 1
+    ;;
+  esac
+}
+
+# Args:
+# * $1 - AWS profile name
+# * $2 - value of AWS Access Key ID
+# * $3 - value of AWS Secret Access Key
+_write_secret() {
+  local secret
+  secret="$(base64 < <(jq -n --arg key_id "$2" --arg access_key "$3" '{"AccessKeyId": $key_id, "SecretAccessKey": $access_key}'))"
+
+  local os
+  os="$(uname -s)"
+
+  case $os in
+  Darwin)
+    security add-generic-password -s "aws-$1" -a "access-key" -p "$secret" -U -T "" "$HOME/Library/Keychains/login.keychain-db"
+    ;;
+  Linux)
+    secret-tool store --label="Password for 'access-key' on 'aws-$1'" service "aws-$1" username "access-key" <<<"$secret"
+    ;;
+  *)
+    kxue43::log_error "Only macOS and Linux are supported."
+
+    return 1
+    ;;
+  esac
+}
+
+_get() {
+  if (($# == 0)) || [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: keyring-aws get [-h] PROFILE
+
+Perform the AWS credential process for the named PROFILE.
+
+ARGUMENTS:
+    PROFILE    AWS profile name
+
+OPTIONS:
+    -h         Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# == 0)); then
+    kxue43::log_error "The positional argument PROFILE is required."
+
+    return 1
+  fi
+
+  jq '{Version: 1, AccessKeyId: .AccessKeyId, SecretAccessKey: .SecretAccessKey}' < <(_read_secret "$1")
+}
+
+_save() {
+  local key_id access_key
+
+  local opt OPTIND OPTARG
+
+  while getopts ":hi:k:" opt; do
+    case $opt in
+    h)
+      cat <<'EOF'
+Usage: keyring-aws save [-h] -i ACCESS_KEY_ID -k SECRET_ACCESS_KEY PROFILE
+
+Save the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY pair for a profile in OSX Keychain.
+
+ARGUMENTS:
+    PROFILE                 AWS profile name
+
+OPTIONS:
+    -h                      Show this help message
+    -i ACCESS_KEY_ID        AWS_ACCESS_KEY_ID
+    -k SECRET_ACCESS_KEY    AWS_SECRET_ACCESS_KEY
+EOF
+
+      return 0
+      ;;
+    i)
+      key_id="$OPTARG"
+      ;;
+    k)
+      access_key="$OPTARG"
+      ;;
+    \?)
+      kxue43::log_error "Invalid option: -$OPTARG"
+
+      return 1
+      ;;
+    :)
+      kxue43::log_error "Option -$OPTARG requires an argument."
+
+      return 1
+      ;;
+    esac
+  done
+
+  shift $((OPTIND - 1))
+
+  if (($# == 0)); then
+    kxue43::log_error "The positional argument PROFILE is required."
+
+    return 1
+  fi
+
+  _write_secret "$1" "$key_id" "$access_key"
+}
+
+main() {
+  if (($# == 0)) || [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: keyring-aws [-h] COMMAND [OPTIONS] [ARGUMENTS...]
+
+Save or retrieve long-term AWS credentials to or from OSX Keychain.
+
+OPTIONS:
+    -h         Show this help message
+
+COMMANDS:
+    save    Save the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY pair for a profile in OSX Keychain.
+    get     Perform the AWS credential process for the named profile.
+EOF
+
+    return 0
+  fi
+
+  case $1 in
+  save)
+    shift 1
+
+    _save "$@"
+    ;;
+  get)
+    shift 1
+
+    _get "$@"
+    ;;
+  *)
+    kxue43::log_error "Unknown command ${1}."
+
+    return 1
+    ;;
+  esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

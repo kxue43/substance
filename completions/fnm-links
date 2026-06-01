@@ -1,0 +1,45 @@
+_fnm_links() {
+  local -a opts
+  opts=("'-h  (Show help message)'" "'list (List symlinks)'" "'count  (Count symlinks)'" "'clean  (Clean up symlinks)'")
+
+  if ((COMP_CWORD == 1)) && [[ $2 == "" ]]; then
+    compgen -V COMPREPLY -W "${opts[*]}"
+
+    return 0
+  elif ((COMP_CWORD == 1)) && [[ $2 == "-" ]]; then
+    COMPREPLY=("-h")
+
+    return 0
+  elif ((COMP_CWORD == 1)) && ! [[ $2 =~ ^- ]]; then
+    compgen -V COMPREPLY -W "list count clean" "$2"
+
+    return 0
+  elif ((COMP_CWORD == 2)) && [[ $3 == "clean" ]] && [[ $2 =~ ^[[:digit:]]+ ]]; then
+    local unit
+    unit="$(sed -E 's/^[0-9]*//' <<<"$2")"
+
+    local num
+    num="$(sed -E 's/[^0-9]*$//' <<<"$2")"
+
+    if [[ $unit == [smhdw] ]]; then
+      # If unit is valid, append an empty space as confirmation.
+      COMPREPLY=("$2")
+    elif [[ $unit == "" ]]; then
+      # If no unit (only number), show all available options.
+      compgen -V COMPREPLY -W "${num}s ${num}m ${num}h ${num}d ${num}w"
+    else
+      # If unit is invalid, strip it and don't leave empty space after the number.
+      compopt -o nospace
+
+      COMPREPLY=("$num")
+    fi
+
+    return 0
+  else
+    COMPREPLY=()
+
+    return 0
+  fi
+} && complete -o bashdefault -F _fnm_links fnm-links
+
+# vim: set ft=sh :
