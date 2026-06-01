@@ -10,6 +10,10 @@
       }
     }
   },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "autoUpdatesChannel": "stable",
   "minimumVersion": "2.1.84",
   "tui": "default",
