@@ -104,6 +104,18 @@ _kxue43_rw::sync() {
   source .venv/bin/activate
 }
 
+_kxue43_rw::branch() {
+  (
+    if ! cd "jarvis-registry"; then
+      kxue43::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
+
+      exit 1
+    fi
+
+    git branch
+  )
+}
+
 rw() {
   if (($# == 0)) || [[ $1 == "-h" ]]; then
     cat <<EOF
@@ -113,6 +125,7 @@ SUBCOMMANDS:
     setup         Set up a Jarvis Registry worktree; must be in a worktree folder
     renew         Pull the latest commits on main; rebase parking branches; delete merged branches; must be in the workspace folder
     sync          Perform uv sync and activate the virtual environment; use -p flag to pull down latest commits; must be in a worktree folder
+    branch        List all branches with worktree occupancy markings
 
 OPTIONS:
     -h            Show this help message
@@ -132,6 +145,9 @@ EOF
 
     _kxue43_rw::sync "$@"
     ;;
+  branch)
+    _kxue43_rw::branch
+    ;;
   *)
     kxue43::log_error "Unknown subcommand $1"
 
@@ -142,7 +158,7 @@ EOF
 
 _kxue43_rw::complete() {
   local -a opts
-  opts=("'-h  (Show help message)'" "'setup  (Setup worktree)'" "'renew  (Renew workspace)'" "'sync  (Sync worktree)'")
+  opts=("'-h  (Show help message)'" "'setup  (Setup worktree)'" "'renew  (Renew workspace)'" "'sync  (Sync worktree)'" "'branch  (List branches)'")
 
   if ((COMP_CWORD == 1)) && [[ $2 == "" ]]; then
     compgen -V COMPREPLY -W "${opts[*]}"
@@ -153,7 +169,7 @@ _kxue43_rw::complete() {
 
     return 0
   elif ((COMP_CWORD == 1)); then
-    compgen -V COMPREPLY -W "setup renew sync" -- "$2"
+    compgen -V COMPREPLY -W "setup renew sync branch" -- "$2"
 
     return 0
   fi
