@@ -60,7 +60,7 @@ renew-registry-worktree() {
 
     printf "\n"
 
-    read -r -p "Continue? [Y/n] " reply
+    read -r -p "Rebase parking branches? [Y/n] " reply
 
     [[ "${reply:-Y}" =~ ^[Yy]$ ]] || exit 1
   ); then
@@ -103,7 +103,7 @@ renew-registry-worktree() {
   local reply
   read -r -p "Delete merged branches? [Y/n] " reply
 
-  [[ "${reply:-Y}" =~ ^[Yy]$ ]] || exit 1
+  [[ "${reply:-Y}" =~ ^[Yy]$ ]] || return 1
 
   local -a to_delete
   mapfile -t to_delete < <(
