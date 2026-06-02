@@ -249,3 +249,5 @@ _kxue43_cplan::complete() {
     return 0
   fi
 } && complete -o bashdefault -F _kxue43_cplan::complete cplan
+
+_kxue43_commands_list+=("cplan")

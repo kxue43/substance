@@ -10,8 +10,9 @@ list-all() {
   local -a executables aliases
 
   # More complex interactive shell functions should be in their own `command_name.sh` file,
-  # which is sourced in `.bashrc` directly.
-  executables=("cplan")
+  # which is sourced in `.bashrc` or `.${env}.bashrc` directly.
+  # shellcheck disable=SC2154 # this variable is appended to by other files
+  executables=("${_kxue43_commands_list[@]}")
 
   mapfile -t -O "${#executables[@]}" executables < <(grep "^[a-zA-Z0-9-]\+() {" "$KXUE43_DOTFILES_DIR/commands.sh")
 

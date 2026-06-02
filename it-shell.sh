@@ -160,6 +160,11 @@ kxue43::bash_init() {
     export KXUE43_USERNAME
   fi
 
+  # Used by the `list-all` interactive shell function
+  if [[ -z "${_kxue43_commands_list:+x}" ]]; then
+    _kxue43_commands_list=()
+  fi
+
   # Perform initialization.
   _kxue43_it_shell::set_path
 
