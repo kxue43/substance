@@ -30,4 +30,5 @@ source "$KXUE43_DOTFILES_DIR/aliases.sh"
 # Load custom commands for interactive use.
 source "$KXUE43_DOTFILES_DIR/commands.sh"
 source "$KXUE43_DOTFILES_DIR/cplan.sh"
+source "$KXUE43_DOTFILES_DIR/acmd.sh"
 # ------------------------------------------------------------------------

@@ -6,48 +6,6 @@ _kxue43_module_set_commands=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-list-all() {
-  local -a executables aliases
-
-  # More complex interactive shell functions should be in their own `command_name.sh` file,
-  # which is sourced in `.bashrc` or `.${env}.bashrc` directly.
-  # shellcheck disable=SC2154 # this variable is appended to by other files
-  executables=("${_kxue43_commands_list[@]}")
-
-  mapfile -t -O "${#executables[@]}" executables < <(grep "^[a-zA-Z0-9-]\+() {" "$KXUE43_DOTFILES_DIR/commands.sh")
-
-  mapfile -t aliases < <(grep "^alias [a-zA-Z0-9-]\+=" "$KXUE43_DOTFILES_DIR/aliases.sh")
-
-  local prefix
-
-  case "$KXUE43_HOSTNAME" in
-  Kes-MacBook-Pro.*)
-    prefix=ascd
-    ;;
-  LM-*)
-    prefix=gd
-    ;;
-  *)
-    prefix=kxue43
-    ;;
-  esac
-
-  if [[ -r "$KXUE43_DOTFILES_DIR/${prefix}.bashrc" ]]; then
-    mapfile -t -O "${#executables[@]}" executables < <(grep "^[a-zA-Z0-9-]\+() {" "$KXUE43_DOTFILES_DIR/${prefix}.bashrc")
-
-    mapfile -t -O "${#executables[@]}" aliases < <(grep "^alias [a-zA-Z0-9-]\+=" "$KXUE43_DOTFILES_DIR/${prefix}.bashrc")
-  fi
-
-  executables=("${executables[@]%() \{}")
-
-  aliases=("${aliases[@]%%=*}")
-  aliases=("${aliases[@]#alias }")
-
-  mapfile -t -O "${#executables[@]}" executables < <(ls -1 "$KXUE43_DOTFILES_DIR/bin/")
-
-  printf "%s\n" "${executables[@]}" "${aliases[@]}" | sort | column -c "$(tput cols)" -x
-}
-
 tl() {
   tmux list-sessions -F '#{session_name}: #{session_windows}win'
 }

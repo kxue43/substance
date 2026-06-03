@@ -20,6 +20,10 @@ pre-commit run --all-files
 - **tartufo** — secret scanning on every commit.
 - **shell-cmd-on-change** — automatically re-runs `set-up.sh` on `post-merge` if tracked files changed.
 
+## Shell version
+
+All shell code targets **Bash 5.1+**. Features unavailable in older Bash (e.g. `mapfile`, `compgen -V`, extended globs, `@(...)` patterns) are fair game.
+
 ## Shell init architecture
 
 `.bashrc` is the entry point. It sources `it-shell.sh`, `aliases.sh`, `commands.sh`, and `cplan.sh` in order, then a `trap … RETURN` fires `kxue43::bash_post_init` (defined in `it-shell.sh`), which loads the **hostname-specific** file based on `$KXUE43_HOSTNAME`.
@@ -27,6 +31,16 @@ pre-commit run --all-files
 All module files guard against double-sourcing via a `_kxue43_module_set_<name>` env var at the top.
 
 `$KXUE43_DOTFILES_DIR` is the canonical env var pointing to the repo root; use it instead of hard-coding the path anywhere.
+
+## Adding a complex interactive shell function
+
+When an interactive shell function is non-trivial (needs its own completion, keybindings, or private helpers), give it its own `<name>.sh` module instead of putting it in `commands.sh`:
+
+1. Create `<name>.sh` with the standard double-loading guard at the top.
+2. Source `utils.sh` at the top of the module (required to use `kxue43::` helpers).
+3. Define the public function, any `_kxue43_<name>::` private helpers, and the bash completion function + `complete` registration inline in the file.
+4. Append the function name to `_kxue43_commands_list` so it appears in `acmd -l`.
+5. Add `source "$KXUE43_DOTFILES_DIR/<name>.sh"` to `.bashrc` (after the existing `source` lines).
 
 ## Adding a new script to `bin/`
 
@@ -54,7 +68,7 @@ _kxue43_module_set_<name>=1
 
 | Scope | Convention | Example |
 |---|---|---|
-| User-facing interactive commands | Plain hyphenated name | `list-all`, `dotfp` |
+| User-facing interactive commands | Plain hyphenated name | `acmd`, `dotfp` |
 | Shared internal helpers (cross-module) | `kxue43::` prefix | `kxue43::log_info`, `kxue43::bash_post_init` |
 | Module-private helpers | `_kxue43_<module>::` prefix | `_kxue43_it_shell::prompt` |
 
