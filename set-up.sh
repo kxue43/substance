@@ -71,11 +71,12 @@ main() {
   # Make necessary directories first.
   mkdir -p "$HOME/.config/ghostty"
   mkdir -p "$HOME/.config/bat"
+  mkdir -p "$HOME/.w3m"
+  mkdir -p "$HOME/.newsboat"
 
   local dotfiles_dir
   dotfiles_dir="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" && pwd)"
 
-  # shellcheck disable=SC2034 # used via nameref
   local -a linked=(
     .bash_logout
     .bash_profile
@@ -92,6 +93,13 @@ main() {
   kxue43::log_info "Installing from $dotfiles_dir"
 
   _link_files "$HOME" "$dotfiles_dir" "linked"
+
+  linked=(config urls)
+  _link_files "$HOME/.newsboat" "$dotfiles_dir/.newsboat" "linked"
+
+  # shellcheck disable=SC2034 # used via nameref
+  linked=(bookmark.html config keymap)
+  _link_files "$HOME/.w3m" "$dotfiles_dir/.w3m" "linked"
 
   local local_bin="$HOME/.local/bin"
 
