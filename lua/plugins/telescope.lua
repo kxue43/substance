@@ -1,11 +1,15 @@
 return {
-  -- Make :Telescope live_grep also search hidden (dot) files.
   {
     "nvim-telescope/telescope.nvim",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     cmd = "Telescope",
     opts = {
       defaults = {
+        file_ignore_patterns = {
+          "__pycache__/",
+          "%.pyc$",
+          "%.pyi$",
+        },
         vimgrep_arguments = {
           "rg",
           "--color=never",
@@ -17,18 +21,6 @@ return {
           "--hidden",
           "--glob",
           "!**/.git/*",
-        },
-      },
-
-      pickers = {
-        find_files = {
-          hidden = false,
-          no_ignore = true,
-        },
-        live_grep = {
-          additional_args = function()
-            return { "--hidden" }
-          end,
         },
       },
     },
