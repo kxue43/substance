@@ -72,6 +72,8 @@ _kxue43_module_set_<name>=1
 | Shared internal helpers (cross-module) | `kxue43::` prefix | `kxue43::log_info`, `kxue43::bash_post_init` |
 | Module-private helpers | `_kxue43_<module>::` prefix | `_kxue43_it_shell::prompt` |
 
+The `_kxue43_<module>::` prefix applies to all bash functions that must not leak into the global namespace — including completion handlers and their helpers in `completions/` files, not just private helpers inside sourced `.sh` modules. `<module>` is always the filename stem with hyphens replaced by underscores. Local names after `::` also use underscores (e.g. `_kxue43_keyring_aws::only_missing_arg`, not `only-missing-arg`).
+
 Never define bare helper functions without a namespace for the interactive shell — they pollute its function namespace.
 
 ### Environment variable naming

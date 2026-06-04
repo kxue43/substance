@@ -1,4 +1,4 @@
-_wdocs() {
+_kxue43_wdocs::completion() {
   local -a opts
   opts=("'-h  (Show help message)'" "'new (New docs tree)'" "'link  (Symlinks to existing tree)'")
 
@@ -25,6 +25,6 @@ _wdocs() {
   fi
 
   return 0
-} && complete -o bashdefault -F _wdocs wdocs
+} && complete -o bashdefault -F _kxue43_wdocs::completion wdocs
 
 # vim: set ft=sh :

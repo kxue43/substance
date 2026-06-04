@@ -1,6 +1,6 @@
 # The hard part of a completion functin is in fact the flow diagram - when to provide what completions.
 # Get it nailed down before writing the completion code.
-_claude_sandbox_exec() {
+_kxue43_claude_sandbox_exec::completion() {
   local config_file="$HOME/.claude-headless.yaml"
 
   if ((COMP_CWORD == 1)) && [[ $2 =~ ^-(h)?$ ]]; then
@@ -14,6 +14,6 @@ _claude_sandbox_exec() {
 
     return 0
   fi
-} && complete -o bashdefault -F _claude_sandbox_exec claude-sandbox-exec
+} && complete -o bashdefault -F _kxue43_claude_sandbox_exec::completion claude-sandbox-exec
 
 # vim: set ft=sh :

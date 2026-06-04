@@ -1,4 +1,4 @@
-_only_missing_arg() {
+_kxue43_keyring_aws::only_missing_arg() {
   if [[ ${COMP_WORDS[1]} == "get" ]] && ((COMP_CWORD == 2)); then
     return 0
   elif [[ ${COMP_WORDS[1]} == "save" ]] && ((COMP_CWORD == 6)) && [[ "${COMP_WORDS[2]}${COMP_WORDS[4]}" == @(-i-k|-k-i) ]]; then
@@ -8,7 +8,7 @@ _only_missing_arg() {
   return 1
 }
 
-_keyring_aws() {
+_kxue43_keyring_aws::completion() {
   local -a opts
   opts=("'-h  (Show help message)'" "'save (Save to Keychain)'" "'get  (Perform AWS credential process)'")
 
@@ -38,7 +38,7 @@ _keyring_aws() {
     return 0
   fi
 
-  if ! _only_missing_arg; then
+  if ! _kxue43_keyring_aws::only_missing_arg; then
     return 0
   fi
 
@@ -51,6 +51,6 @@ _keyring_aws() {
   compgen -V COMPREPLY -W "${profiles[*]}" -- "$2"
 
   return 0
-} && complete -o bashdefault -F _keyring_aws keyring-aws
+} && complete -o bashdefault -F _kxue43_keyring_aws::completion keyring-aws
 
 # vim: set ft=sh :

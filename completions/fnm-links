@@ -1,4 +1,4 @@
-_fnm_links() {
+_kxue43_fnm_links::completion() {
   local -a opts
   opts=("'-h  (Show help message)'" "'list (List symlinks)'" "'count  (Count symlinks)'" "'clean  (Clean up symlinks)'")
 
@@ -40,6 +40,6 @@ _fnm_links() {
 
     return 0
   fi
-} && complete -o bashdefault -F _fnm_links fnm-links
+} && complete -o bashdefault -F _kxue43_fnm_links::completion fnm-links
 
 # vim: set ft=sh :
