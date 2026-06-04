@@ -187,12 +187,13 @@ end, {
 
 -- Close all unmodified buffers
 map({ "n" }, "\\bc", function()
+  local cur = vim.api.nvim_get_current_buf()
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buftype == "" and not vim.bo[buf].modified then
+    if buf ~= cur and vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buftype == "" and not vim.bo[buf].modified then
       vim.api.nvim_buf_delete(buf, {})
     end
   end
-end, { desc = "Close all unmodified buffers." })
+end, { desc = "Close all unmodified buffers except the current one." })
 
 -- jumping out of terminal mode
 map({ "t" }, "<A-n>", function()
