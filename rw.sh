@@ -116,6 +116,29 @@ _kxue43_rw::branch() {
   )
 }
 
+_kxue43_rw::park() {
+  local base
+  base="$(basename "$(pwd)")"
+
+  if [[ "$base" == "jarvis-registry" ]]; then
+    kxue43::log_error "jarvis-registry is not a parked worktree"
+
+    return 1
+  fi
+
+  if ! git rev-parse --verify "refs/heads/parking/$base" &>/dev/null; then
+    kxue43::log_error "No parking branch named 'parking/$base'"
+
+    return 1
+  fi
+
+  if ! git checkout "parking/$base"; then
+    kxue43::log_error "Failed to check out parking/$base branch"
+
+    return 1
+  fi
+}
+
 rw() {
   if (($# == 0)) || [[ $1 == "-h" ]]; then
     cat <<EOF
@@ -126,6 +149,7 @@ SUBCOMMANDS:
     renew         Pull the latest commits on main; rebase parking branches; delete merged branches; must be in the workspace folder
     sync          Perform uv sync and activate the virtual environment; use -p flag to pull down latest commits; must be in a worktree folder
     branch        List all branches with worktree occupancy markings
+    park          Checkout the corresponding parking branch of the worktree
 
 OPTIONS:
     -h            Show this help message
@@ -148,6 +172,9 @@ EOF
   branch)
     _kxue43_rw::branch
     ;;
+  park)
+    _kxue43_rw::park
+    ;;
   *)
     kxue43::log_error "Unknown subcommand $1"
 
@@ -158,7 +185,7 @@ EOF
 
 _kxue43_rw::complete() {
   local -a opts
-  opts=("'-h  (Show help message)'" "'setup  (Setup worktree)'" "'renew  (Renew workspace)'" "'sync  (Sync worktree)'" "'branch  (List branches)'")
+  opts=("'-h  (Show help message)'" "'setup  (Setup worktree)'" "'renew  (Renew workspace)'" "'sync  (Sync worktree)'" "'branch  (List branches)'" "'park  (Checkout parking branch)'")
 
   if ((COMP_CWORD == 1)) && [[ $2 == "" ]]; then
     compgen -V COMPREPLY -W "${opts[*]}"
@@ -169,7 +196,7 @@ _kxue43_rw::complete() {
 
     return 0
   elif ((COMP_CWORD == 1)); then
-    compgen -V COMPREPLY -W "setup renew sync branch" -- "$2"
+    compgen -V COMPREPLY -W "setup renew sync branch park" -- "$2"
 
     return 0
   fi
