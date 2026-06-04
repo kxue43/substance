@@ -1,4 +1,6 @@
 # ------------------------------------------------------------------------
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
+# ------------------------------------------------------------------------
 # Secret environment variables.
 
 # Source credentials from untracked file if exists.
@@ -33,5 +35,58 @@ source "$KXUE43_DOTFILES_DIR/rw.sh"
 
 sso-login() {
   aws sso login --sso-session sso-ascending
+}
+
+jarvis-logs() {
+  local namespace
+  namespace="$(printf "%s\n" "jarvis-demo" "jarvis" | fzf --height=50% --layout=reverse)"
+
+  if [[ -z "$namespace" ]]; then
+    kxue43::log_info "No namespace selected. Exit"
+
+    return 0
+  fi
+
+  local -a pods
+  mapfile -t pods < <(kubectl -n "$namespace" get pods -o name)
+
+  pods=("${pods[@]#"pod/"}")
+
+  local pod
+  pod="$(printf "%s\n" "${pods[@]}" | fzf --height=50% --layout=reverse)"
+
+  if [[ -z "$pod" ]]; then
+    kxue43::log_info "No pod selected. Exit"
+
+    return 0
+  fi
+
+  local since
+
+  read -r -p "Enter --since value (empty means no use): " since
+
+  local follow
+
+  read -r -p "Follow stream? [Y/n] " follow
+
+  follow="${follow:-Y}"
+
+  local dest
+
+  if ! [[ "$follow" =~ ^[Yy]$ ]]; then
+    read -r -p "Enter destination file path (empty means stdout): " dest
+  fi
+
+  local -a args=(-n "$namespace" logs "$pod")
+
+  [[ -n "$since" ]] && args+=(--since "$since")
+
+  if [[ "$follow" =~ ^[Yy]$ ]]; then
+    kubectl "${args[@]}" -f
+  elif [[ -n "$dest" ]]; then
+    kubectl "${args[@]}" >>"$dest"
+  else
+    kubectl "${args[@]}"
+  fi
 }
 # ------------------------------------------------------------------------
