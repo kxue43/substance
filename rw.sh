@@ -9,7 +9,7 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 _kxue43_rw::setup() {
   ln -s ../registry-working-docs/ .working-docs
 
-  local files=(.env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml)
+  local files=(.env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml pyrightconfig.json)
   for file in "${files[@]}"; do
     ln -s ../"${file}" "$file"
   done
