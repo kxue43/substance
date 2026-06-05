@@ -98,6 +98,7 @@ USAGE: jarvis-ldc [-h] [SUBCOMMAND]
 SUBCOMMANDS:
     up    [-n]     docker compose up with the right options
     down           docker compose down with the right options
+    logs           docker logs -f against a container
 
 OPTIONS:
     -h             Show this help message
@@ -122,6 +123,18 @@ EOF
     ;;
   down)
     docker compose -f docker-compose.no-db.yml --profile full down
+    ;;
+  logs)
+    local container
+    container="$(docker ps --format '{{.Names}}' | fzf --height=50% --layout=reverse)"
+
+    if [[ -z "$container" ]]; then
+      kxue43::log_info "No container selected. Exit"
+
+      return 0
+    fi
+
+    docker logs -f "$container"
     ;;
   *)
     kxue43::log_error "Unknown subcommand $1"
