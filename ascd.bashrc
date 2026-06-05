@@ -89,4 +89,45 @@ jarvis-logs() {
     kubectl "${args[@]}"
   fi
 }
+
+jarvis-ldc() {
+  if (($# == 0)) || [[ "$1" == "-h" ]]; then
+    cat <<EOF
+USAGE: jarvis-ldc [-h] [SUBCOMMAND]
+
+SUBCOMMANDS:
+    up    [-n]     docker compose up with the right options
+    down           docker compose down with the right options
+
+OPTIONS:
+    -h             Show this help message
+EOF
+
+    return 0
+  fi
+
+  case "$1" in
+  up)
+    shift 1
+
+    local -a args=("-f" "docker-compose.no-db.yml" "--profile" "full" "up" "-d")
+
+    if [[ "$1" == "-n" ]]; then
+      args+=("--no-build")
+    else
+      args+=("--build")
+    fi
+
+    docker compose "${args[@]}"
+    ;;
+  down)
+    docker compose -f docker-compose.no-db.yml --profile full down
+    ;;
+  *)
+    kxue43::log_error "Unknown subcommand $1"
+
+    return 1
+    ;;
+  esac
+}
 # ------------------------------------------------------------------------
