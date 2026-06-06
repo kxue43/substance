@@ -130,6 +130,16 @@ rm-docker-images() {
   docker image rm "${tags[@]}"
 }
 
+enter-work-mode() {
+  # Enter work mode in the current shell and all sub-processes.
+  # Current work mode env prefix is `ascd`.
+  KXUE43_WORK_MODE="ascd"
+
+  export KXUE43_WORK_MODE
+
+  kxue43::bash_post_init
+}
+
 if [[ "$KXUE43_PLATFORM" == "Darwin" ]]; then
   ls-jdk() {
     /usr/libexec/java_home -V

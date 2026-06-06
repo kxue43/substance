@@ -201,6 +201,10 @@ kxue43::bash_post_init() {
     ;;
   esac
 
+  if [[ -n "${KXUE43_WORK_MODE:+x}" ]]; then
+    prefix="$KXUE43_WORK_MODE"
+  fi
+
   if [[ ! -r "$KXUE43_DOTFILES_DIR/${prefix}.bashrc" ]]; then
     kxue43::log_error "Env-specific .bashrc file '${prefix}.bashrc' does not exist on hostname '$KXUE43_HOSTNAME'."
 
