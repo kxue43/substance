@@ -12,7 +12,7 @@ augroup END
 
 augroup ShellScriptFileType
   autocmd!
-  autocmd BufRead,BufNewFile *.bashrc let g:is_bash = 1 | set filetype=sh
+  autocmd BufRead,BufNewFile *.sh,*.bashrc let b:is_bash = 1 | set filetype=bash
 augroup END
 " ----------------------------------------------------------------------------
 " For Markdown files, show rendered HTML in browser
