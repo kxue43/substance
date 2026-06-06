@@ -71,6 +71,7 @@ main() {
   # Make necessary directories first.
   mkdir -p "$HOME/.config/ghostty"
   mkdir -p "$HOME/.config/bat"
+  mkdir -p "$HOME/.vim"
   mkdir -p "$HOME/.w3m"
   mkdir -p "$HOME/.newsboat"
 
@@ -135,6 +136,9 @@ main() {
   _ensure_symlink "$HOME/.claude/settings.json" "$dotfiles_dir/.claude/settings.json"
   _ensure_symlink "$HOME/.claude/skills" "$dotfiles_dir/.claude/skills/"
   _ensure_symlink "$HOME/.claude/agents" "$dotfiles_dir/.claude/agents/"
+
+  # Symlinking own Vim plugin scripts
+  _ensure_symlink "$HOME/.vim/plugin" "$dotfiles_dir/.vim/plugin/"
 
   # Disable Git commit signing in devcontainer.
   if [[ "$(whoami)" == "vscode" && ! -r "$HOME/.gitconfig.override" ]]; then
