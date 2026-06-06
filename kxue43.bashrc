@@ -1,8 +1,6 @@
 # ------------------------------------------------------------------------
-# Secret environment variables.
+# Environment variables.
 
-# Source credentials from untracked file if exists.
-[[ -r "$KXUE43_DOTFILES_DIR/creds.bashrc" ]] && source "$KXUE43_DOTFILES_DIR/creds.bashrc"
 # ------------------------------------------------------------------------
 # Aliases.
 

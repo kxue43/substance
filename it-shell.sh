@@ -219,5 +219,9 @@ kxue43::bash_post_init() {
     return 1
   fi
 
+  # Source env-specific bashrc file.
   source "$KXUE43_DOTFILES_DIR/${prefix}.bashrc"
+
+  # Source credentials from untracked file if exists.
+  [[ -r "$KXUE43_DOTFILES_DIR/creds.bashrc" ]] && source "$KXUE43_DOTFILES_DIR/creds.bashrc"
 }

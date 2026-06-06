@@ -1,11 +1,4 @@
 # ------------------------------------------------------------------------
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
-# ------------------------------------------------------------------------
-# Secret environment variables.
-
-# Source credentials from untracked file if exists.
-[[ -r "$KXUE43_DOTFILES_DIR/creds.bashrc" ]] && source "$KXUE43_DOTFILES_DIR/creds.bashrc"
-# ------------------------------------------------------------------------
 # Environment variables.
 
 # Make tmux+NeoVim work over SSH
