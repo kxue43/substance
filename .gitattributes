@@ -1,0 +1,3 @@
+*.bashrc      linguist-language=Shell
+bin/*         linguist-language=Shell
+completions/* linguist-language=Shell

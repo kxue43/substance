@@ -38,6 +38,6 @@ set nu
 " Use highlight search by default
 set hlsearch
 
-" Use light background
+" Use dark background
 set bg=dark
 " ----------------------------------------------------------------------------

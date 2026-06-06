@@ -15,4 +15,4 @@ _kxue43_ta::complete() {
   fi
 } && complete -o bashdefault -F _kxue43_ta::complete ta
 
-# vim: set ft=sh :
+# vim: set ft=bash :

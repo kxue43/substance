@@ -53,4 +53,4 @@ _kxue43_keyring_aws::complete() {
   return 0
 } && complete -o bashdefault -F _kxue43_keyring_aws::complete keyring-aws
 
-# vim: set ft=sh :
+# vim: set ft=bash :
