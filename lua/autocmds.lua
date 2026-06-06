@@ -2,6 +2,17 @@ require "nvchad.autocmds"
 
 local map = vim.keymap.set
 
+-- NvChad's nvdash and terminal set `number = false` as a window-local option.
+-- NeoVim copies window-local options to new splits, so opening any split from
+-- those windows propagates the missing line numbers. Re-assert it on entry.
+vim.api.nvim_create_autocmd("BufWinEnter", {
+  callback = function(args)
+    if vim.bo[args.buf].buftype == "" then
+      vim.wo.number = true
+    end
+  end,
+})
+
 -- All shell scripts are in Bash.
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "bash", "sh" },
