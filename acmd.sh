@@ -36,17 +36,7 @@ EOF
 
   local prefix
 
-  case "$KXUE43_HOSTNAME" in
-  Kes-MacBook-Pro.*)
-    prefix=ascd
-    ;;
-  LM-*)
-    prefix=gd
-    ;;
-  *)
-    prefix=kxue43
-    ;;
-  esac
+  kxue43::get_env_prefix "prefix"
 
   if [[ -r "$KXUE43_DOTFILES_DIR/${prefix}.bashrc" ]]; then
     mapfile -t -O "${#executables[@]}" executables < <(grep "^[a-zA-Z0-9-]\+() {" "$KXUE43_DOTFILES_DIR/${prefix}.bashrc")

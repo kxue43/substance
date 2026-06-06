@@ -177,36 +177,44 @@ kxue43::bash_init() {
   _kxue43_it_shell::set_man_pager
 }
 
-kxue43::bash_post_init() {
-  local prefix
+kxue43::get_env_prefix() {
+  local -n __prefix_var="$1"
 
   case "$KXUE43_HOSTNAME" in
   love66* | fedora)
-    prefix=kxue43
+    __prefix_var=kxue43
     ;;
   Kes-MacBook-Pro.*)
-    prefix=ascd
+    __prefix_var=ascd
     ;;
   LM-*)
-    prefix=gd
+    __prefix_var=gd
     ;;
   *)
     if [[ "$KXUE43_USERNAME" == "vscode" ]]; then
-      prefix=kxue43
+      __prefix_var=kxue43
     else
-      kxue43::log_error "Unrecognized hostname '$KXUE43_HOSTNAME'. No env-specific .bashrc file for it."
-
-      return 1
+      __prefix_var=""
     fi
     ;;
   esac
 
   if [[ -n "${KXUE43_WORK_MODE:+x}" ]]; then
-    prefix="$KXUE43_WORK_MODE"
+    __prefix_var="$KXUE43_WORK_MODE"
   fi
+}
 
-  if [[ ! -r "$KXUE43_DOTFILES_DIR/${prefix}.bashrc" ]]; then
-    kxue43::log_error "Env-specific .bashrc file '${prefix}.bashrc' does not exist on hostname '$KXUE43_HOSTNAME'."
+kxue43::bash_post_init() {
+  local prefix
+
+  kxue43::get_env_prefix "prefix"
+
+  if [[ -z "$prefix" ]]; then
+    kxue43::log_error "Unrecognizable hostname '$KXUE43_HOSTNAME'. No env-specific .bashrc file for it"
+
+    return 1
+  elif [[ ! -r "$KXUE43_DOTFILES_DIR/${prefix}.bashrc" ]]; then
+    kxue43::log_error "Env-specific .bashrc file '${prefix}.bashrc' does not exist on host '$KXUE43_HOSTNAME'."
 
     return 1
   fi
