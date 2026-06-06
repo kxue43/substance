@@ -18,10 +18,10 @@
     "body": ["#!/usr/bin/env bash\n$0"],
     "description": "universal bash shebang"
   },
-  "Shell Modeline": {
-    "prefix": "SHM",
-    "body": ["# vim: set ft=sh :"],
-    "description": "shell modeline"
+  "Bash Shell Modeline": {
+    "prefix": "BSM",
+    "body": ["# vim: set ft=bash :"],
+    "description": "bash shell modeline"
   },
   "Set Shell Options": {
     "prefix": "EUP",

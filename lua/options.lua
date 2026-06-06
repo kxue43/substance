@@ -3,7 +3,8 @@ require "nvchad.options"
 -- add yours here!
 vim.filetype.add {
   extension = {
-    bashrc = "sh",
+    bashrc = "bash",
+    sh = "bash",
   },
 }
 

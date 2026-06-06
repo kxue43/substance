@@ -17,7 +17,7 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "bash", "sh" },
   callback = function()
-    vim.g.is_bash = 1
+    vim.b.is_bash = 1
   end,
 })
 
