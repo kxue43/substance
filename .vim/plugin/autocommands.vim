@@ -5,7 +5,7 @@
 
 augroup yank_to_clipboard
   autocmd!
-  autocmd TextYankPost * if v:event.operator ==# 'y' | call setreg('+', v:event.regcontents) | endif
+  autocmd TextYankPost * if v:event.operator ==# 'y' | call setreg('*', v:event.regcontents) | endif
 augroup END
 " ----------------------------------------------------------------------------
 " Set extension name for Bash scripts
@@ -18,7 +18,7 @@ augroup END
 " For Markdown files, show rendered HTML in browser
 
 function! s:SetupMarkdownMappings()
-  nnoremap <buffer> <silent> <leader>ll :call <SID>RenderMarkdownFile()<CR>
+  nnoremap <buffer> <silent> \ll :call <SID>RenderMarkdownFile()<CR>
 endfunction
 
 function! s:RenderMarkdownFile()

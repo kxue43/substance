@@ -40,4 +40,7 @@ set hlsearch
 
 " Use dark background
 set bg=dark
+
+" Make <leader> key match NeoVim
+let mapleader = " "
 " ----------------------------------------------------------------------------
