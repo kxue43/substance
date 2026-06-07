@@ -86,7 +86,7 @@ _kxue43_it_shell::enable_completion() {
 
     # Activate completion manually for AWS CLI because it's not installed by port.
     complete -C '/usr/local/bin/aws_completer' aws
-  elif [[ "$KXUE43_HOSTNAME" == "fedora" ]]; then
+  elif [[ "$(hostname)" == "fedora" ]]; then
     # On Fedora Server, this file doesn't seem to be automatically sourced.
     source /etc/profile.d/bash_completion.sh
 
@@ -115,7 +115,7 @@ _kxue43_it_shell::shell_integration() {
 
 _kxue43_it_shell::activate_fnm() {
   # FNM is not used in devcontainers.
-  if [[ "$KXUE43_USERNAME" == "vscode" ]]; then
+  if [[ "$(whoami)" == "vscode" ]]; then
     return 0
   fi
 
@@ -137,29 +137,10 @@ _kxue43_it_shell::set_man_pager() {
   # not with the more modern ANSI escape codes. macOS only uses
   # backspace-based formatting. On Linux, we need to set GROFF_NO_SGR
   # to force it.
-  [[ "$KXUE43_PLATFORM" == "Linux" ]] && export GROFF_NO_SGR=1
+  [[ "$(uname -s)" == "Linux" ]] && export GROFF_NO_SGR=1
 }
 
 kxue43::bash_init() {
-  # Set up custom env vars.
-  if [[ -z "${KXUE43_PLATFORM:+x}" ]]; then
-    KXUE43_PLATFORM="$(uname -s)"
-
-    export KXUE43_PLATFORM
-  fi
-
-  if [[ -z "${KXUE43_HOSTNAME:+x}" ]]; then
-    KXUE43_HOSTNAME="$(hostname)"
-
-    export KXUE43_HOSTNAME
-  fi
-
-  if [[ -z "${KXUE43_USERNAME:+x}" ]]; then
-    KXUE43_USERNAME="$(whoami)"
-
-    export KXUE43_USERNAME
-  fi
-
   # Used by the `acmd` interactive shell function
   if [[ -z "${_kxue43_commands_list:+x}" ]]; then
     _kxue43_commands_list=()
@@ -180,7 +161,7 @@ kxue43::bash_init() {
 kxue43::get_env_prefix() {
   local -n __prefix_var="$1"
 
-  case "$KXUE43_HOSTNAME" in
+  case "$(hostname)" in
   love66* | fedora)
     __prefix_var=kxue43
     ;;
@@ -191,7 +172,7 @@ kxue43::get_env_prefix() {
     __prefix_var=gd
     ;;
   *)
-    if [[ "$KXUE43_USERNAME" == "vscode" ]]; then
+    if [[ "$(whoami)" == "vscode" ]]; then
       __prefix_var=kxue43
     else
       __prefix_var=""
@@ -210,18 +191,15 @@ kxue43::bash_post_init() {
   kxue43::get_env_prefix "prefix"
 
   if [[ -z "$prefix" ]]; then
-    kxue43::log_error "Unrecognizable hostname '$KXUE43_HOSTNAME'. No env-specific .bashrc file for it"
+    kxue43::log_error "Unrecognizable hostname '$(hostname)'. No env-specific .bashrc file for it"
 
     return 1
-  elif [[ ! -r "$KXUE43_DOTFILES_DIR/${prefix}.bashrc" ]]; then
-    kxue43::log_error "Env-specific .bashrc file '${prefix}.bashrc' does not exist on host '$KXUE43_HOSTNAME'."
+  elif [[ ! -r "$KXUE43_DOTFILES_DIR/profile/${prefix}.bashrc" ]]; then
+    kxue43::log_error "Env-specific .bashrc file '${prefix}.bashrc' does not exist on host '$(hostname)'."
 
     return 1
   fi
 
   # Source env-specific bashrc file.
-  source "$KXUE43_DOTFILES_DIR/${prefix}.bashrc"
-
-  # Source credentials from untracked file if exists.
-  [[ -r "$KXUE43_DOTFILES_DIR/creds.bashrc" ]] && source "$KXUE43_DOTFILES_DIR/creds.bashrc"
+  source "$KXUE43_DOTFILES_DIR/profile/${prefix}.bashrc"
 }

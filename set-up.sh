@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/lib/utils.sh"
 
 # Create symlinks in source_dir and point them to actual files in sink_dir.
 # Args:

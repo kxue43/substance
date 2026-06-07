@@ -7,7 +7,7 @@ if [[ -z "${KXUE43_DOTFILES_DIR:+x}" ]]; then
 fi
 # -----------------------------------------------------------------------
 # Source personal library functions.
-source "$KXUE43_DOTFILES_DIR/it-shell.sh"
+source "$KXUE43_DOTFILES_DIR/lib/it-shell.sh"
 # -----------------------------------------------------------------------
 # Initialization
 
@@ -25,10 +25,10 @@ export GPG_TTY
 export EDITOR=vim
 # ------------------------------------------------------------------------
 # Load aliases for interactive use.
-source "$KXUE43_DOTFILES_DIR/aliases.sh"
+source "$KXUE43_DOTFILES_DIR/lib/aliases.sh"
 # ------------------------------------------------------------------------
 # Load custom commands for interactive use.
-source "$KXUE43_DOTFILES_DIR/commands.sh"
-source "$KXUE43_DOTFILES_DIR/cplan.sh"
-source "$KXUE43_DOTFILES_DIR/acmd.sh"
+source "$KXUE43_DOTFILES_DIR/lib/commands.sh"
+source "$KXUE43_DOTFILES_DIR/lib/cplan.sh"
+source "$KXUE43_DOTFILES_DIR/lib/acmd.sh"
 # ------------------------------------------------------------------------

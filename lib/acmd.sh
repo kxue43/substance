@@ -30,18 +30,18 @@ EOF
   # shellcheck disable=SC2154 # this variable is appended to by other files
   executables=("${_kxue43_commands_list[@]}")
 
-  mapfile -t -O "${#executables[@]}" executables < <(grep "^[a-zA-Z0-9-]\+() {" "$KXUE43_DOTFILES_DIR/commands.sh")
+  mapfile -t -O "${#executables[@]}" executables < <(grep "^[a-zA-Z0-9-]\+() {" "$KXUE43_DOTFILES_DIR/lib/commands.sh")
 
-  mapfile -t aliases < <(grep "^alias [a-zA-Z0-9-]\+=" "$KXUE43_DOTFILES_DIR/aliases.sh")
+  mapfile -t aliases < <(grep "^alias [a-zA-Z0-9-]\+=" "$KXUE43_DOTFILES_DIR/lib/aliases.sh")
 
   local prefix
 
   kxue43::get_env_prefix "prefix"
 
-  if [[ -r "$KXUE43_DOTFILES_DIR/${prefix}.bashrc" ]]; then
-    mapfile -t -O "${#executables[@]}" executables < <(grep "^[a-zA-Z0-9-]\+() {" "$KXUE43_DOTFILES_DIR/${prefix}.bashrc")
+  if [[ -r "$KXUE43_DOTFILES_DIR/profile/${prefix}.bashrc" ]]; then
+    mapfile -t -O "${#executables[@]}" executables < <(grep "^[a-zA-Z0-9-]\+() {" "$KXUE43_DOTFILES_DIR/profile/${prefix}.bashrc")
 
-    mapfile -t -O "${#executables[@]}" aliases < <(grep "^alias [a-zA-Z0-9-]\+=" "$KXUE43_DOTFILES_DIR/${prefix}.bashrc")
+    mapfile -t -O "${#executables[@]}" aliases < <(grep "^alias [a-zA-Z0-9-]\+=" "$KXUE43_DOTFILES_DIR/profile/${prefix}.bashrc")
   fi
 
   executables=("${executables[@]%() \{}")

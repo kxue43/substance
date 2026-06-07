@@ -26,34 +26,51 @@ All shell code targets **Bash 5.1+**. Features unavailable in older Bash (e.g. `
 
 ## Shell init architecture
 
-`.bashrc` is the entry point. It sources `it-shell.sh`, `aliases.sh`, `commands.sh`, and `cplan.sh` in order, then a `trap … RETURN` fires `kxue43::bash_post_init` (defined in `it-shell.sh`), which loads the **hostname-specific** file based on `$KXUE43_HOSTNAME`.
+`.bashrc` is the entry point. It sets `$KXUE43_DOTFILES_DIR` first, then sources `lib/it-shell.sh` and immediately calls `kxue43::bash_init` (which sets up PATH, fnm, completion, and man pager). A `trap … RETURN` is armed to fire `kxue43::bash_post_init` once `.bashrc` finishes returning; that function resolves the current environment prefix (via `hostname`) and sources the matching `profile/<prefix>.bashrc`. After the trap, `.bashrc` sources the remaining interactive lib files: `lib/aliases.sh`, `lib/commands.sh`, `lib/cplan.sh`, and `lib/acmd.sh`.
 
 All module files guard against double-sourcing via a `_kxue43_module_set_<name>` env var at the top.
 
 `$KXUE43_DOTFILES_DIR` is the canonical env var pointing to the repo root; use it instead of hard-coding the path anywhere.
 
+## lib/ and profile/ file rules
+
+### lib/ files
+
+- Must have a module-load guard.
+- Declare lib-to-lib dependencies by sourcing directly, using a path relative to the file's own disk location (the `readlink -f "${BASH_SOURCE[0]}"` pattern). Never rely on load order.
+- May not access env vars set by other lib functions at source time. `$KXUE43_DOTFILES_DIR` is the one exception — it is a bootstrap var set by `.bashrc` before any lib is sourced.
+- For platform, host, and user detection, call `$(uname -s)`, `$(hostname)`, `$(whoami)` inline. Do not introduce cached `KXUE43_*` vars for these. (`KXUE43_SHELL_INIT` is a session-state flag, not a cache — do not confuse the two.)
+- Non-`utils.sh` lib files are for interactive shell use only and may be sourced only by `.bashrc` or `profile/` files — never by scripts.
+
+### profile/ files
+
+- No module-load guard — idempotency comes from the guards inside the lib files they source.
+- Source lib files using `$KXUE43_DOTFILES_DIR`-relative paths (`$KXUE43_DOTFILES_DIR` is guaranteed present by the time any profile file is sourced).
+- May source any lib file from `lib/`.
+
 ## Adding a complex interactive shell function
 
-When an interactive shell function is non-trivial (needs its own completion, keybindings, or private helpers), give it its own `<name>.sh` module instead of putting it in `commands.sh`:
+When an interactive shell function is non-trivial (needs its own completion, keybindings, or private helpers), give it its own `lib/<name>.sh` module instead of putting it in `lib/commands.sh`:
 
-1. Create `<name>.sh` with the standard double-loading guard at the top.
-2. Source `utils.sh` at the top of the module (required to use `kxue43::` helpers).
+1. Create `lib/<name>.sh` with the standard double-loading guard at the top.
+2. Source `lib/utils.sh` using the `readlink -f "${BASH_SOURCE[0]}"` relative path pattern. If the module depends on another lib file (e.g., `lib/it-shell.sh`), source it the same way — explicit, never implicit.
 3. Define the public function, any `_kxue43_<name>::` private helpers, and the bash completion function + `complete` registration inline in the file.
 4. Append the function name to `_kxue43_commands_list` so it appears in `acmd -l`.
-5. Add `source "$KXUE43_DOTFILES_DIR/<name>.sh"` to `.bashrc` (after the existing `source` lines).
+5. Add `source "$KXUE43_DOTFILES_DIR/lib/<name>.sh"` to `.bashrc` if the function is needed in all environments, or to the relevant `profile/<prefix>.bashrc` if it is env-specific.
 
 ## Adding a new script to `bin/`
 
 1. Create the executable in `bin/<name>`.
 2. Add a matching bash completion file in `completions/<name>`.
-3. Run `./set-up.sh` — it symlinks everything in `bin/` into `~/.local/bin` automatically.
-4. Run `date > .keep` and commit the result. The `shell-cmd-on-change` pre-commit hook watches `.keep`; when other clones pull this commit, their `post-merge` hook will detect the change and automatically run `./set-up.sh` to pick up the new script.
+3. Scripts may only source `lib/utils.sh` — no other lib file. Use the `readlink -f "${BASH_SOURCE[0]}"` relative path pattern to locate it.
+4. Run `./set-up.sh` — it symlinks everything in `bin/` into `~/.local/bin` automatically.
+5. Run `date > .keep` and commit the result. The `shell-cmd-on-change` pre-commit hook watches `.keep`; when other clones pull this commit, their `post-merge` hook will detect the change and automatically run `./set-up.sh` to pick up the new script.
 
 ## Shell utility conventions
 
 ### Double-loading guard
 
-Every sourced `.sh` module must open with a guard that prevents re-sourcing:
+Every sourced `.sh` module in `lib/` must open with a guard that prevents re-sourcing:
 
 ```bash
 if [[ -n "${_kxue43_module_set_<name>+x}" ]]; then
@@ -63,6 +80,8 @@ _kxue43_module_set_<name>=1
 ```
 
 `<name>` is the module's filename stem with hyphens replaced by underscores (e.g. `it-shell.sh` → `it_shell`). The `+x` form tests for the variable being set without treating an empty value as unset.
+
+`profile/` files do not use this guard — they are sourced for their side effects, and idempotency is provided by the guards in the lib files they source.
 
 ### Function namespacing
 
@@ -78,7 +97,7 @@ Never define bare helper functions without a namespace for the interactive shell
 
 ### Environment variable naming
 
-All exported env vars use the `KXUE43_` prefix (e.g. `KXUE43_DOTFILES_DIR`, `KXUE43_HOSTNAME`, `KXUE43_PLATFORM`). Guard vars use the `_kxue43_module_set_` prefix and are intentionally not exported.
+All exported env vars use the `KXUE43_` prefix (e.g. `KXUE43_DOTFILES_DIR`, `KXUE43_SHELL_INIT`). Guard vars use the `_kxue43_module_set_` prefix and are intentionally not exported.
 
 ## Claude Code configuration
 

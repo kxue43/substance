@@ -5,6 +5,7 @@ fi
 _kxue43_module_set_commands=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/it-shell.sh"
 
 tl() {
   tmux list-sessions -F '#{session_name}: #{session_windows}win'
@@ -140,7 +141,7 @@ enter-work-mode() {
   kxue43::bash_post_init
 }
 
-if [[ "$KXUE43_PLATFORM" == "Darwin" ]]; then
+if [[ "$(uname -s)" == "Darwin" ]]; then
   ls-jdk() {
     /usr/libexec/java_home -V
   }

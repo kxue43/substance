@@ -1,5 +1,5 @@
 main() {
-  if ! [[ "$KXUE43_PLATFORM" == "Darwin" && -d "${HOME}/.local/share/fnm" ]]; then
+  if ! [[ "$(uname -s)" == "Darwin" && -d "${HOME}/.local/share/fnm" ]]; then
     # Clean up symlinks in the $HOME/.local/state/fnm_multishells/ folder on macOS only.
     # On Linux the symlinks already live under a temporary directory.
     return

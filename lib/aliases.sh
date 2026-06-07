@@ -30,6 +30,6 @@ alias ls-path='printenv PATH | tr ":" "\n"'
 
 alias nvconfp='pushd ~/.config/nvim >/dev/null && git pull && popd >/dev/null'
 
-if [[ "$KXUE43_PLATFORM" == "Darwin" ]]; then
+if [[ "$(uname -s)" == "Darwin" ]]; then
   alias mvim='open -a MacVim'
 fi
