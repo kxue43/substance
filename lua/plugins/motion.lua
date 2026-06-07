@@ -1,6 +1,9 @@
 return {
   "folke/flash.nvim",
   event = "VeryLazy",
+  init = function()
+    dofile(vim.g.base46_cache .. "flash")
+  end,
   -- Keyboard navigation
   -- fFtT followed by one character and repeated f/F/t/T hits for jump
   keys = {
