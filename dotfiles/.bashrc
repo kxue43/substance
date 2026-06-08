@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------
 # Locate substance directory
 if [[ -z "${KXUE43_SUBSTANCE_DIR:+x}" ]]; then
-  KXUE43_SUBSTANCE_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+  KXUE43_SUBSTANCE_DIR="$(cd "$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")" && pwd)"
 
   export KXUE43_SUBSTANCE_DIR
 fi

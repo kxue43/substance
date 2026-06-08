@@ -166,6 +166,18 @@ main() {
 	gpgSign = false
 EOF
   fi
+
+  if ! type pre-commit &>/dev/null; then
+    return 0
+  fi
+
+  local -a args
+  [[ -e "$substance_dir/.git/hooks/pre-commit" ]] || args+=("-t" "pre-commit")
+  [[ -e "$substance_dir/.git/hooks/post-merge" ]] || args+=("-t" "post-merge")
+
+  if ((${#args[@]} > 0)); then
+    pre-commit install "${args[@]}"
+  fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
