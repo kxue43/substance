@@ -57,9 +57,13 @@ _ensure_symlink() {
 
     if ! [[ "$target_now" -ef "$target_path" ]]; then
       kxue43::log_error "$link_path is incorrectly symlinked to $target_now"
+
+      unlink "$link_path"
     fi
   elif [[ -e "$link_path" ]]; then
     kxue43::log_error "$link_path already exists and is not a symlink"
+
+    return 0
   else
     kxue43::log_info "Symlinking $link_path to $target_path"
 
@@ -102,10 +106,13 @@ main() {
   linked=(bookmark.html config keymap)
   _link_files "$HOME/.w3m" "$dotfiles_dir/.w3m" "linked"
 
+  # Symlinking nvim folder
+  _ensure_symlink "$HOME/.config/nvim" "$dotfiles_dir/nvim/"
+
   # Symlinking own Vim plugin scripts
   _ensure_symlink "$HOME/.vim/plugin" "$dotfiles_dir/.vim/plugin/"
 
-  # Symlinking Claude related files and folders.
+  # Symlinking Claude related files and folders
   _ensure_symlink "$HOME/.claude/skills" "$dotfiles_dir/.claude/skills/"
   _ensure_symlink "$HOME/.claude/agents" "$dotfiles_dir/.claude/agents/"
   _ensure_symlink "$HOME/.claude/CLAUDE.md" "$dotfiles_dir/.claude/CLAUDE.md"
