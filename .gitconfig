@@ -1,0 +1,35 @@
+[user]
+	name = kxue43
+	email = kxue43@gmail.com
+	signingkey = 5EF2BE73370DCE7E808814DBC9EED408F4B6D021
+[commit]
+	gpgsign = true
+[tag]
+	gpgSign = true
+[core]
+	editor = vim
+[init]
+	defaultBranch = main
+[fetch]
+	prune = true
+	pruneTags = true
+[submodule]
+	recurse = true
+[push]
+	recurseSubmodules = check
+[alias]
+	smu = submodule update --init --recursive
+	sms = submodule status
+	sma = submodule add
+	lgl = log --graph --oneline --decorate-refs=refs/heads
+	lgb = log --graph --oneline --branches
+	lga = log --graph --oneline --all
+	lgmh = "!f() { git log --oneline \"${1:-main}\"..HEAD; }; f"
+	fp = fetch origin --prune --prune-tags
+	df = diff
+	dfc = diff --cached
+	wtl = worktree list
+	wta = worktree add
+	wtr = worktree remove
+[include]
+	path = .gitconfig.override

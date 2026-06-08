@@ -1,0 +1,30 @@
+FROM registry.fedoraproject.org/fedora:43
+
+ARG USERNAME=kxue
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN dnf install -y \
+    git \
+    curl \
+    jq \
+    nodejs \
+    && dnf clean all
+
+RUN npm install -g @anthropic-ai/claude-code
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
+# Create the user and give them passwordless sudo access
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+USER $USERNAME
+
+RUN mkdir -p /home/$USERNAME/.claude \
+    && echo '{"skipDangerousModePermissionPrompt":true}' > /home/$USERNAME/.claude/settings.json \
+    && mkdir -p /home/$USERNAME/workspace
+
+WORKDIR /home/$USERNAME/workspace

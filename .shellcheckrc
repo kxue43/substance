@@ -1,0 +1,6 @@
+shell=bash
+
+# The dot files work with both Homebrew and MacPorts,
+# so some files are bound to be missing.
+disable=SC1090
+disable=SC1091

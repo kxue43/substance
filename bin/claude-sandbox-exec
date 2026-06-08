@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+main() {
+  if (($# == 0)) || [[ "$1" == "-h" ]]; then
+    cat <<EOF
+USAGE: claude-sandbox-exec [-h] [PROJECT]
+
+Run Claude Code CLI in a container sandbox in headless mode.
+
+ARGUMENTS:
+    PROJECT    The project name defined in .claude-headless.yaml.
+
+OPTIONS:
+    -h         Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# == 0)); then
+    kxue43::log_error "The positional argument PROJECT is required."
+
+    return 1
+  fi
+
+  if ! docker --version &>/dev/null; then
+    kxue43::log_error "docker is not available."
+
+    return 1
+  fi
+
+  local config_file="$HOME/.claude-headless.yaml"
+  if [[ ! -r "$config_file" ]]; then
+    kxue43::log_error "The configuration file ~/.claude-headless.yaml does not exist."
+
+    return 1
+  fi
+
+  local project="$1"
+  if [[ "$(yq ".projects.${project}" "$config_file")" == "null" ]]; then
+    kxue43::log_error "Project '${project}' does not exist in ~/.claude-headless.yaml."
+
+    return 1
+  fi
+
+  local bin_dir
+  bin_dir="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+
+  local dotfiles_dir
+  dotfiles_dir="$(cd "$(dirname "$bin_dir")" && pwd)"
+
+  local dockerfile_dir="$dotfiles_dir/docker"
+  if [[ ! -d "$dockerfile_dir" ]]; then
+    kxue43::log_error "The directory for Claude sandbox Dockerfiles doesn't exist."
+
+    return 1
+  fi
+
+  local image mount workdir prompt
+  mount=$(yq ".projects.${project}.mount" "$config_file")
+  workdir=$(yq ".projects.${project}.workdir" "$config_file")
+  image=$(yq ".projects.${project}.image" "$config_file")
+  prompt=$(yq ".projects.${project}.prompt" "$config_file")
+
+  local image_id
+  image_id="$(docker image ls -q "$image")"
+
+  if [[ -z "$image_id" ]]; then
+    if [[ ! -r "$dockerfile_dir/Dockerfile.${image}" ]]; then
+      kxue43::log_error "Dockerfile.${image} does not exist. Cannot build image."
+
+      return 1
+    fi
+
+    kxue43::log_info "Docker image '$image' does not exist. Building..."
+
+    if ! (cd "$dockerfile_dir" && docker build -t "$image" -f "Dockerfile.${image}" .); then
+      return 1
+    fi
+  fi
+
+  if [[ ! -d "$mount" ]]; then
+    kxue43::log_error "The mount point folder '$mount' does not exist."
+
+    return 1
+  fi
+
+  if [[ "$workdir" != "null" ]] && [[ "$workdir" == /* ]]; then
+    kxue43::log_error "workdir must be relative to mount, but it is '$workdir'."
+
+    return 1
+  fi
+
+  if [[ "$workdir" != "null" ]] && [[ "$workdir" == *..* ]]; then
+    kxue43::log_error "workdir must not contain '..'."
+
+    return 1
+  fi
+
+  if [[ "$workdir" != "null" ]] && ! [[ -d "$mount/$workdir" ]]; then
+    kxue43::log_error "The workdir '$workdir' cannot be resolved against mount point '$mount'."
+
+    return 1
+  fi
+
+  if [[ "$prompt" == "null" ]]; then
+    kxue43::log_error "Prompt must not be empty."
+
+    return 1
+  fi
+
+  local workspace="/home/kxue/workspace"
+
+  if [[ "$workdir" == "null" ]]; then
+    workdir="$workspace"
+  else
+    workdir="$workspace/$workdir"
+  fi
+
+  local token
+  if ! token="$(security find-generic-password -s "kxue43-claude-cli" -a "oauth-token-1y" -w)"; then
+    kxue43::log_error "Failed to get CLAUDE_CODE_OAUTH_TOKEN from KeyChain access."
+
+    return 1
+  fi
+
+  docker run --rm \
+    -e CLAUDE_CODE_OAUTH_TOKEN="$token" -e DISABLE_TELEMETRY=1 \
+    -v "${mount}:$workspace" \
+    -w "$workdir" \
+    -u 1000:1000 \
+    "${image}:latest" \
+    claude -p --dangerously-skip-permissions "$prompt"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

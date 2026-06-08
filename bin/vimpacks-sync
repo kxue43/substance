@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+main() {
+  local repos=(
+    morhetz/gruvbox
+    preservim/nerdtree
+    vim-airline/vim-airline
+    vim-airline/vim-airline-themes
+  )
+
+  local url repo dir name
+
+  for repo in "${repos[@]}"; do
+    url="https://github.com/$repo"
+
+    name=$(basename "$url")
+
+    dir="$HOME/.vim/pack/$name/start/$name/"
+
+    if [[ -d "$dir" ]]; then
+      pushd "$dir" >/dev/null || return 1
+      git pull --no-tags
+      popd >/dev/null || return 1
+    else
+      mkdir -p "$dir"
+      git clone --depth 1 "$url" "$dir"
+    fi
+  done
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main
+fi

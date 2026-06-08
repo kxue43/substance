@@ -1,0 +1,6 @@
+# Open in external browser
+keymap  O   EXTERN
+keymap  o   EXTERN_LINK
+
+# reread all config options
+keymap  M-r REINIT

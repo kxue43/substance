@@ -1,0 +1,20 @@
+[tool.tartufo]
+repo-path = "."
+regex = true
+entropy = true
+
+exclude-path-patterns = [
+    {path-pattern = 'tartufo\.toml$', reason = 'contains many high entropy signatures'},
+]
+
+exclude-entropy-patterns = [
+    # {path-pattern = "", pattern = "", reason = ""},
+]
+
+exclude-signatures = [
+    {signature = "f778aaca32f07db00e1a7ca8270caccb1007f7916aea3274313a9de29fd76e5e", reason = "false positive of GPG public key signature in .gitconfig file"},
+    {signature = "a12aa3aab0a502ff1649f23e0f5bea8b9e2f45258dc68b78e6366b7dba848e49", reason = "file path is not credential"},
+    {signature = "7af46544d225cff898466b812c267ff568956629c62427a0a5c702197516d9ce", reason = "file path is not credential"},
+    {signature = "5d80ddf542f590eb70ff0e5a8ee171e4b1211f992b443145c59e8d5915ae1629", reason = "file path is not credential"},
+    {signature = "c50abc977ab920476a1a0b5c81c46fd3b0d1a08d0188eae13524312127d6f693", reason = "file path is not credential"},
+]

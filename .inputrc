@@ -1,0 +1,25 @@
+# Up and Down arrow key.
+"\e[A": previous-history
+"\e[B": next-history
+
+# PageUp and PageDown *also* work.
+"\C-p": history-search-backward
+"\C-n": history-search-forward
+
+# Use \C-x( and \C-x) to record macro, and \C-xp to print
+# RHS of ":" to put in .inputrc.
+"\C-xp": print-last-kbd-macro
+
+"\C-xgs": "git stash push -S -m ''\C-b"
+
+"\C-xgc": "git commit -m ''\C-b"
+
+# For Claude Code CLI invocation
+"\C-xsp": " --dangerously-skip-permissions"
+
+# Kill or copy the region between the mark (set by '\e ') and the point (current cursor).
+# kill-region cuts the region. copy-region-as-kill only copies the region.
+# Use C-y to yank. After one yank, use M-y to rotate the yanked text.
+# M-y only shows effect when multiple blocks of texts have been cut or copied.
+"\C-xrk": kill-region
+"\C-xrc": copy-region-as-kill

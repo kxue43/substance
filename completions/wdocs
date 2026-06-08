@@ -1,0 +1,30 @@
+_kxue43_wdocs::complete() {
+  local -a opts
+  opts=("'-h  (Show help message)'" "'new (New docs tree)'" "'link  (Symlinks to existing tree)'")
+
+  if ((COMP_CWORD == 1)) && [[ $2 == "" ]]; then
+    compgen -V COMPREPLY -W "${opts[*]}"
+
+    return 0
+  elif ((COMP_CWORD == 1)) && [[ $2 == @(-|-h) ]]; then
+    COMPREPLY=("-h")
+
+    return 0
+  elif ((COMP_CWORD == 1)); then
+    compgen -V COMPREPLY -W "new link" -- "$2"
+
+    return 0
+  elif ((COMP_CWORD == 2)) && [[ ${COMP_WORDS[1]} == @(link|new) ]] && [[ $2 == @(-|-h) ]]; then
+    COMPREPLY=("-h")
+
+    return 0
+  elif ((COMP_CWORD == 2)) && [[ ${COMP_WORDS[1]} == @(link|new) ]]; then
+    compgen -V COMPREPLY -d -- "$2"
+
+    return 0
+  fi
+
+  return 0
+} && complete -o bashdefault -F _kxue43_wdocs::complete wdocs
+
+# vim: set ft=bash :

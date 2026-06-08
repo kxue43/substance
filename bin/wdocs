@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+_new() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: wdocs new [-h] [ROOT_DIR]
+
+Create a working docs directory at ROOT_DIR. Defaults to the .working-docs/ directory under CWD.
+
+ARGUMENTS:
+    ROOT_DIR     Root directory to create working docs in
+
+OPTIONS:
+    -h           Show this help message
+EOF
+
+    return 0
+  fi
+
+  local tree_root
+
+  if (($# == 0)); then
+    mkdir -p .working-docs
+
+    tree_root=./.working-docs
+  elif (($# == 1)); then
+    tree_root="$1"
+
+    if ! [[ -d "$tree_root" ]]; then
+      kxue43::log_error "$tree_root is not an existing directory"
+
+      return 1
+    fi
+  else
+    kxue43::log_error "wdocs new accepts only one optional positional argument ROOT_DIR"
+
+    return 1
+  fi
+
+  cd "$tree_root"
+
+  if [[ -r "README.md" ]]; then
+    kxue43::log_error "A README.md file already exists at working docs root folder $tree_root"
+
+    return 1
+  fi
+
+  cat >README.md <<'EOF'
+# Working Docs
+
+**IMPORTANT: Do not treat any file in this doc tree as a definitive description of the system being built!**
+A spec file starts a development task, but the process is often iterative and likely changes the original spec.
+To move fast, we might not update the spec files afterwards. That is why they are called "working docs".
+
+EOF
+
+  mkdir -p spec session
+
+  local -a directories
+  mapfile -t directories < <(printf "%s\n" research note investigation review | fzf -m --height=50% --layout=reverse)
+
+  if ((${#directories[@]} > 0)); then
+    mkdir -p "${directories[@]}"
+  fi
+}
+
+_link() {
+  if (($# == 0)) || [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: wdocs link [-h] TARGET_DIR
+
+Create a symlink from .working-docs under CWD to TARGET_DIR.
+
+ARGUMENTS:
+    TARGET_DIR   Target directory to symlink to
+
+OPTIONS:
+    -h           Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# != 1)); then
+    kxue43::log_error "wdocs link requires exactly one positional argument LINK_TARGET"
+
+    return 1
+  fi
+
+  if ! [[ -d "$1" ]]; then
+    kxue43::log_error "LINK_TARGET $1 is not an existing directory"
+
+    return 1
+  fi
+
+  if [[ -e ".working-docs" ]]; then
+    kxue43::log_error ".working-docs is an existing file or directory"
+
+    return 1
+  fi
+
+  ln -s "$1" .working-docs
+}
+
+main() {
+  if (($# == 0)) || [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: wdocs [-h] COMMAND [OPTIONS] [ARGUMENTS...]
+
+Scaffold a new working docs directory or symlink to an existing one.
+
+COMMANDS:
+    new        Create a new working doc tree
+    link       Create a symlink from .working-docs under cwd to target directory
+
+OPTIONS:
+    -h         Show this help message
+EOF
+
+    return 0
+  fi
+
+  case $1 in
+  new)
+    shift 1
+
+    _new "$@"
+    ;;
+  link)
+    shift 1
+
+    _link "$@"
+    ;;
+  *)
+    kxue43::log_error "Unknown command ${1}."
+
+    return 1
+    ;;
+  esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
