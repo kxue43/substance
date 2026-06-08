@@ -4,6 +4,16 @@ set -eu -o pipefail
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/lib/utils.sh"
 
+_get_symlink_target() {
+  readlink "$1"
+
+  if [[ -e "$1" ]]; then
+    return 0
+  fi
+
+  return 1
+}
+
 # Create symlinks in source_dir and point them to actual files in sink_dir.
 # Args:
 #   $1: source_dir
@@ -16,17 +26,17 @@ _link_files() {
   local name target_now
 
   for name in "${base_names[@]}"; do
-    if [[ -L "$1/$name" ]]; then
-      target_now="$(readlink -f "$1/$name")"
+    if [[ -L "$1/$name" ]] && ! target_now="$(_get_symlink_target "$1/$name")"; then
+      kxue43::log_info "Symlink target $target_now does not exist. Removing symlink"
 
-      if [[ "$2/$name" -ef "$target_now" ]]; then
-        # If already correctly symlinked, continue.
-        continue
-      else
-        kxue43::log_info "$name is symlinked to $target_now. Removing"
+      unlink "$1/$name"
+    elif [[ -L "$1/$name" ]] && [[ "$2/$name" -ef "$target_now" ]]; then
+      # If already correctly symlinked, continue.
+      continue
+    elif [[ -L "$1/$name" ]]; then
+      kxue43::log_info "$name is symlinked to $target_now. Removing symlink"
 
-        unlink "$1/$name"
-      fi
+      unlink "$1/$name"
     elif [[ -f "$1/$name" ]]; then
       # If the ln target already exists as a regular file, remove it.
       kxue43::log_info "Removing existing file $name"
@@ -34,7 +44,6 @@ _link_files() {
       rm "$1/$name"
     fi
 
-    # If execution reaches here, create the correct symlink.
     ln -s "$2/$name" "$1/$name"
 
     kxue43::log_info "$name has been correctly symlinked"
@@ -53,14 +62,14 @@ _ensure_symlink() {
   local target_path="$2"
   local target_now
 
-  if [[ -L "$link_path" ]]; then
-    target_now="$(readlink -f "$link_path")"
+  if [[ -L "$link_path" ]] && ! target_now="$(_get_symlink_target "$link_path")"; then
+    kxue43::log_info "Symlink target $target_now does not exist. Removing symlink"
 
-    if [[ "$target_now" -ef "$target_path" ]]; then
-      return 0
-    fi
-
-    kxue43::log_info "$link_path is incorrectly symlinked to $target_now. Removing"
+    unlink "$link_path"
+  elif [[ -L "$link_path" ]] && [[ "$target_now" -ef "$target_path" ]]; then
+    return 0
+  elif [[ -L "$link_path" ]]; then
+    kxue43::log_info "$link_path is incorrectly symlinked to $target_now. Removing symlink"
 
     unlink "$link_path"
   elif [[ -e "$link_path" ]]; then
@@ -138,7 +147,7 @@ main() {
 
   # Clean up symlinks in ~/.local/bin
   for name in "${binaries[@]}"; do
-    if [[ ! -x "$(readlink -f "$name")" ]]; then
+    if [[ ! -x "$(readlink "$name")" ]]; then
       kxue43::log_info "Script $name should no longer exist. Removing"
 
       unlink "$name"
