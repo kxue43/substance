@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Personal dotfiles. `set-up.sh` creates symlinks from `$HOME` (and `~/.local/bin`) pointing into this repo, so edits here take effect immediately for the running shell (after re-sourcing the relevant file).
+Personal platform for AI-assisted workflow.
+`set-up.sh` creates symlinks from `$HOME` (and `~/.config/nvim`) pointing into this repo,
+so edits here take effect immediately for the running shell (after re-sourcing the relevant file).
 
 ## Common commands
 

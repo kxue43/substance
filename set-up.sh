@@ -41,8 +41,9 @@ _link_files() {
   done
 }
 
-# Ensure link_path is a symlink pointing to target_path. Creates the symlink if absent;
-# logs an error if the path exists but is not a symlink or points elsewhere.
+# Ensure link_path is a symlink pointing to target_path.
+# Creates the symlink if absent; recreate the symlink if target is wrong.
+# Logs an error if the path exists but is not a symlink.
 # Args:
 #   $1: link_path
 #   $2: target_path
@@ -55,20 +56,22 @@ _ensure_symlink() {
   if [[ -L "$link_path" ]]; then
     target_now="$(readlink -f "$link_path")"
 
-    if ! [[ "$target_now" -ef "$target_path" ]]; then
-      kxue43::log_error "$link_path is incorrectly symlinked to $target_now"
-
-      unlink "$link_path"
+    if [[ "$target_now" -ef "$target_path" ]]; then
+      return 0
     fi
+
+    kxue43::log_info "$link_path is incorrectly symlinked to $target_now. Removing"
+
+    unlink "$link_path"
   elif [[ -e "$link_path" ]]; then
     kxue43::log_error "$link_path already exists and is not a symlink"
 
     return 0
-  else
-    kxue43::log_info "Symlinking $link_path to $target_path"
-
-    ln -s "$target_path" "$link_path"
   fi
+
+  kxue43::log_info "Symlinking $link_path to $target_path"
+
+  ln -s "$target_path" "$link_path"
 }
 
 main() {

@@ -5,7 +5,7 @@ repos:
       - id: tartufo
 
   - repo: https://github.com/kxue43/shell-cmd-on-change
-    rev: "2.0.0"
+    rev: "2.1.0"
     hooks:
       - id: shell-cmd-on-change
         name: set-up
