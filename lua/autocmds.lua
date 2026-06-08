@@ -51,7 +51,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- The ruff and basedpyright LSPs are used together. Disable hover capability from ruff.
--- In configs.lspconfig, disable certain capabilities of basedpyright to use ruff exclusively for linting and formatting.
+-- In plugins.lspconfig, disable certain capabilities of basedpyright to use ruff exclusively for linting and formatting.
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("lsp_attach_disable_ruff_hover", { clear = true }),
   callback = function(args)

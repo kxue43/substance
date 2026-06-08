@@ -5,14 +5,6 @@ return {
     lazy = false,
   },
 
-  -- Pull own LSP configs.
-  {
-    "neovim/nvim-lspconfig",
-    config = function()
-      require("configs.lspconfig").defaults()
-    end,
-  },
-
   -- Add onto nvim-tree defaults.
   {
     "nvim-tree/nvim-tree.lua",
