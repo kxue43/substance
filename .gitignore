@@ -1,7 +1,4 @@
 .DS_Store
-*.zip
-/.git-prompt.sh
-/creds.bashrc
 /.gitignore.override
 /.claude/settings.local.json
 

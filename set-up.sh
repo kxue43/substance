@@ -100,15 +100,15 @@ main() {
     .bash_logout
     .bash_profile
     .bashrc
-    .inputrc
     .gitconfig
-    .vimrc
     .gvimrc
+    .inputrc
     .tmux.conf
-    .config/ghostty/config
-    .config/bat/config
+    .vimrc
   )
+  _link_files "$HOME" "$substance_dir/dotfiles" "linked"
 
+  linked=(.config/ghostty/config .config/bat/config)
   _link_files "$HOME" "$substance_dir" "linked"
 
   linked=(config urls)
