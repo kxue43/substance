@@ -89,7 +89,7 @@ _kxue43_module_set_<name>=1
 
 | Scope | Convention | Example |
 |---|---|---|
-| User-facing interactive commands | Plain hyphenated name | `acmd`, `dotfp` |
+| User-facing interactive commands | Plain hyphenated name | `acmd`, `subp` |
 | Shared internal helpers (cross-module) | `kxue43::` prefix | `kxue43::log_info`, `kxue43::bash_post_init` |
 | Module-private helpers | `_kxue43_<module>::` prefix | `_kxue43_it_shell::prompt` |
 

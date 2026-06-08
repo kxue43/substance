@@ -11,16 +11,6 @@ tl() {
   tmux list-sessions -F '#{session_name}: #{session_windows}win'
 }
 
-dotfp() {
-  kxue43::log_info "Pulling dot-file changes into $KXUE43_SUBSTANCE_DIR"
-
-  pushd "$KXUE43_SUBSTANCE_DIR" >/dev/null || return 1
-
-  git pull
-
-  popd >/dev/null || return 1
-}
-
 set-aws-region() {
   local region
 

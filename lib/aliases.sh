@@ -28,7 +28,7 @@ alias gci='aws sts get-caller-identity'
 
 alias ls-path='printenv PATH | tr ":" "\n"'
 
-alias nvconfp='pushd ~/.config/nvim >/dev/null && git pull && popd >/dev/null'
+alias subp='pushd "$KXUE43_SUBSTANCE_DIR" >/dev/null && git pull && popd >/dev/null'
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
   alias mvim='open -a MacVim'
