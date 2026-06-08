@@ -12,9 +12,9 @@ tl() {
 }
 
 dotfp() {
-  kxue43::log_info "Pulling dot-file changes into $KXUE43_DOTFILES_DIR"
+  kxue43::log_info "Pulling dot-file changes into $KXUE43_SUBSTANCE_DIR"
 
-  pushd "$KXUE43_DOTFILES_DIR" >/dev/null || return 1
+  pushd "$KXUE43_SUBSTANCE_DIR" >/dev/null || return 1
 
   git pull
 
@@ -85,15 +85,15 @@ gtc() {
 }
 
 init-devcon-files() {
-  if [[ ! -d "$KXUE43_DOTFILES_DIR/.devcontainer" ]]; then
-    kxue43::log_error "The $KXUE43_DOTFILES_DIR/.devcontainer/ folder does not exist."
+  if [[ ! -d "$KXUE43_SUBSTANCE_DIR/.devcontainer" ]]; then
+    kxue43::log_error "The $KXUE43_SUBSTANCE_DIR/.devcontainer/ folder does not exist."
 
     return 1
   fi
 
   kxue43::log_info "Creating .devcontainer/ folder in the current working directory."
 
-  cp -R "$KXUE43_DOTFILES_DIR/.devcontainer/" ./.devcontainer/
+  cp -R "$KXUE43_SUBSTANCE_DIR/.devcontainer/" ./.devcontainer/
 }
 
 rm-cdk-images() {

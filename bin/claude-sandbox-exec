@@ -50,10 +50,10 @@ EOF
   local bin_dir
   bin_dir="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
-  local dotfiles_dir
-  dotfiles_dir="$(cd "$(dirname "$bin_dir")" && pwd)"
+  local substance_dir
+  substance_dir="$(cd "$(dirname "$bin_dir")" && pwd)"
 
-  local dockerfile_dir="$dotfiles_dir/docker"
+  local dockerfile_dir="$substance_dir/docker"
   if [[ ! -d "$dockerfile_dir" ]]; then
     kxue43::log_error "The directory for Claude sandbox Dockerfiles doesn't exist."
 

@@ -1,4 +1,4 @@
-# Bug & Concern Report — PR #2 (`kxue43/dotfiles`)
+# Bug & Concern Report — PR #2 (`kxue43/substance`)
 
 ## BUG-1 — Wrong discovery query in `kxue43-fetch-pr-comments` *(confirmed)*
 

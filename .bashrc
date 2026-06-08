@@ -1,13 +1,13 @@
 # -----------------------------------------------------------------------
-# Locate dotfiles directory
-if [[ -z "${KXUE43_DOTFILES_DIR:+x}" ]]; then
-  KXUE43_DOTFILES_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+# Locate substance directory
+if [[ -z "${KXUE43_SUBSTANCE_DIR:+x}" ]]; then
+  KXUE43_SUBSTANCE_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
-  export KXUE43_DOTFILES_DIR
+  export KXUE43_SUBSTANCE_DIR
 fi
 # -----------------------------------------------------------------------
 # Source personal library functions.
-source "$KXUE43_DOTFILES_DIR/lib/it-shell.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/it-shell.sh"
 # -----------------------------------------------------------------------
 # Initialization
 
@@ -25,10 +25,10 @@ export GPG_TTY
 export EDITOR=vim
 # ------------------------------------------------------------------------
 # Load aliases for interactive use.
-source "$KXUE43_DOTFILES_DIR/lib/aliases.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/aliases.sh"
 # ------------------------------------------------------------------------
 # Load custom commands for interactive use.
-source "$KXUE43_DOTFILES_DIR/lib/commands.sh"
-source "$KXUE43_DOTFILES_DIR/lib/cplan.sh"
-source "$KXUE43_DOTFILES_DIR/lib/acmd.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/commands.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/cplan.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/acmd.sh"
 # ------------------------------------------------------------------------

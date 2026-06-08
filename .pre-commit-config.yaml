@@ -11,7 +11,7 @@ repos:
         name: set-up
         args:
           - "-P.keep"
-          - "~/.config/dotfiles/set-up.sh"
+          - "~/.config/substance/set-up.sh"
         stages: [post-merge]
         always_run: true
         verbose: true

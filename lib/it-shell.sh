@@ -73,7 +73,7 @@ _kxue43_it_shell::set_path() {
 }
 
 _kxue43_it_shell::enable_completion() {
-  export BASH_COMPLETION_USER_DIR="$KXUE43_DOTFILES_DIR:$HOME/.local/share/bash-completion"
+  export BASH_COMPLETION_USER_DIR="$KXUE43_SUBSTANCE_DIR:$HOME/.local/share/bash-completion"
 
   if [[ -x /opt/homebrew/bin/brew ]]; then
     source /opt/homebrew/etc/profile.d/bash_completion.sh
@@ -194,12 +194,12 @@ kxue43::bash_post_init() {
     kxue43::log_error "Unrecognizable hostname '$(hostname)'. No env-specific .bashrc file for it"
 
     return 1
-  elif [[ ! -r "$KXUE43_DOTFILES_DIR/profile/${prefix}.bashrc" ]]; then
+  elif [[ ! -r "$KXUE43_SUBSTANCE_DIR/profile/${prefix}.bashrc" ]]; then
     kxue43::log_error "Env-specific .bashrc file '${prefix}.bashrc' does not exist on host '$(hostname)'."
 
     return 1
   fi
 
   # Source env-specific bashrc file.
-  source "$KXUE43_DOTFILES_DIR/profile/${prefix}.bashrc"
+  source "$KXUE43_SUBSTANCE_DIR/profile/${prefix}.bashrc"
 }

@@ -84,8 +84,8 @@ main() {
   mkdir -p "$HOME/.claude/"
   mkdir -p "$HOME/.local/bin"
 
-  local dotfiles_dir
-  dotfiles_dir="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" && pwd)"
+  local substance_dir
+  substance_dir="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" && pwd)"
 
   local -a linked=(
     .bash_logout
@@ -100,39 +100,39 @@ main() {
     .config/bat/config
   )
 
-  _link_files "$HOME" "$dotfiles_dir" "linked"
+  _link_files "$HOME" "$substance_dir" "linked"
 
   linked=(config urls)
-  _link_files "$HOME/.newsboat" "$dotfiles_dir/.newsboat" "linked"
+  _link_files "$HOME/.newsboat" "$substance_dir/.newsboat" "linked"
 
   # shellcheck disable=SC2034 # used via nameref
   linked=(bookmark.html config keymap)
-  _link_files "$HOME/.w3m" "$dotfiles_dir/.w3m" "linked"
+  _link_files "$HOME/.w3m" "$substance_dir/.w3m" "linked"
 
   # Symlinking nvim folder
-  _ensure_symlink "$HOME/.config/nvim" "$dotfiles_dir/nvim/"
+  _ensure_symlink "$HOME/.config/nvim" "$substance_dir/nvim/"
 
   # Symlinking own Vim plugin scripts
-  _ensure_symlink "$HOME/.vim/plugin" "$dotfiles_dir/.vim/plugin/"
+  _ensure_symlink "$HOME/.vim/plugin" "$substance_dir/.vim/plugin/"
 
   # Symlinking Claude related files and folders
-  _ensure_symlink "$HOME/.claude/skills" "$dotfiles_dir/.claude/skills/"
-  _ensure_symlink "$HOME/.claude/agents" "$dotfiles_dir/.claude/agents/"
-  _ensure_symlink "$HOME/.claude/CLAUDE.md" "$dotfiles_dir/.claude/CLAUDE.md"
-  _ensure_symlink "$HOME/.claude/settings.json" "$dotfiles_dir/.claude/settings.json"
+  _ensure_symlink "$HOME/.claude/skills" "$substance_dir/.claude/skills/"
+  _ensure_symlink "$HOME/.claude/agents" "$substance_dir/.claude/agents/"
+  _ensure_symlink "$HOME/.claude/CLAUDE.md" "$substance_dir/.claude/CLAUDE.md"
+  _ensure_symlink "$HOME/.claude/settings.json" "$substance_dir/.claude/settings.json"
 
-  # settings.local.json must exist in the dotfiles folder because settings.json is symlinked
-  if ! [[ -e "$dotfiles_dir/.claude/settings.local.json" ]]; then
-    kxue43::log_info "Creating .claude/settings.local.json in dotfiles directory"
+  # settings.local.json must exist in the substance folder because settings.json is symlinked
+  if ! [[ -e "$substance_dir/.claude/settings.local.json" ]]; then
+    kxue43::log_info "Creating .claude/settings.local.json in substance directory"
 
-    echo '{}' >"$dotfiles_dir/.claude/settings.local.json"
+    echo '{}' >"$substance_dir/.claude/settings.local.json"
   fi
 
   local -a binaries
 
-  mapfile -t binaries < <(ls -1 "$dotfiles_dir/bin")
+  mapfile -t binaries < <(ls -1 "$substance_dir/bin")
 
-  _link_files "$HOME/.local/bin" "$dotfiles_dir/bin" "binaries"
+  _link_files "$HOME/.local/bin" "$substance_dir/bin" "binaries"
 
   mapfile -t binaries < <(find "$HOME/.local/bin" -type l)
 
