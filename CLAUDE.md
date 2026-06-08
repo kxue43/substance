@@ -13,9 +13,6 @@ so edits here take effect immediately for the running shell (after re-sourcing t
 ```bash
 # Re-run the installer (idempotent — safe to re-run after any structural change)
 ./set-up.sh
-
-# Run all pre-commit hooks against every file
-pre-commit run --all-files
 ```
 
 `pre-commit` is configured in `.pre-commit-config.yaml` with two hooks:
@@ -28,7 +25,7 @@ All shell code targets **Bash 5.1+**. Features unavailable in older Bash (e.g. `
 
 ## Shell init architecture
 
-`.bashrc` is the entry point. It sets `$KXUE43_SUBSTANCE_DIR` first, then sources `lib/it-shell.sh` and immediately calls `kxue43::bash_init` (which sets up PATH, fnm, completion, and man pager). A `trap … RETURN` is armed to fire `kxue43::bash_post_init` once `.bashrc` finishes returning; that function resolves the current environment prefix (via `hostname`) and sources the matching `profile/<prefix>.bashrc`. After the trap, `.bashrc` sources the remaining interactive lib files: `lib/aliases.sh`, `lib/commands.sh`, `lib/cplan.sh`, and `lib/acmd.sh`.
+`dotfiles/.bashrc` is the entry point. It sets `$KXUE43_SUBSTANCE_DIR` first, then sources `lib/it-shell.sh` and immediately calls `kxue43::bash_init` (which sets up PATH, fnm, completion, and man pager). A `trap … RETURN` is armed to fire `kxue43::bash_post_init` once `dotfiles/.bashrc` finishes returning; that function resolves the current environment prefix (via `hostname`) and sources the matching `profile/<prefix>.bashrc`. After the trap, `dotfiles/.bashrc` sources the remaining interactive lib files: `lib/aliases.sh`, `lib/commands.sh`, `lib/cplan.sh`, and `lib/acmd.sh`.
 
 All module files guard against double-sourcing via a `_kxue43_module_set_<name>` env var at the top.
 
@@ -40,9 +37,9 @@ All module files guard against double-sourcing via a `_kxue43_module_set_<name>`
 
 - Must have a module-load guard.
 - Declare lib-to-lib dependencies by sourcing directly, using a path relative to the file's own disk location (the `readlink -f "${BASH_SOURCE[0]}"` pattern). Never rely on load order.
-- May not access env vars set by other lib functions at source time. `$KXUE43_SUBSTANCE_DIR` is the one exception — it is a bootstrap var set by `.bashrc` before any lib is sourced.
+- May not access env vars set by other lib functions at source time. `$KXUE43_SUBSTANCE_DIR` is the one exception — it is a bootstrap var set by `dotfiles/.bashrc` before any lib is sourced.
 - For platform, host, and user detection, call `$(uname -s)`, `$(hostname)`, `$(whoami)` inline. Do not introduce cached `KXUE43_*` vars for these. (`KXUE43_SHELL_INIT` is a session-state flag, not a cache — do not confuse the two.)
-- Non-`utils.sh` lib files are for interactive shell use only and may be sourced only by `.bashrc` or `profile/` files — never by scripts.
+- Non-`utils.sh` lib files are for interactive shell use only and may be sourced only by `dotfiles/.bashrc` or `profile/` files — never by scripts.
 
 ### profile/ files
 
@@ -58,7 +55,7 @@ When an interactive shell function is non-trivial (needs its own completion, key
 2. Source `lib/utils.sh` using the `readlink -f "${BASH_SOURCE[0]}"` relative path pattern. If the module depends on another lib file (e.g., `lib/it-shell.sh`), source it the same way — explicit, never implicit.
 3. Define the public function, any `_kxue43_<name>::` private helpers, and the bash completion function + `complete` registration inline in the file.
 4. Append the function name to `_kxue43_commands_list` so it appears in `acmd -l`.
-5. Add `source "$KXUE43_SUBSTANCE_DIR/lib/<name>.sh"` to `.bashrc` if the function is needed in all environments, or to the relevant `profile/<prefix>.bashrc` if it is env-specific.
+5. Add `source "$KXUE43_SUBSTANCE_DIR/lib/<name>.sh"` to `dotfiles/.bashrc` if the function is needed in all environments, or to the relevant `profile/<prefix>.bashrc` if it is env-specific.
 
 ## Adding a new script to `bin/`
 
