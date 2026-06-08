@@ -32,7 +32,7 @@ options → autocmds → commands → mappings
 | Path | Purpose |
 |------|---------|
 | `lua/plugins/*.lua` | lazy.nvim plugin specs (each file returns a table) |
-| `lua/configs/` | Plugin-specific config modules (`lspconfig.lua`, `conform.lua`) |
+| `lua/configs/` | Plugin-specific config modules. Use a file here only when the config has real logic, wraps an external call, or is likely to grow. Pure data tables with a single call site belong inline in the plugin spec. |
 | `lua/chadrc.lua` | NvChad UI/theme config and Mason package list |
 | `lua/options.lua` | Vim options extending `nvchad.options` |
 | `lua/autocmds.lua` | Autocommands extending `nvchad.autocmds` |
