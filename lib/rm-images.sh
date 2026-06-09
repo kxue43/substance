@@ -51,7 +51,7 @@ SUBCOMMANDS:
     docker        Select and remove Docker images
 
 OPTIONS:
-    -h             Show this help message
+    -h            Show this help message
 EOF
 
     return 0
