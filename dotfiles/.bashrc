@@ -31,4 +31,5 @@ source "$KXUE43_SUBSTANCE_DIR/lib/aliases.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/commands.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/cplan.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/acmd.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/rm-images.sh"
 # ------------------------------------------------------------------------

@@ -86,41 +86,6 @@ init-devcon-files() {
   cp -R "$KXUE43_SUBSTANCE_DIR/.devcontainer/" ./.devcontainer/
 }
 
-rm-cdk-images() {
-  local tags
-  mapfile -t tags < <(docker images --filter "reference=cdkasset-*:latest" --format "{{.Repository}}:{{.Tag}}")
-
-  if ((${#tags[@]} == 0)); then
-    kxue43::log_info "No existing CDK asset images."
-
-    return 0
-  fi
-
-  docker image rm "${tags[@]}"
-
-  mapfile -t tags < <(docker images --filter "reference=*.amazonaws.com/cdk-hnb659fds-*:*" --format "{{.Repository}}:{{.Tag}}")
-
-  if ((${#tags[@]} > 0)); then
-    docker image rm "${tags[@]}"
-  fi
-}
-
-rm-docker-images() {
-  local tags
-  mapfile -t tags < <(docker images --format "{{.Repository}}:{{.Tag}}" | fzf -m --height=50% --layout=reverse)
-
-  if ((${#tags[@]} == 0)); then
-    kxue43::log_info "No image selected."
-
-    return 0
-  else
-    kxue43::log_info "The following images are selected:"
-    kxue43::log_info "${tags[@]}" "\n"
-  fi
-
-  docker image rm "${tags[@]}"
-}
-
 enter-work-mode() {
   # Enter work mode in the current shell and all sub-processes.
   # Current work mode env prefix is `ascd`.
