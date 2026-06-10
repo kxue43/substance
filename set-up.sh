@@ -171,7 +171,7 @@ EOF
     return 0
   fi
 
-  local -a args
+  local -a args=()
   [[ -e "$substance_dir/.git/hooks/pre-commit" ]] || args+=("-t" "pre-commit")
   [[ -e "$substance_dir/.git/hooks/post-merge" ]] || args+=("-t" "post-merge")
 
