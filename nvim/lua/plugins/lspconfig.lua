@@ -48,11 +48,13 @@ return {
           analysis = {
             autoSearchPaths = false,
             diagnosticMode = "workspace", -- NEW: analyze all files, not just open buffers
-            typeCheckingMode = "basic",
+            typeCheckingMode = "off",
             useTypingExtensions = true,
             inlayHints = {
               callArgumentNames = false,
             },
+            reportUnusedCallResult = "none",
+            reportAny = "none",
           },
         },
       },
