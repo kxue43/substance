@@ -7,6 +7,14 @@ arguments: [subcommand]
 allowed-tools: Bash Read Write Edit Grep Skill Agent mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
 ---
 
+## Repository Constraint
+
+This skill only supports PRs in the `ascending-llc/jarvis-registry` repository. The
+`kxue43-gitnexus-analysis` subagent will return an `ERROR:` and the review will stop if run
+against any other repository.
+
+---
+
 ## Web Search
 
 If you are uncertain about a library, API, or technology referenced in the PR, discover a web
@@ -52,10 +60,7 @@ with standard review behavior.
    prompt. If the result starts with `ERROR:`, stop immediately and report the error to the user
    verbatim. Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside `<pr_message>…</pr_message>`) from the output.
 
-4. **Collect full diff of all changed files**:
-   - Use the base branch obtained from the PR data in Step 3. Run:
-     `git diff origin/<base_branch>...HEAD`
-   - If the `git` CLI is insufficient (e.g., the remote ref is not available locally), fall back to using GitHub-related tools discovered from the `jarvis-registry` MCP server.
+4. **Collect full diff of all changed files**: use the base branch obtained from the PR data in Step 3 and run `git diff origin/<base_branch>...HEAD`.
 
 5. **GitNexus impact analysis**: Invoke the `kxue43-gitnexus-analysis` subagent (not
    jarvis-registry directly), passing `origin/<base_branch>` as the prompt (using the base branch
@@ -178,7 +183,7 @@ Write a session manifest file to `$session_file` (create parent directories with
 load:
   - <$spec_file — path relative to CWD>
   - <$report_file — path relative to CWD>
-base_branch: <base branch name fetched in Step 2>
+base_branch: <base branch name fetched in Step 3>
 next_labels:
   C: <computed next Critical number>
   M: <computed next Major number>
@@ -258,7 +263,7 @@ and all findings from previous sessions. If you need to read additional source f
 **Pre-review preparation — link reviewer comments to findings:**
 
 1. Extract all finding labels from the `changes_requested` field of the report file's front
-   matter. Strip brackets from each label and join with spaces (e.g. `[C1, M2]` → `C1 M2`).
+   matter (e.g. `changes_requested: [C1, M2]` parses to `["C1", "M2"]`) and join with spaces (e.g. `C1 M2`).
    Invoke the `kxue43-fetch-pr-comments` subagent (not jarvis-registry directly), passing `$pr_url` followed by the label list
    as the prompt. If the result starts with `ERROR:`, stop immediately and report the error to
    the user verbatim. Parse the returned output: `LABEL_MAP` entries show which labels have
@@ -285,7 +290,7 @@ and all findings from previous sessions. If you need to read additional source f
 **Obtain the PR diff:**
 
 Run `git diff origin/<base_branch>...HEAD` using the `base_branch` value parsed from the
-session manifest. If the command fails because `origin/<base_branch>` has not been fetched, stop immediately and report the error to the user.
+session manifest.
 
 Use this diff as the primary source of changes for all three review tracks below.
 
@@ -304,9 +309,10 @@ Perform the following three review tracks **in order, completing each before sta
 2. **New problems:** Examine the changes introduced since the previous review for any bugs,
    regressions, security issues, or quality problems that did not exist before.
 
-3. **Missed problems:** First write a brief internal handoff: one bullet per label in
-   `changes_requested` with its Track 1 rating, plus a one-line note on anything significant
-   from Track 2. This is a focusing summary only — you do not need to re-run the diff. Then,
+3. **Missed problems:** First reason through (internally, not shown to the user) one bullet per
+   label in `changes_requested` with its Track 1 rating, plus a one-line note on anything
+   significant from Track 2. This is a focusing exercise only — you do not need to re-run the
+   diff. Then,
    with fresh eyes and the benefit of the loaded context, check for issues that previous review
    sessions may have overlooked — including areas not directly touched by the latest changes.
    Do not re-surface findings whose labels are in `findings_dismissed`.
