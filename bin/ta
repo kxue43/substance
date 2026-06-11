@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
 main() {
   if (($# > 0)) && [[ $1 == "-h" ]]; then
     cat <<'EOF'
@@ -15,6 +19,12 @@ OPTIONS:
 EOF
 
     return 0
+  fi
+
+  if (($# == 0)); then
+    kxue43::log_error "ta requires at least one argument."
+
+    return 1
   fi
 
   tmux attach-session -t "$1"

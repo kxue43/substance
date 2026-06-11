@@ -6,6 +6,7 @@ _kxue43_module_set_commands=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/it-shell.sh"
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/acmd.sh"
 
 tl() {
   tmux list-sessions -F '#{session_name}: #{session_windows}win'
@@ -94,6 +95,8 @@ enter-work-mode() {
   export KXUE43_WORK_MODE
 
   kxue43::bash_post_init
+
+  acmd -d
 }
 
 if [[ "$(uname -s)" == "Darwin" ]]; then

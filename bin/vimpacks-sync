@@ -5,7 +5,7 @@ set -eu -o pipefail
 main() {
   if (($# > 0)) && [[ $1 == "-h" ]]; then
     cat <<'EOF'
-Usage: vimpack-sync
+Usage: vimpacks-sync
 
 Sync all Vim packages to the latest version.
 
