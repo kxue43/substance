@@ -57,18 +57,24 @@ with standard review behavior.
      `git diff origin/<base_branch>...HEAD`
    - If the `git` CLI is insufficient (e.g., the remote ref is not available locally), fall back to using GitHub-related tools discovered from the `jarvis-registry` MCP server.
 
-5. **Explore local context** using `Bash` (`git log`, `git blame`) and `Read`/`Grep` to understand
+5. **GitNexus impact analysis**: Invoke the `kxue43-gitnexus-analysis` subagent (not
+   jarvis-registry directly), passing `origin/<base_branch>` as the prompt (using the base branch
+   fetched in Step 2). If the result starts with `ERROR:`, stop immediately and report the error
+   to the user verbatim. Otherwise, use the returned digest to guide which symbols and routes to
+   focus on in the next step.
+
+6. **Explore local context** using `Bash` (`git log`, `git blame`) and `Read`/`Grep` to understand
    how the changed code fits into the surrounding codebase. Check tests, related modules, and any
    configuration touched by the PR.
 
-6. **Evaluate against the spec:**
+7. **Evaluate against the spec:**
    - Does the implementation match the spec's intent and acceptance criteria?
    - Are the focus areas called out in the spec adequately addressed?
    - Are there bugs, missing edge cases, or security concerns?
    - Is code quality acceptable: naming, structure, error handling, test coverage?
    - If anything is unclear due to unfamiliar technology, use web search before concluding.
 
-7. **Do not post any comments to GitHub.** All output goes to `$report_file` only.
+8. **Do not post any comments to GitHub.** All output goes to `$report_file` only.
 
 ### Output Format
 
@@ -279,6 +285,12 @@ Run `git diff origin/<base_branch>...HEAD` using the `base_branch` value parsed 
 session manifest. If the command fails because `origin/<base_branch>` has not been fetched, stop immediately and report the error to the user.
 
 Use this diff as the primary source of changes for all three review tracks below.
+
+**GitNexus impact analysis:** Invoke the `kxue43-gitnexus-analysis` subagent (not
+jarvis-registry directly), passing `origin/<base_branch>` as the prompt (using the
+`base_branch` value parsed from the session manifest). If the result starts with `ERROR:`,
+stop immediately and report the error to the user verbatim. Otherwise, use the returned
+digest to inform all three review tracks below.
 
 Perform the following three review tracks **in order, completing each before starting the next**:
 
