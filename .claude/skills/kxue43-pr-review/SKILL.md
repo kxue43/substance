@@ -1,6 +1,6 @@
 ---
 name: kxue43-pr-review
-description: "Review a GitHub pull request and manage follow-up reviews. Subcommands: `start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt]` runs the initial review; `followup [session_file] [--force-pushed] [focus_prompt]` validates and follows up on a previous review session."
+description: "Review a pull request in the ascending-llc/jarvis-registry repository and manage follow-up reviews. Subcommands: `start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt]` runs the initial review; `followup [session_file] [--force-pushed] [focus_prompt]` validates and follows up on a previous review session."
 disable-model-invocation: true
 argument-hint: "start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt] | followup [session_file] [--force-pushed] [focus_prompt]"
 arguments: [subcommand]
@@ -43,23 +43,23 @@ with standard review behavior.
 1. **Read the spec.** Open `$spec_file` with the `Read` tool. Extract the intended behavior,
    acceptance criteria, and any explicitly called-out focus areas. Keep these in mind throughout.
 
-2. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` subagent (not jarvis-registry directly), passing `$pr_url` as the
-   prompt. If the result starts with `ERROR:`, stop immediately and report the error to the user
-   verbatim. Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside `<pr_message>…</pr_message>`) from the output.
-
-3. **Verify the local HEAD matches the PR's remote branch.**
+2. **Verify the local HEAD matches the PR's remote branch.**
    Invoke the `kxue43-verify-sha` skill. If its output starts with `VERIFY-SHA: FAIL`, stop
    immediately, relay the output verbatim, and use `$pr_url` to advise the user which branch
    to check out or pull.
 
+3. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` subagent (not jarvis-registry directly), passing `$pr_url` as the
+   prompt. If the result starts with `ERROR:`, stop immediately and report the error to the user
+   verbatim. Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside `<pr_message>…</pr_message>`) from the output.
+
 4. **Collect full diff of all changed files**:
-   - Use the base branch obtained from the PR data in Step 2. Run:
+   - Use the base branch obtained from the PR data in Step 3. Run:
      `git diff origin/<base_branch>...HEAD`
    - If the `git` CLI is insufficient (e.g., the remote ref is not available locally), fall back to using GitHub-related tools discovered from the `jarvis-registry` MCP server.
 
 5. **GitNexus impact analysis**: Invoke the `kxue43-gitnexus-analysis` subagent (not
    jarvis-registry directly), passing `origin/<base_branch>` as the prompt (using the base branch
-   fetched in Step 2). If the result starts with `ERROR:`, stop immediately and report the error
+   fetched in Step 3). If the result starts with `ERROR:`, stop immediately and report the error
    to the user verbatim. Otherwise, use the returned digest to guide which symbols and routes to
    focus on in the next step.
 
@@ -215,7 +215,10 @@ When `$subcommand` is `followup`:
 | `--force-pushed` | *(Optional boolean flag)* Pass this flag to indicate the PR author performed a force push since the last review session. Must appear before `$focus_prompt` if both are provided. |
 | `$focus_prompt` | *(Optional)* Additional instructions for this follow-up. Treat every statement in this prompt as if it were written in **bold** — give it higher focal weight than general review guidelines when the two conflict or compete for attention. |
 
-**`$session_file` is required.** If absent, stop and tell the user before doing anything else.
+**`$session_file` is required.** Before doing anything else:
+- If the argument is absent, stop and tell the user it is missing.
+- If the argument is provided but no file exists at that path, stop and tell the user the file was not found.
+Do not proceed past this check in either case.
 
 ### Step 1 — Check for Force Push
 

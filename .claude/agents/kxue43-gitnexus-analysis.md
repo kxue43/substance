@@ -28,7 +28,7 @@ Call `mcp__jarvis-registry__discover_servers` with query `"gitnexus detect_chang
 ERROR: GitNexus MCP server unavailable or unauthenticated
 ```
 
-and stop. From the result, extract the `server_id` of the GitNexus server — use it for all subsequent `mcp__jarvis-registry__execute_tool` calls in this session.
+and stop. From the result, extract the `server_id` of the GitNexus server. All GitNexus tools (`detect_changes`, `impact`, `api_impact`, `tool_map`) share this same `server_id` — use it for all subsequent `mcp__jarvis-registry__execute_tool` calls in this session.
 
 **Step 3 — Detect changed symbols**
 
@@ -37,13 +37,13 @@ Call `mcp__jarvis-registry__execute_tool` with:
 - `server_id`: from Step 2
 - `arguments`: `{ "scope": "compare", "base_ref": "<base ref from prompt>", "repo": "jarvis-registry" }`
 
-If the call fails or returns an authentication error, output exactly:
+If the call returns an authentication error, output exactly:
 
 ```
 ERROR: GitNexus MCP server unavailable or unauthenticated
 ```
 
-and stop.
+and stop. For any other failure, output `ERROR: detect_changes failed: <reason>` and stop — without this step's output there is no symbol data to build the digest from.
 
 Parse the response to extract:
 - All changed symbols and their file paths
@@ -71,7 +71,7 @@ Collect consumer count, risk level, and shape mismatch flags. If any call fails,
 
 **Step 6 — MCP tool handler impact**
 
-From the changed file paths in Step 3, identify any file that appears to be an MCP tool handler (e.g. flagged with HANDLES_TOOL edges in the detect_changes output, or located under a `tools/` directory). If any such files are present, call `mcp__jarvis-registry__execute_tool` with:
+From the changed file paths in Step 3, identify any file located under `registry/src/registry/mcpgw/tools/`. If any such files are present, call `mcp__jarvis-registry__execute_tool` with:
 - `tool_name`: `"tool_map"`
 - `server_id`: from Step 2
 - `arguments`: `{ "repo": "jarvis-registry" }`
@@ -80,7 +80,7 @@ Filter the result to only tools whose handler files are among the changed files.
 
 **Step 7 — Output the digest**
 
-Your entire response must begin with `## GitNexus Analysis` — no preamble before it. Keep the total output under 10,000 tokens. Drop LOW-risk items, d=3 blast-radius results, and API routes with no shape mismatches and fewer than 4 consumers — include only load-bearing findings.
+Your entire response must begin with `## GitNexus Analysis` — no preamble before it. Keep the total output under 10,000 tokens. Drop LOW-risk items and d=3 blast-radius results unconditionally. Drop API routes with no shape mismatches and fewer than 4 consumers only if needed to stay within the 10,000-token limit — otherwise include them.
 
 Use this structure (omit any section that has no content):
 

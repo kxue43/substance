@@ -41,7 +41,7 @@ This call surfaces `pull_request_read`. Make two calls:
 - Paginate while the returned array length equals 100: call again with `page: N+1`.
   Accumulate all comments across pages.
 
-If either call fails or returns an authentication error, output exactly `ERROR: please authenticate with jarvis-registry` and stop. For any other failure, output `ERROR: <reason>` and stop.
+If either call returns an authentication error, output exactly `ERROR: please authenticate with jarvis-registry` and stop. For any other failure, output `ERROR: <reason>` and stop.
 
 **Data shape reference** — given this abbreviated `get_review_comments` response:
 
