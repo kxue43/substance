@@ -1,10 +1,18 @@
 ---
 name: kxue43-pr-review
-description: "Review a GitHub pull request and manage follow-up reviews. Subcommands: `start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt]` runs the initial review; `followup [session_file] [--force-pushed] [focus_prompt]` validates and follows up on a previous review session."
+description: "Review a pull request in the ascending-llc/jarvis-registry repository and manage follow-up reviews. Subcommands: `start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt]` runs the initial review; `followup [session_file] [--force-pushed] [focus_prompt]` validates and follows up on a previous review session."
 disable-model-invocation: true
 argument-hint: "start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt] | followup [session_file] [--force-pushed] [focus_prompt]"
 arguments: [subcommand]
 allowed-tools: Bash Read Write Edit Grep Skill Agent mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
+---
+
+## Repository Constraint
+
+This skill only supports PRs in the `ascending-llc/jarvis-registry` repository. The
+`kxue43-gitnexus-analysis` subagent will return an `ERROR:` and the review will stop if run
+against any other repository.
+
 ---
 
 ## Web Search
@@ -43,32 +51,35 @@ with standard review behavior.
 1. **Read the spec.** Open `$spec_file` with the `Read` tool. Extract the intended behavior,
    acceptance criteria, and any explicitly called-out focus areas. Keep these in mind throughout.
 
-2. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` subagent (not jarvis-registry directly), passing `$pr_url` as the
-   prompt. If the result starts with `ERROR:`, stop immediately and report the error to the user
-   verbatim. Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside `<pr_message>…</pr_message>`) from the output.
-
-3. **Verify the local HEAD matches the PR's remote branch.**
+2. **Verify the local HEAD matches the PR's remote branch.**
    Invoke the `kxue43-verify-sha` skill. If its output starts with `VERIFY-SHA: FAIL`, stop
    immediately, relay the output verbatim, and use `$pr_url` to advise the user which branch
    to check out or pull.
 
-4. **Collect full diff of all changed files**:
-   - Use the base branch obtained from the PR data in Step 2. Run:
-     `git diff origin/<base_branch>...HEAD`
-   - If the `git` CLI is insufficient (e.g., the remote ref is not available locally), fall back to using GitHub-related tools discovered from the `jarvis-registry` MCP server.
+3. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` subagent (not jarvis-registry directly), passing `$pr_url` as the
+   prompt. If the result starts with `ERROR:`, stop immediately and report the error to the user
+   verbatim. Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside `<pr_message>…</pr_message>`) from the output.
 
-5. **Explore local context** using `Bash` (`git log`, `git blame`) and `Read`/`Grep` to understand
+4. **Collect full diff of all changed files**: use the base branch obtained from the PR data in Step 3 and run `git diff origin/<base_branch>...HEAD`.
+
+5. **GitNexus impact analysis**: Invoke the `kxue43-gitnexus-analysis` subagent (not
+   jarvis-registry directly), passing `origin/<base_branch>` as the prompt (using the base branch
+   fetched in Step 3). If the result starts with `ERROR:`, stop immediately and report the error
+   to the user verbatim. Otherwise, use the returned digest to guide which symbols and routes to
+   focus on in the next step.
+
+6. **Explore local context** using `Bash` (`git log`, `git blame`) and `Read`/`Grep` to understand
    how the changed code fits into the surrounding codebase. Check tests, related modules, and any
    configuration touched by the PR.
 
-6. **Evaluate against the spec:**
+7. **Evaluate against the spec:**
    - Does the implementation match the spec's intent and acceptance criteria?
    - Are the focus areas called out in the spec adequately addressed?
    - Are there bugs, missing edge cases, or security concerns?
    - Is code quality acceptable: naming, structure, error handling, test coverage?
    - If anything is unclear due to unfamiliar technology, use web search before concluding.
 
-7. **Do not post any comments to GitHub.** All output goes to `$report_file` only.
+8. **Do not post any comments to GitHub.** All output goes to `$report_file` only.
 
 ### Output Format
 
@@ -172,7 +183,7 @@ Write a session manifest file to `$session_file` (create parent directories with
 load:
   - <$spec_file — path relative to CWD>
   - <$report_file — path relative to CWD>
-base_branch: <base branch name fetched in Step 2>
+base_branch: <base branch name fetched in Step 3>
 next_labels:
   C: <computed next Critical number>
   M: <computed next Major number>
@@ -209,7 +220,10 @@ When `$subcommand` is `followup`:
 | `--force-pushed` | *(Optional boolean flag)* Pass this flag to indicate the PR author performed a force push since the last review session. Must appear before `$focus_prompt` if both are provided. |
 | `$focus_prompt` | *(Optional)* Additional instructions for this follow-up. Treat every statement in this prompt as if it were written in **bold** — give it higher focal weight than general review guidelines when the two conflict or compete for attention. |
 
-**`$session_file` is required.** If absent, stop and tell the user before doing anything else.
+**`$session_file` is required.** Before doing anything else:
+- If the argument is absent, stop and tell the user it is missing.
+- If the argument is provided but no file exists at that path, stop and tell the user the file was not found.
+Do not proceed past this check in either case.
 
 ### Step 1 — Check for Force Push
 
@@ -249,7 +263,7 @@ and all findings from previous sessions. If you need to read additional source f
 **Pre-review preparation — link reviewer comments to findings:**
 
 1. Extract all finding labels from the `changes_requested` field of the report file's front
-   matter. Strip brackets from each label and join with spaces (e.g. `[C1, M2]` → `C1 M2`).
+   matter (e.g. `changes_requested: [C1, M2]` parses to `["C1", "M2"]`) and join with spaces (e.g. `C1 M2`).
    Invoke the `kxue43-fetch-pr-comments` subagent (not jarvis-registry directly), passing `$pr_url` followed by the label list
    as the prompt. If the result starts with `ERROR:`, stop immediately and report the error to
    the user verbatim. Parse the returned output: `LABEL_MAP` entries show which labels have
@@ -276,9 +290,15 @@ and all findings from previous sessions. If you need to read additional source f
 **Obtain the PR diff:**
 
 Run `git diff origin/<base_branch>...HEAD` using the `base_branch` value parsed from the
-session manifest. If the command fails because `origin/<base_branch>` has not been fetched, stop immediately and report the error to the user.
+session manifest.
 
 Use this diff as the primary source of changes for all three review tracks below.
+
+**GitNexus impact analysis:** Invoke the `kxue43-gitnexus-analysis` subagent (not
+jarvis-registry directly), passing `origin/<base_branch>` as the prompt (using the
+`base_branch` value parsed from the session manifest). If the result starts with `ERROR:`,
+stop immediately and report the error to the user verbatim. Otherwise, use the returned
+digest to inform all three review tracks below.
 
 Perform the following three review tracks **in order, completing each before starting the next**:
 
@@ -289,9 +309,10 @@ Perform the following three review tracks **in order, completing each before sta
 2. **New problems:** Examine the changes introduced since the previous review for any bugs,
    regressions, security issues, or quality problems that did not exist before.
 
-3. **Missed problems:** First write a brief internal handoff: one bullet per label in
-   `changes_requested` with its Track 1 rating, plus a one-line note on anything significant
-   from Track 2. This is a focusing summary only — you do not need to re-run the diff. Then,
+3. **Missed problems:** First reason through (internally, not shown to the user) one bullet per
+   label in `changes_requested` with its Track 1 rating, plus a one-line note on anything
+   significant from Track 2. This is a focusing exercise only — you do not need to re-run the
+   diff. Then,
    with fresh eyes and the benefit of the loaded context, check for issues that previous review
    sessions may have overlooked — including areas not directly touched by the latest changes.
    Do not re-surface findings whose labels are in `findings_dismissed`.
