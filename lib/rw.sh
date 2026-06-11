@@ -199,6 +199,10 @@ _kxue43_rw::complete() {
     compgen -V COMPREPLY -W "setup renew sync branch park" -- "$2"
 
     return 0
+  elif ((COMP_CWORD == 2)) && [[ $3 == "sync" ]]; then
+    compgen -V COMPREPLY -W "-p" -- "$2"
+
+    return 0
   fi
 } && complete -o bashdefault -F _kxue43_rw::complete rw
 
