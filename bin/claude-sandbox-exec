@@ -6,7 +6,7 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/ut
 
 main() {
   if (($# == 0)) || [[ "$1" == "-h" ]]; then
-    cat <<EOF
+    cat <<'EOF'
 USAGE: claude-sandbox-exec [-h] [PROJECT]
 
 Run Claude Code CLI in a container sandbox in headless mode.

@@ -11,6 +11,8 @@ exclude-entropy-patterns = [
     {path-pattern = "dotfiles/\\.bashrc$", pattern = "\\$KXUE43_SUBSTANCE_DIR/lib/\\S+\\.sh", reason = "source path references are not credentials"},
     {path-pattern = "profile/ascd\\.bashrc$", pattern = "\\$KXUE43_SUBSTANCE_DIR/lib/\\S+\\.sh", reason = "source path references are not credentials"},
     {path-pattern = "profile/kxue43\\.bashrc$", pattern = "\\$KXUE43_SUBSTANCE_DIR/lib/\\S+\\.sh", reason = "source path references are not credentials"},
+    {path-pattern = "lib/acmd\\.sh$", pattern = "\\$KXUE43_SUBSTANCE_DIR/profile/\\S+", reason = "source path references are not credentials"},
+    {path-pattern = "lib/acmd\\.sh$", pattern = "\\$KXUE43_SUBSTANCE_DIR/lib/\\S+", reason = "source path references are not credentials"},
 ]
 
 exclude-signatures = [

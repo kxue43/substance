@@ -43,7 +43,7 @@ _kxue43_rm_images::docker() {
 
 rm-images() {
   if (($# == 0)) || [[ "$1" == "-h" ]]; then
-    cat <<EOF
+    cat <<'EOF'
 USAGE: rm-images [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:

@@ -42,7 +42,7 @@ _list() {
 
 main() {
   if (($# == 0)) || [[ $1 == "-h" ]]; then
-    cat <<EOF
+    cat <<'EOF'
 USAGE: fnm-links [-h] [SUBCOMMAND] [-N] [DURATION]
 
 SUBCOMMANDS:

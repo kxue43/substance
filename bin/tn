@@ -20,6 +20,22 @@ _create_one() {
 }
 
 main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: tn [-h] [DIR_NAME]
+
+Create a new Tmux session in directory DIR_NAME.
+
+ARGUMENTS:
+    DIR_NAME     Directory to create a new Tmux session in
+
+OPTIONS:
+    -h           Show this help message
+EOF
+
+    return 0
+  fi
+
   if (($# == 0)); then
     kxue43::log_error "tn requires at least one argument."
 

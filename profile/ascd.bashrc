@@ -19,7 +19,8 @@ alias gjrw='cd ~/projects/jarvis-registry-workspace/'
 # Functions.
 
 source "$KXUE43_SUBSTANCE_DIR/lib/rw.sh"
-source "$KXUE43_SUBSTANCE_DIR/lib/jarvis.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-logs.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-ldc.sh"
 
 sso-login() {
   aws sso login --sso-session sso-ascending
