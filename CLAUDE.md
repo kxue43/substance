@@ -31,40 +31,6 @@ All module files guard against double-sourcing via a `_kxue43_module_set_<name>`
 
 `$KXUE43_SUBSTANCE_DIR` is the canonical env var pointing to the repo root; use it instead of hard-coding the path anywhere.
 
-## lib/ and profile/ file rules
-
-### lib/ files
-
-- Must have a module-load guard.
-- Declare lib-to-lib dependencies by sourcing directly, using a path relative to the file's own disk location (the `readlink -f "${BASH_SOURCE[0]}"` pattern). Never rely on load order.
-- May not access env vars set by other lib functions at source time. `$KXUE43_SUBSTANCE_DIR` is the one exception — it is a bootstrap var set by `dotfiles/.bashrc` before any lib is sourced.
-- For platform, host, and user detection, call `$(uname -s)`, `$(hostname)`, `$(whoami)` inline. Do not introduce cached `KXUE43_*` vars for these. (`KXUE43_SHELL_INIT` is a session-state flag, not a cache — do not confuse the two.)
-- Non-`utils.sh` lib files are for interactive shell use only and may be sourced only by `dotfiles/.bashrc` or `profile/` files — never by scripts.
-
-### profile/ files
-
-- No module-load guard — idempotency comes from the guards inside the lib files they source.
-- Source lib files using `$KXUE43_SUBSTANCE_DIR`-relative paths (`$KXUE43_SUBSTANCE_DIR` is guaranteed present by the time any profile file is sourced).
-- May source any lib file from `lib/`.
-
-## Adding a complex interactive shell function
-
-When an interactive shell function is non-trivial (needs its own completion, keybindings, or private helpers), give it its own `lib/<name>.sh` module instead of putting it in `lib/commands.sh`:
-
-1. Create `lib/<name>.sh` with the standard double-loading guard at the top.
-2. Source `lib/utils.sh` using the `readlink -f "${BASH_SOURCE[0]}"` relative path pattern. If the module depends on another lib file (e.g., `lib/it-shell.sh`), source it the same way — explicit, never implicit.
-3. Define the public function, any `_kxue43_<name>::` private helpers, and the bash completion function + `complete` registration inline in the file.
-4. Append the function name to `_kxue43_commands_list` so it appears in `acmd -l`.
-5. Add `source "$KXUE43_SUBSTANCE_DIR/lib/<name>.sh"` to `dotfiles/.bashrc` if the function is needed in all environments, or to the relevant `profile/<prefix>.bashrc` if it is env-specific.
-
-## Adding a new script to `bin/`
-
-1. Create the executable in `bin/<name>`.
-2. Add a matching bash completion file in `completions/<name>`.
-3. Scripts may only source `lib/utils.sh` — no other lib file. Use the `readlink -f "${BASH_SOURCE[0]}"` relative path pattern to locate it.
-4. Run `./set-up.sh` — it symlinks everything in `bin/` into `~/.local/bin` automatically.
-5. Run `date > .keep` and commit the result. The `shell-cmd-on-change` pre-commit hook watches `.keep`; when other clones pull this commit, their `post-merge` hook will detect the change and automatically run `./set-up.sh` to pick up the new script.
-
 ## Shell utility conventions
 
 ### Double-loading guard
@@ -97,6 +63,76 @@ Never define bare helper functions without a namespace for the interactive shell
 ### Environment variable naming
 
 All exported env vars use the `KXUE43_` prefix (e.g. `KXUE43_SUBSTANCE_DIR`, `KXUE43_SHELL_INIT`). Guard vars use the `_kxue43_module_set_` prefix and are intentionally not exported.
+
+## lib/ and profile/ file rules
+
+### lib/ files
+
+- Must have a module-load guard.
+- Declare lib-to-lib dependencies by sourcing directly, using a path relative to the file's own disk location (the `readlink -f "${BASH_SOURCE[0]}"` pattern). Never rely on load order.
+- May not access env vars set by other lib functions _at source time_. `$KXUE43_SUBSTANCE_DIR` is the one exception — it is a bootstrap var set by `dotfiles/.bashrc` before any lib is sourced.
+- For platform, host, and user detection, call `$(uname -s)`, `$(hostname)`, `$(whoami)` inline. Do not introduce cached `KXUE43_*` vars for these. (`KXUE43_SHELL_INIT` is a session-state flag, not a cache — do not confuse the two.)
+- Non-`utils.sh` lib files are for interactive shell use only and may be sourced only by `dotfiles/.bashrc` or `profile/` files — never by scripts.
+
+### profile/ files
+
+- No module-load guard — idempotency comes from the guards inside the lib files they source.
+- Source lib files using `$KXUE43_SUBSTANCE_DIR`-relative paths (`$KXUE43_SUBSTANCE_DIR` is guaranteed present by the time any profile file is sourced).
+- May source any lib file from `lib/`.
+
+## Adding a complex interactive shell function
+
+When an interactive shell function is non-trivial (needs its own completion, keybindings, or private helpers), give it its own `lib/<name>.sh` module instead of putting it in `lib/commands.sh`:
+
+1. Create `lib/<name>.sh` with the standard double-loading guard at the top.
+2. Source `lib/utils.sh` using the `readlink -f "${BASH_SOURCE[0]}"` relative path pattern. If the module depends on another lib file (e.g., `lib/it-shell.sh`), source it the same way — explicit, never implicit.
+3. Define the public function, any `_kxue43_<name>::` private helpers, and the bash completion function + `complete` registration inline in the file.
+4. The public function's help text **must** use a quoted heredoc (`cat <<'EOF'`), never unquoted (`cat <<EOF`). The `acmd` preview system locates the help range by searching for the literal string `<<'EOF'`; an unquoted heredoc will not be detected and the preview falls back to a 5-line stub.
+5. Append the function name to `_kxue43_commands_list` so it appears in `acmd -l`.
+6. Add `source "$KXUE43_SUBSTANCE_DIR/lib/<name>.sh"` to `dotfiles/.bashrc` if the function is needed in all environments, or to the relevant `profile/<prefix>.bashrc` if it is env-specific.
+7. Run `acmd -d` to invalidate the cache; the next `acmd -l` or `acmd -p` invocation will rebuild it.
+
+## Adding a new script to `bin/`
+
+Every `bin/` script must follow this standard structure (required for `acmd` preview to work):
+
+```bash
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: <name> [-h] ...
+...
+EOF
+
+    return 0
+  fi
+
+  # implementation
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
+```
+
+Key rules:
+- Scripts may only source `lib/utils.sh` — no other lib file.
+- The `-h` help block **must** use `cat <<'EOF'` (quoted). The `acmd` preview system finds the help range by matching the literal `<<'EOF'` marker; an unquoted heredoc will not be detected.
+- The entry-point guard must call `main "$@"`, not bare `main`.
+
+Steps to add a new script:
+
+1. Create the executable in `bin/<name>` using the structure above.
+2. Add a matching bash completion file in `completions/<name>`.
+3. Run `./set-up.sh` — it symlinks everything in `bin/` into `~/.local/bin` automatically.
+4. Run `date > .keep` and commit the result. The `shell-cmd-on-change` pre-commit hook watches `.keep`; when other clones pull this commit, their `post-merge` hook will detect the change and automatically run `./set-up.sh` to pick up the new script.
+5. Run `acmd -d` to invalidate the cache; the next `acmd -l` or `acmd -p` invocation will rebuild it.
 
 ## Claude Code configuration
 
