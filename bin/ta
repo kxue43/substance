@@ -1,3 +1,25 @@
 #!/usr/bin/env bash
 
-tmux attach-session -t "$1"
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: ta [-h] [SESSION_NAME]
+
+Attach to a Tmux session.
+
+ARGUMENTS:
+    SESSION_NAME     Name of the session
+
+OPTIONS:
+    -h               Show this help message
+EOF
+
+    return 0
+  fi
+
+  tmux attach-session -t "$1"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

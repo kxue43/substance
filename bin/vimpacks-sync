@@ -3,6 +3,19 @@
 set -eu -o pipefail
 
 main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: vimpack-sync
+
+Sync all Vim packages to the latest version.
+
+OPTIONS:
+    -h               Show this help message
+EOF
+
+    return 0
+  fi
+
   local repos=(
     morhetz/gruvbox
     preservim/nerdtree
@@ -31,5 +44,5 @@ main() {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
-  main
+  main "$@"
 fi

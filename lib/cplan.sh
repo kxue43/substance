@@ -191,7 +191,7 @@ _kxue43_cplan::vi() {
 
 cplan() {
   if (($# == 0)) || [[ $1 == "-h" ]]; then
-    cat <<EOF
+    cat <<'EOF'
 USAGE: cplan [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:

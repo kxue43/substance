@@ -61,7 +61,7 @@ jarvis-logs() {
 
 jarvis-ldc() {
   if (($# == 0)) || [[ "$1" == "-h" ]]; then
-    cat <<EOF
+    cat <<'EOF'
 USAGE: jarvis-ldc [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:

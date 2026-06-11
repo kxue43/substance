@@ -141,7 +141,7 @@ _kxue43_rw::park() {
 
 rw() {
   if (($# == 0)) || [[ $1 == "-h" ]]; then
-    cat <<EOF
+    cat <<'EOF'
 USAGE: rw [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:
