@@ -32,6 +32,7 @@ options → autocmds → commands → mappings
 | Path | Purpose |
 |------|---------|
 | `lua/plugins/*.lua` | lazy.nvim plugin specs (each file returns a table) |
+| `lua/configs/fold.lua` | Layered fold config module (treesitter + LSP); called from `autocmds.lua` |
 | `lua/chadrc.lua` | NvChad UI/theme config and Mason package list |
 | `lua/options.lua` | Vim options extending `nvchad.options` |
 | `lua/autocmds.lua` | Autocommands extending `nvchad.autocmds` |
@@ -57,4 +58,13 @@ options → autocmds → commands → mappings
 
 ### Folding
 
-Treesitter-based folding is enabled with `foldlevel = 99` (all folds open by default). Use `zM` to close all folds.
+Folding uses a two-layer system defined in `lua/configs/fold.lua` (mirrors LazyVim's approach), wired in via `autocmds.lua`:
+
+- **Layer 1 (FileType)** — upgrades `foldmethod` to `expr` + treesitter `foldexpr` for any filetype that has a TS "folds" query. Silently skips unsupported filetypes (help, terminal, etc.).
+- **Layer 2 (LspAttach)** — further upgrades to `vim.lsp.foldexpr()` when the attached LSP server advertises `foldingRangeProvider` (requires Neovim 0.11+).
+
+Both layers use `set_default()`, which won't override options the user has explicitly set for a window/buffer.
+
+Global fallback options (set in `options.lua`): `foldmethod = "indent"`, `foldlevel = 99`, `foldlevelstart = 99` (all folds open by default), `foldtext = ""` (first line used as fold text, Nvim 0.10+), `foldnestmax = 4`. Fold gutter icons are set via `fillchars`.
+
+`chadrc.lua` overrides `Folded = { bg = "#3c3836" }` to make folded regions more visible. Use `zM` to close all folds.
