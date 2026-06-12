@@ -13,6 +13,7 @@ local M = {
       -- Making comments lighter. For details, see :help nvui.base46
       Comment = { fg = "#928374" }, -- Targeting integrations/defaults.lua
       ["@comment"] = { fg = "#928374" }, -- Targeting integrations/treesitter.lua
+      Folded = { bg = "#3c3836" }, -- Make Folded more visible; integrations/defaults.lua
       FlashLabel = { fg = "black", bg = "orange", bold = true }, -- Make flash.nvim labels more visible
     },
   },
