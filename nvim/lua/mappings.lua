@@ -195,12 +195,12 @@ map({ "n" }, "\\bc", function()
   end
 end, { desc = "Close all unmodified buffers except the current one." })
 
--- jumping out of terminal mode
+-- Jumping out of terminal mode
 map({ "t" }, "<A-n>", function()
   vim.cmd.stopinsert()
 end, { desc = "Jumping out of terminal mode." })
 
--- dedent in the plus register
+-- Dedent in the plus register
 map({ "n" }, "<leader>dp", function()
   local text = vim.fn.getreg "+"
   local lines = vim.split(text, "\n", { plain = true })
@@ -233,3 +233,36 @@ map({ "n" }, "<leader>dp", function()
 
   vim.fn.setreg("+", table.concat(lines, "\n"))
 end, { desc = "Dedent the string in the plug register." })
+
+local function buf_relpath()
+  local bufpath = vim.fn.resolve(vim.api.nvim_buf_get_name(0))
+  if bufpath == "" then
+    return nil
+  end
+  local git_root = vim.fs.root(bufpath, { ".git" })
+  local root = (git_root or vim.fn.resolve(vim.fn.getcwd())) .. "/"
+  return bufpath:sub(1, #root) == root and bufpath:sub(#root + 1) or bufpath
+end
+
+-- put Claude Code style line range reference in the plus register
+map({ "x" }, "<leader>ks", function()
+  local relpath = buf_relpath()
+  if not relpath then
+    return
+  end
+  local start_line = vim.fn.line "v"
+  local end_line = vim.fn.line "."
+  if start_line > end_line then
+    start_line, end_line = end_line, start_line
+  end
+  vim.fn.setreg("+", string.format("@%s#L%d-%d", relpath, start_line, end_line))
+end, { desc = "Put Claude Code line range reference in the plus register." })
+
+-- put Claude Code style file reference in the plus register
+map({ "n" }, "<leader>kb", function()
+  local relpath = buf_relpath()
+  if not relpath then
+    return
+  end
+  vim.fn.setreg("+", "@" .. relpath)
+end, { desc = "Put Claude Code file reference in the plus register." })
