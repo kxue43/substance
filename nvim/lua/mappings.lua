@@ -11,6 +11,13 @@ del({ "n", "t" }, "<A-i>")
 del({ "n", "t" }, "<A-v>")
 del({ "n", "t" }, "<A-h>")
 
+-- Delete the "toggle new horizontal term" and "toggle new vertical term" key maps set by NvChad.
+del("n", "<leader>h")
+del("n", "<leader>v")
+
+-- Delete the "toggle line number" key map set by NvChad.
+del("n", "<leader>n")
+
 -- Delete the <C-x> key map that escape terminal mode. Use <C-\\><C-n> instead.
 -- <C-x> is reserved for Readline.
 del("t", "<C-x>")
@@ -18,7 +25,7 @@ del("t", "<C-x>")
 -- Show full path of the current buffer.
 map("n", "\\eb", function()
   print(vim.fn.expand "%:p")
-end, { desc = "Echo full file path of the current buffer." })
+end, { desc = "echo full file path of the current buffer." })
 
 -- Telescope find file under certain directory.
 map("n", "<leader>fu", function()
@@ -102,7 +109,7 @@ map("t", "<A-k>", function()
     -- Open up terminal at the bottom again.
     require("nvchad.term").toggle { pos = "sp", id = "htoggleTerm" }
   end
-end, { desc = "Toggle the current htoggleTerm between bottom and fullscreen." })
+end, { desc = "toggle the current htoggleTerm between bottom and fullscreen." })
 
 -- Open the current htoggleTerm and make it fullscreen.
 map("n", "<A-k>", function()
@@ -122,11 +129,11 @@ map("n", "<A-k>", function()
 
   -- Return to insert mode in the terminal window
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("a", true, false, true), "n", false)
-end, { desc = "Toggle the current htoggleTerm between bottom and fullscreen." })
+end, { desc = "toggle the current htoggleTerm between bottom and fullscreen." })
 
 map({ "n" }, "<A-h>", function()
   require("nvchad.term").toggle { pos = "sp", id = "htoggleTerm" }
-end, { desc = "Open a new htoggleTerm at the bottom of the window." })
+end, { desc = "open a new htoggleTerm at the bottom of the window." })
 
 map("t", "<A-h>", function()
   -- Get alternate buffer number
@@ -146,7 +153,7 @@ map("t", "<A-h>", function()
     -- and terminal is automatically hidden.
     vim.api.nvim_set_current_buf(alt_buf)
   end
-end, { desc = "Hide the current htoggleTerm, fullscreen or not." })
+end, { desc = "hide the current htoggleTerm, fullscreen or not." })
 
 -- Wrap words under cursor inside backticks
 local function wrap_in_backticks(boundary_pat)
@@ -176,13 +183,13 @@ end
 map({ "n" }, "<leader>wg", function()
   wrap_in_backticks "%s"
 end, {
-  desc = "Wrap greedily the current words under cursor inside backticks. Boundaries are leftmost and right most empty space characters.",
+  desc = "wrap greedily the current words under cursor inside backticks. Boundaries are leftmost and right most empty space characters.",
 })
 
 map({ "n" }, "<leader>wl", function()
   wrap_in_backticks "[%s,.:;]"
 end, {
-  desc = "Wrap lazily the current words under cursor inside backticks. Boundaries are leftmost and right most empty space character, comma, period, colon, semi-colon.",
+  desc = "wrap lazily the current words under cursor inside backticks. Boundaries are leftmost and right most empty space character, comma, period, colon, semi-colon.",
 })
 
 -- Close all unmodified buffers
@@ -193,12 +200,12 @@ map({ "n" }, "\\bc", function()
       vim.api.nvim_buf_delete(buf, {})
     end
   end
-end, { desc = "Close all unmodified buffers except the current one." })
+end, { desc = "close all unmodified buffers except the current one." })
 
 -- Jumping out of terminal mode
 map({ "t" }, "<A-n>", function()
   vim.cmd.stopinsert()
-end, { desc = "Jumping out of terminal mode." })
+end, { desc = "jumping out of terminal mode." })
 
 -- Dedent in the plus register
 map({ "n" }, "<leader>dp", function()
@@ -232,7 +239,7 @@ map({ "n" }, "<leader>dp", function()
   end
 
   vim.fn.setreg("+", table.concat(lines, "\n"))
-end, { desc = "Dedent the string in the plug register." })
+end, { desc = "dedent the string in the plug register." })
 
 local function buf_relpath()
   local bufpath = vim.fn.resolve(vim.api.nvim_buf_get_name(0))
@@ -256,7 +263,7 @@ map({ "x" }, "<leader>ks", function()
     start_line, end_line = end_line, start_line
   end
   vim.fn.setreg("+", string.format("@%s#L%d-%d", relpath, start_line, end_line))
-end, { desc = "Put Claude Code line range reference in the plus register." })
+end, { desc = "put Claude Code line range reference in the plus register." })
 
 -- put Claude Code style file reference in the plus register
 map({ "n" }, "<leader>kb", function()
@@ -265,4 +272,4 @@ map({ "n" }, "<leader>kb", function()
     return
   end
   vim.fn.setreg("+", "@" .. relpath)
-end, { desc = "Put Claude Code file reference in the plus register." })
+end, { desc = "put Claude Code file reference in the plus register." })
