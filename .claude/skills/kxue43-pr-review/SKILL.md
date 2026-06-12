@@ -28,6 +28,16 @@ Use the results to inform your review rather than guessing at behavior.
 
 ---
 
+## GitNexus Digest
+
+The digest returned by the `kxue43-gitnexus-analysis` subagent is a **sound but incomplete** structural map.
+Edges it asserts are reliable — treat them as confirmed relationships.
+Missing edges do not mean missing relationships — DI-wired connections and interface-to-concrete bindings are invisible to the graph.
+Use the digest to prioritize which symbols and call chains deserve closer scrutiny;
+do not use it as proof that unmentioned code is unaffected by the PR's changes.
+
+---
+
 ## Subcommand: `start`
 
 When `$subcommand` is `start`:
