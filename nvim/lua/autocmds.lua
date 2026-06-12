@@ -1,5 +1,7 @@
 require "nvchad.autocmds"
 
+require("configs.fold").setup()
+
 local map = vim.keymap.set
 
 -- NvChad's nvdash and terminal set `number = false` as a window-local option.
