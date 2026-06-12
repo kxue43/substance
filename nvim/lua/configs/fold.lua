@@ -40,10 +40,9 @@ local function set_default(option, value, win)
   local own_key = option .. "=" .. tostring(value) -- value we're about to write
   local cur_key = option .. "=" .. tostring(lval) -- value currently in place
 
-  _own_defaults[own_key] = true -- remember this is ours
-
   if lval == gval or _own_defaults[cur_key] then
     vim.api.nvim_set_option_value(option, value, scope_local)
+    _own_defaults[own_key] = true -- mark only after a successful write
     return true
   end
   return false
@@ -82,12 +81,11 @@ function M.foldexpr()
   return has_ts_folds() and vim.treesitter.foldexpr() or "0"
 end
 
--- Expose as a named global so the option string below resolves correctly.
--- Usage in foldexpr:  "v:lua.NvFold.foldexpr()"
-_G.NvFold = M
-
 --- Wire up the fold autocmds. Call once from autocmds.lua.
 function M.setup()
+  -- Must be set before any FileType fires and evaluates the foldexpr string.
+  _G.NvFold = M
+
   -- ── Layer 1: tree-sitter, applied per FileType ──────────────────────────
   vim.api.nvim_create_autocmd("FileType", {
     group = vim.api.nvim_create_augroup("fold_treesitter", { clear = true }),
