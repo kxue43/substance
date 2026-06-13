@@ -136,6 +136,8 @@ main() {
     echo '{}' >"$substance_dir/.claude/settings.local.json"
   fi
 
+  local name
+
   local -a binaries
 
   mapfile -t binaries < <(ls -1 "$substance_dir/bin")
@@ -148,6 +150,18 @@ main() {
   for name in "${binaries[@]}"; do
     if [[ ! -x "$(readlink "$name")" ]]; then
       kxue43::log_info "Script $name should no longer exist. Removing"
+
+      unlink "$name"
+    fi
+  done
+
+  local -a dotfiles
+  mapfile -t dotfiles < <(find "$HOME" -maxdepth 1 -mindepth 1 -type l)
+
+  # Clean up symlinks to dot files
+  for name in "${dotfiles[@]}"; do
+    if [[ ! -e "$(readlink "$name")" ]]; then
+      kxue43::log_info "Dot file $name should no longer exist. Removing"
 
       unlink "$name"
     fi

@@ -166,8 +166,11 @@ kxue43::get_env_prefix() {
   local -n __prefix_var="$1"
 
   case "$(hostname)" in
-  love66* | fedora)
+  love66*)
     __prefix_var=kxue43
+    ;;
+  fedora)
+    __prefix_var=fedora
     ;;
   Kes-MacBook-Pro.*)
     __prefix_var=ascd
