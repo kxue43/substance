@@ -21,3 +21,33 @@ kxue43::log_info() {
     printf "%s\n" "$@"
   fi
 }
+
+kxue43::get_env_prefix() {
+  local -n __prefix_var="$1"
+
+  case "$(hostname)" in
+  love66*)
+    __prefix_var=kxue43
+    ;;
+  fedora)
+    __prefix_var=fedora
+    ;;
+  Kes-MacBook-Pro.*)
+    __prefix_var=ascd
+    ;;
+  LM-*)
+    __prefix_var=gd
+    ;;
+  *)
+    if [[ "$(whoami)" == "vscode" ]]; then
+      __prefix_var=kxue43
+    else
+      __prefix_var=""
+    fi
+    ;;
+  esac
+
+  if [[ -n "${KXUE43_WORK_MODE:+x}" ]]; then
+    __prefix_var="$KXUE43_WORK_MODE"
+  fi
+}

@@ -3,7 +3,6 @@
 set -eu -o pipefail
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/lib/utils.sh"
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/lib/it-shell.sh"
 
 _get_symlink_target() {
   readlink "$1"
@@ -167,7 +166,7 @@ main() {
 
   # Clean up symlinks to dot files
   for name in "${dotfiles[@]}"; do
-    if [[ ! -e "$(readlink "$name")" ]]; then
+    if [[ ! -e "$(readlink "$name")" ]] || [[ "$prefix" != "fedora" && "$name" == "$HOME/.tmux.conf" ]]; then
       kxue43::log_info "Dot file $name should no longer exist. Removing"
 
       unlink "$name"
