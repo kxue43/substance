@@ -219,14 +219,6 @@ endfunction
 
 " Key bindings
 
-" screen-256color (Tmux's default-terminal) lacks meta-key definitions, so Vim
-" doesn't recognise ESC+key as <A-key> automatically. Declare them explicitly.
-if !has('gui_running')
-  execute "set <A-h>=\eh"
-  execute "set <A-k>=\ek"
-  execute "set <A-n>=\en"
-endif
-
 nnoremap <silent> <A-h> :call <SID>ToggleTerm()<CR>
 tnoremap <silent> <A-h> <C-w>:call <SID>HideTermFromTerminal()<CR>
 tnoremap <silent> <A-k> <C-w>:call <SID>ToggleTermSizeFromTerminal()<CR>

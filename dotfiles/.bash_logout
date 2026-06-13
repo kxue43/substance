@@ -5,11 +5,6 @@ main() {
     return
   fi
 
-  if type -a tmux &>/dev/null && tmux list-sessions &>/dev/null; then
-    # Don't clean if there are live tmux sessions.
-    return
-  fi
-
   # Disable exit on error for cleanup.
   set +e
 
@@ -17,7 +12,7 @@ main() {
   eval "$(fnm env)"
 
   if [[ -n "${FNM_MULTISHELL_PATH:+x}" ]]; then
-    find "$(dirname "${FNM_MULTISHELL_PATH}")/" -type l -name '*_*' -mtime +30 -exec rm {} +
+    find "$(dirname "${FNM_MULTISHELL_PATH}")/" -type l -name '*_*' -mtime +60 -exec rm {} +
   fi
 }
 

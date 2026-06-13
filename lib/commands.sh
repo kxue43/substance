@@ -8,8 +8,15 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/it-shell.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/acmd.sh"
 
-tl() {
-  tmux list-sessions -F '#{session_name}: #{session_windows}win'
+gt() {
+  if (($# != 1)); then
+    kxue43::log_error "gt expects exactly one argument"
+
+    return 1
+  fi
+
+  # Sets Ghostty tab title
+  printf '\033]0;%s\007' "$1"
 }
 
 set-aws-region() {

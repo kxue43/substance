@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+_open_tab() {
+  local target
+  target=$(cd "$1" 2>/dev/null && pwd) || {
+    kxue43::log_error "gn: directory not found: $1"
+
+    return 1
+  }
+
+  local escaped="${target//\\/\\\\}"
+  escaped="${escaped//\"/\\\"}"
+
+  osascript <<EOF
+tell application "Ghostty"
+  set cfg to new surface configuration
+  set initial working directory of cfg to "$escaped"
+  try
+    new tab with configuration cfg
+  end try
+end tell
+EOF
+}
+
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: gn [-h] DIR_NAME [DIR_NAME ...]
+
+Open new Ghostty tab(s), one per directory.
+
+ARGUMENTS:
+    DIR_NAME    Directory to open in a new Ghostty tab
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# == 0)); then
+    kxue43::log_error "gn requires at least one argument."
+
+    return 1
+  fi
+
+  local dir
+
+  for dir in "$@"; do
+    _open_tab "$dir"
+  done
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

@@ -6,7 +6,7 @@ font-thicken = true
 font-thicken-strength = 150
 
 shell-integration = bash
-shell-integration-features = no-cursor
+shell-integration-features = no-cursor,no-title
 
 cursor-style = block
 cursor-style-blink = false
@@ -20,3 +20,15 @@ macos-option-as-alt = left
 keybind = global:alt+f9=toggle_quick_terminal
 quick-terminal-position = top
 quick-terminal-size = 70%
+
+keybind = cmd+1=goto_tab:1
+keybind = cmd+2=goto_tab:2
+keybind = cmd+3=goto_tab:3
+keybind = cmd+4=goto_tab:4
+keybind = cmd+5=goto_tab:5
+keybind = cmd+6=goto_tab:6
+keybind = cmd+7=goto_tab:7
+keybind = cmd+8=goto_tab:8
+keybind = cmd+9=goto_tab:9
+keybind = cmd+page_down=next_tab
+keybind = cmd+page_up=previous_tab
