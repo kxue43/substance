@@ -111,6 +111,10 @@ _kxue43_it_shell::shell_integration() {
   --bind 'ctrl-/:change-preview-window(down|hidden|)'"
 
   eval "$(fzf --bash)"
+
+  if [[ "${TERM_PROGRAM:-}" == "ghostty" ]]; then
+    printf '\033]0;%s\007' "$(basename "$PWD")"
+  fi
 }
 
 _kxue43_it_shell::activate_fnm() {

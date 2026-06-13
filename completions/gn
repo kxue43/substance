@@ -1,0 +1,7 @@
+_kxue43_gn::complete() {
+  compgen -V COMPREPLY -d -- "$2"
+
+  return 0
+} && complete -o bashdefault -F _kxue43_gn::complete gn
+
+# vim: set ft=bash :
