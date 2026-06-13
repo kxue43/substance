@@ -3,6 +3,7 @@
 set -eu -o pipefail
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/lib/utils.sh"
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/lib/it-shell.sh"
 
 _get_symlink_target() {
   readlink "$1"
@@ -96,6 +97,9 @@ main() {
   local substance_dir
   substance_dir="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" && pwd)"
 
+  local prefix
+  kxue43::get_env_prefix "prefix"
+
   local -a linked=(
     .bash_logout
     .bash_profile
@@ -105,6 +109,9 @@ main() {
     .inputrc
     .vimrc
   )
+
+  [[ "$prefix" == "fedora" ]] && linked+=(".tmux.conf")
+
   _link_files "$HOME" "$substance_dir/dotfiles" "linked"
 
   linked=(.config/ghostty/config .config/bat/config)

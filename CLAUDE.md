@@ -72,7 +72,7 @@ All exported env vars use the `KXUE43_` prefix (e.g. `KXUE43_SUBSTANCE_DIR`, `KX
 - Declare lib-to-lib dependencies by sourcing directly, using a path relative to the file's own disk location (the `readlink -f "${BASH_SOURCE[0]}"` pattern). Never rely on load order.
 - May not access env vars set by other lib functions _at source time_. `$KXUE43_SUBSTANCE_DIR` is the one exception — it is a bootstrap var set by `dotfiles/.bashrc` before any lib is sourced.
 - For platform, host, and user detection, call `$(uname -s)`, `$(hostname)`, `$(whoami)` inline. Do not introduce cached `KXUE43_*` vars for these. (`KXUE43_SHELL_INIT` is a session-state flag, not a cache — do not confuse the two.)
-- Non-`utils.sh` lib files are for interactive shell use only and may be sourced only by `dotfiles/.bashrc` or `profile/` files — never by scripts.
+- Non-`utils.sh` lib files may be sourced by other lib files, `dotfiles/.bashrc`, `profile/` files, or `set-up.sh` — never by `bin/` scripts.
 
 ### profile/ files
 
