@@ -15,7 +15,7 @@
 "\C-xgc": "git commit -m ''\C-b"
 
 # For Claude Code CLI invocation
-"\C-xsp": " --dangerously-skip-permissions"
+"\C-xsp": "--dangerously-skip-permissions"
 
 # Kill or copy the region between the mark (set by '\e ') and the point (current cursor).
 # kill-region cuts the region. copy-region-as-kill only copies the region.

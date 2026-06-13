@@ -18,7 +18,7 @@ del("n", "<leader>v")
 -- Delete the "toggle line number" key map set by NvChad.
 del("n", "<leader>n")
 
--- Delete the <C-x> key map that escape terminal mode. Use <C-\\><C-n> instead.
+-- Delete the <C-x> key map that escape terminal mode. Use <A-n> instead.
 -- <C-x> is reserved for Readline.
 del("t", "<C-x>")
 
