@@ -30,5 +30,5 @@ keybind = cmd+6=goto_tab:6
 keybind = cmd+7=goto_tab:7
 keybind = cmd+8=goto_tab:8
 keybind = cmd+9=goto_tab:9
-keybind = cmd+page_up=next_tab
-keybind = cmd+page_down=previous_tab
+keybind = cmd+page_down=next_tab
+keybind = cmd+page_up=previous_tab

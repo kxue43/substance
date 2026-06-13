@@ -51,12 +51,6 @@ EOF
 
   local dir
 
-  if (($# == 1)); then
-    _open_tab "$1"
-
-    return 0
-  fi
-
   for dir in "$@"; do
     _open_tab "$dir"
   done
