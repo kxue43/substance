@@ -103,7 +103,6 @@ main() {
     .gitconfig
     .gvimrc
     .inputrc
-    .tmux.conf
     .vimrc
   )
   _link_files "$HOME" "$substance_dir/dotfiles" "linked"

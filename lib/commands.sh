@@ -8,10 +8,6 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/it-shell.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/acmd.sh"
 
-tl() {
-  tmux list-sessions -F '#{session_name}: #{session_windows}win'
-}
-
 gt() {
   if (($# != 1)); then
     kxue43::log_error "gt expects exactly one argument"
