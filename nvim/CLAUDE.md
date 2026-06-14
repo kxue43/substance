@@ -46,9 +46,13 @@ options → autocmds → commands → mappings
 - **Formatting**: `conform.nvim` — format on save; lua→stylua, go→gofmt, yaml/json/js/ts→prettier
 - **Linting**: `nvim-lint` — mypy for Python (only invoked if `mypy` is executable; should come from project venv, not Mason)
 - **LSP**: `nvim-lspconfig` — gopls, lua_ls, bashls, basedpyright, ruff, ts_ls, eslint; enabled via `vim.lsp.enable()`
-- **Motion**: `flash.nvim` — `s`=jump-by-label, `S`=treesitter-node, `<C-t>`=incremental treesitter selection
+- **Motion**: `flash.nvim` — `s`=jump-by-label, `S`=treesitter-node, `<C-t>`=incremental treesitter selection; `tabout.nvim` — `<Tab>`/`<S-Tab>` to jump out of brackets/quotes (loads after `blink.cmp` via `dependencies`)
 - **Git**: `gitsigns.nvim` — inline blame on, hunk navigation `]c`/`[c`, hunk actions under `\h` prefix
 - **Claude**: `claudecode.nvim` — keymaps under `<leader>a`
+
+### Treesitter
+
+This config uses `neovim-treesitter/nvim-treesitter` (the community fork, not the original `nvim-treesitter/nvim-treesitter`). Always reference it as `"neovim-treesitter/nvim-treesitter"` in plugin specs and dependencies. It requires `neovim-treesitter/treesitter-parser-registry` as a dependency.
 
 ### LSP notes
 

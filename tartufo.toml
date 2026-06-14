@@ -5,6 +5,7 @@ entropy = true
 
 exclude-path-patterns = [
     {path-pattern = 'tartufo\.toml$', reason = 'contains many high entropy signatures'},
+    {path-pattern = 'nvim/lazy-lock\.json$', reason = 'contains many high entropy git commit SHAs'},
 ]
 
 exclude-entropy-patterns = [
