@@ -263,6 +263,7 @@ map({ "x" }, "<leader>ks", function()
     start_line, end_line = end_line, start_line
   end
   vim.fn.setreg("+", string.format("@%s#L%d-%d", relpath, start_line, end_line))
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
 end, { desc = "put Claude Code line range reference in the plus register." })
 
 -- put Claude Code style file reference in the plus register
