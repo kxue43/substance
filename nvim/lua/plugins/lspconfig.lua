@@ -35,7 +35,6 @@ return {
       root_dir = function(bufnr, on_dir)
         local root = vim.fs.root(bufnr, { "uv.lock" }) -- uv workspace root (only ever at monorepo root)
           or vim.fs.root(bufnr, { ".git" }) -- repo root fallback
-          or vim.fs.root(bufnr, { "pyrightconfig.json" }) -- explicit pyright config fallback
           or vim.fs.root(bufnr, { "pyproject.toml" }) -- last resort
         if root then
           on_dir(root)
@@ -46,6 +45,7 @@ return {
         basedpyright = {
           disableOrganizeImports = true,
           analysis = {
+            exclude = { "*/build" },
             autoSearchPaths = false,
             diagnosticMode = "workspace", -- NEW: analyze all files, not just open buffers
             typeCheckingMode = "off",
