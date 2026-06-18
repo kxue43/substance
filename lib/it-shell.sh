@@ -66,6 +66,7 @@ _kxue43_it_shell::set_path() {
       PATH="/opt/local/bin:/opt/local/sbin:$PATH"
     elif [[ -x /opt/homebrew/bin/brew ]]; then
       export HOMEBREW_FORBIDDEN_FORMULAE="openjdk"
+      export HOMEBREW_NO_ASK=1
 
       eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
