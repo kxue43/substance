@@ -1,18 +1,10 @@
 ---
 name: kxue43-pr-review
-description: "Review a pull request in the ascending-llc/jarvis-registry repository and manage follow-up reviews. Subcommands: `start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt]` runs the initial review; `followup [session_file] [--force-pushed] [focus_prompt]` validates and follows up on a previous review session."
+description: "Review a GitHub pull request and manage follow-up reviews. Subcommands: `start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt]` runs the initial review; `followup [session_file] [--force-pushed] [focus_prompt]` validates and follows up on a previous review session."
 disable-model-invocation: true
 argument-hint: "start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt] | followup [session_file] [--force-pushed] [focus_prompt]"
 arguments: [subcommand]
 allowed-tools: Bash Read Write Edit Grep Skill Agent mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
----
-
-## Repository Constraint
-
-This skill only supports PRs in the `ascending-llc/jarvis-registry` repository. The
-`kxue43-gitnexus-analysis` subagent will return an `ERROR:` and the review will stop if run
-against any other repository.
-
 ---
 
 ## Web Search
@@ -25,16 +17,6 @@ search tool via `jarvis-registry`:
 3. Call `mcp__jarvis-registry__execute_tool` with that tool to retrieve current documentation.
 
 Use the results to inform your review rather than guessing at behavior.
-
----
-
-## GitNexus Digest
-
-The digest returned by the `kxue43-gitnexus-analysis` subagent is a **sound but incomplete** structural map.
-Edges it asserts are reliable — treat them as confirmed relationships.
-Missing edges do not mean missing relationships — DI-wired connections and interface-to-concrete bindings are invisible to the graph.
-Use the digest to prioritize which symbols and call chains deserve closer scrutiny;
-do not use it as proof that unmentioned code is unaffected by the PR's changes.
 
 ---
 
@@ -58,13 +40,13 @@ with standard review behavior.
 
 ### Review Process
 
-1. **Read the spec.** Open `$spec_file` with the `Read` tool. Extract the intended behavior,
-   acceptance criteria, and any explicitly called-out focus areas. Keep these in mind throughout.
-
-2. **Verify the local HEAD matches the PR's remote branch.**
+1. **Verify the local HEAD matches the PR's remote branch.**
    Invoke the `kxue43-verify-sha` skill. If its output starts with `VERIFY-SHA: FAIL`, stop
    immediately, relay the output verbatim, and use `$pr_url` to advise the user which branch
    to check out or pull.
+
+2. **Read the spec.** Open `$spec_file` with the `Read` tool. Extract the intended behavior,
+   acceptance criteria, and any explicitly called-out focus areas. Keep these in mind throughout.
 
 3. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` subagent (not jarvis-registry directly), passing `$pr_url` as the
    prompt. If the result starts with `ERROR:`, stop immediately and report the error to the user
@@ -72,24 +54,18 @@ with standard review behavior.
 
 4. **Collect full diff of all changed files**: use the base branch obtained from the PR data in Step 3 and run `git diff origin/<base_branch>...HEAD`.
 
-5. **GitNexus impact analysis**: Invoke the `kxue43-gitnexus-analysis` subagent (not
-   jarvis-registry directly), passing `origin/<base_branch>` as the prompt (using the base branch
-   fetched in Step 3). If the result starts with `ERROR:`, stop immediately and report the error
-   to the user verbatim. Otherwise, use the returned digest to guide which symbols and routes to
-   focus on in the next step.
-
-6. **Explore local context** using `Bash` (`git log`, `git blame`) and `Read`/`Grep` to understand
+5. **Explore local context** using `Bash` (`git log`, `git blame`) and `Read`/`Grep` to understand
    how the changed code fits into the surrounding codebase. Check tests, related modules, and any
    configuration touched by the PR.
 
-7. **Evaluate against the spec:**
+6. **Evaluate against the spec:**
    - Does the implementation match the spec's intent and acceptance criteria?
    - Are the focus areas called out in the spec adequately addressed?
    - Are there bugs, missing edge cases, or security concerns?
    - Is code quality acceptable: naming, structure, error handling, test coverage?
    - If anything is unclear due to unfamiliar technology, use web search before concluding.
 
-8. **Do not post any comments to GitHub.** All output goes to `$report_file` only.
+7. **Do not post any comments to GitHub.** All output goes to `$report_file` only.
 
 ### Output Format
 
@@ -303,12 +279,6 @@ Run `git diff origin/<base_branch>...HEAD` using the `base_branch` value parsed 
 session manifest.
 
 Use this diff as the primary source of changes for all three review tracks below.
-
-**GitNexus impact analysis:** Invoke the `kxue43-gitnexus-analysis` subagent (not
-jarvis-registry directly), passing `origin/<base_branch>` as the prompt (using the
-`base_branch` value parsed from the session manifest). If the result starts with `ERROR:`,
-stop immediately and report the error to the user verbatim. Otherwise, use the returned
-digest to inform all three review tracks below.
 
 Perform the following three review tracks **in order, completing each before starting the next**:
 
