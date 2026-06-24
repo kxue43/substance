@@ -47,7 +47,7 @@ return {
           analysis = {
             exclude = { "*/build" },
             autoSearchPaths = false,
-            diagnosticMode = "workspace", -- NEW: analyze all files, not just open buffers
+            diagnosticMode = "openFilesOnly", -- Only analyze open files. Othewise ("workspace") memory comsuption is too high and crashes the LSP.
             typeCheckingMode = "off",
             useTypingExtensions = true,
             inlayHints = {
