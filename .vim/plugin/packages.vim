@@ -30,6 +30,20 @@ let g:airline#extensions#tabline#enabled = 1
 " Airline theme
 let g:airline_theme='base16_gruvbox_dark_medium'
 
+" The term extension renders section C using the `airline_term` highlight group,
+" which no theme defines. Patch it with the normal-mode section-C colors so
+" it doesn't fall back to a black background in terminal buffers.
+function! AirlineThemePatch(palette) abort
+  if !has_key(a:palette, 'normal') || !has_key(a:palette.normal, 'airline_c')
+    return
+  endif
+  if !has_key(a:palette, 'terminal')
+    let a:palette.terminal = {}
+  endif
+  let a:palette.terminal['airline_term'] = copy(a:palette.normal['airline_c'])
+endfunction
+let g:airline_theme_patch_func = 'AirlineThemePatch'
+
 if !exists('g:airline_symbols')
   let g:airline_symbols = {}
 endif

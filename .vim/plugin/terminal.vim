@@ -1,9 +1,9 @@
 " terminal.vim
 " Integrated terminal management: open, hide, toggle bottom/fullscreen.
 "
-" <A-h>  normal    Toggle terminal at the bottom (open / hide)
+" <A-h>  normal    Toggle terminal (open/hide from source; hide from terminal normal mode)
 " <A-h>  terminal  Hide terminal (bottom → close window; fullscreen → swap buffer)
-" <A-k>  normal    Open terminal in fullscreen (create or reveal)
+" <A-k>  normal    Open fullscreen (from source); toggle bottom↔fullscreen (from terminal normal mode)
 " <A-k>  terminal  Toggle between bottom split and fullscreen
 " <A-n>  terminal  Exit terminal mode → Normal mode in the terminal window
 
@@ -18,6 +18,13 @@ function! s:IsTermBufValid() abort
         \ && bufexists(s:term_buf)
         \ && term_getstatus(s:term_buf) =~# 'running'
 endfunction
+
+" Match terminal background to Normal (avoids the default pure-black in insert mode).
+highlight! link Terminal Normal
+augroup TerminalHighlight
+  autocmd!
+  autocmd ColorScheme * highlight! link Terminal Normal
+augroup END
 
 " Suppress line numbers in terminal windows
 " set nu is global; setlocal overrides it per-window, including after <C-w>N.
@@ -75,8 +82,23 @@ endfunction
 
 " Entry points called from keymaps
 
-" <A-h> normal — toggle terminal at bottom
+" <A-h> normal — toggle terminal at bottom, or hide from terminal normal mode
 function! s:ToggleTerm() abort
+  if &buftype ==# 'terminal'
+    " Invoked from normal mode inside a terminal window.
+    let l:alt = bufnr('#')
+    if l:alt == -1 || !bufexists(l:alt)
+      return
+    endif
+    if bufwinnr(l:alt) > 0
+      " Terminal is at bottom; source buffer visible above — close the terminal window.
+      call s:HideTermWindow()
+    else
+      " Terminal is fullscreen — swap buffer to source without closing the window.
+      execute 'buffer! ' . l:alt
+    endif
+    return
+  endif
   if !s:IsTermBufValid()
     call s:CreateTermAtBottom()
   elseif bufwinnr(s:term_buf) != -1
@@ -123,8 +145,23 @@ function! s:ToggleTermSizeFromTerminal() abort
   endif
 endfunction
 
-" <A-k> normal — open terminal (create or reveal) directly in fullscreen
+" <A-k> normal — open terminal in fullscreen (from source); toggle bottom↔fullscreen (from terminal normal mode)
 function! s:OpenTermFullscreen() abort
+  if &buftype ==# 'terminal'
+    " Invoked from normal mode inside a terminal window.
+    let l:cur = winnr()
+    wincmd k
+    if winnr() != l:cur
+      " Moved to a window above — terminal was at bottom. Hide it to go fullscreen.
+      hide
+      startinsert
+    else
+      " Didn't move — terminal is already fullscreen. Restore it to a bottom split.
+      call s:SwitchToSource(s:term_buf)
+      call s:OpenTermAtBottom()
+    endif
+    return
+  endif
   if !s:IsTermBufValid()
     execute 'botright ' . s:TermHeight() . ' split'
     call term_start(&shell, {'curwin': 1, 'exit_cb': function('s:OnTermExit')})
