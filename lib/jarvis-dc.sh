@@ -1,15 +1,15 @@
-if [[ -n "${_kxue43_module_set_jarvis_ldc+x}" ]]; then
+if [[ -n "${_kxue43_module_set_jarvis_dc+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_jarvis_ldc=1
+_kxue43_module_set_jarvis_dc=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-jarvis-ldc() {
+jarvis-dc() {
   if (($# == 0)) || [[ "$1" == "-h" ]]; then
     cat <<'EOF'
-USAGE: jarvis-ldc [-h] [SUBCOMMAND]
+USAGE: jarvis-dc [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:
     up    [-n]     docker compose up with the right options
@@ -27,6 +27,20 @@ EOF
   up)
     shift 1
 
+    if (($# > 0)) && [[ $1 == "-h" ]]; then
+      cat <<'EOF'
+Usage: jarvis-dc up [-n] [-h]
+
+docker compose up with the right options.
+
+OPTIONS:
+    -n          --no-build
+    -h          Show this help message
+EOF
+
+      return 0
+    fi
+
     local -a args=("-f" "docker-compose.no-db.yml" "--profile" "full" "up" "-d")
 
     if [[ "$1" == "-n" ]]; then
@@ -38,9 +52,39 @@ EOF
     docker compose "${args[@]}"
     ;;
   down)
+    shift 1
+
+    if (($# > 0)) && [[ $1 == "-h" ]]; then
+      cat <<'EOF'
+Usage: jarvis-dc down [-h]
+
+docker compose down with the right options.
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+      return 0
+    fi
+
     docker compose -f docker-compose.no-db.yml --profile full down
     ;;
   logs)
+    shift 1
+
+    if (($# > 0)) && [[ $1 == "-h" ]]; then
+      cat <<'EOF'
+Usage: jarvis-dc logs [-h]
+
+docker logs -f on the fzf-selected container.
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+      return 0
+    fi
+
     local container
     container="$(docker ps --format '{{.Names}}' | fzf --height=50% --layout=reverse)"
 
@@ -60,7 +104,7 @@ EOF
   esac
 }
 
-_kxue43_jarvis_ldc::complete() {
+_kxue43_jarvis_dc::complete() {
   local -a opts
   opts=("'-h  (Show help message)'" "'up  (docker compose up)'" "'down  (docker compose down)'" "'logs  (docker logs -f)'")
 
@@ -76,15 +120,15 @@ _kxue43_jarvis_ldc::complete() {
     compgen -V COMPREPLY -W "up down logs" -- "$2"
 
     return 0
-  elif ((COMP_CWORD == 2)) && [[ $3 == "up" ]] && [[ $2 == "" ]]; then
-    COMPREPLY=("-n")
+  elif ((COMP_CWORD == 2)) && [[ $3 == "up" ]]; then
+    compgen -V COMPREPLY -W "-n -h" -- "$2"
 
     return 0
-  elif ((COMP_CWORD == 2)) && [[ $3 == "up" ]] && [[ $2 =~ ^-n?$ ]]; then
-    COMPREPLY=("-n")
+  elif ((COMP_CWORD == 2)) && [[ $3 != "up" ]]; then
+    COMPREPLY=("-h")
 
     return 0
   fi
-} && complete -o bashdefault -F _kxue43_jarvis_ldc::complete jarvis-ldc
+} && complete -o bashdefault -F _kxue43_jarvis_dc::complete jarvis-dc
 
-_kxue43_commands_list+=("jarvis-ldc")
+_kxue43_commands_list+=("jarvis-dc")
