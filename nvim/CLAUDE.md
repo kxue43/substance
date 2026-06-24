@@ -45,7 +45,7 @@ options → autocmds → commands → mappings
 - **Completion**: `blink.cmp` (sources: lsp + snippets + path; disabled for Markdown)
 - **Formatting**: `conform.nvim` — format on save; lua→stylua, go→gofmt, yaml/json/js/ts→prettier
 - **Linting**: `nvim-lint` — mypy for Python (only invoked if `mypy` is executable; should come from project venv, not Mason)
-- **LSP**: `nvim-lspconfig` — gopls, lua_ls, bashls, basedpyright, ruff, ts_ls, eslint; enabled via `vim.lsp.enable()`
+- **LSP**: `nvim-lspconfig` — gopls, lua_ls, bashls, jedi_language_server, ruff, ts_ls, eslint; enabled via `vim.lsp.enable()`
 - **Motion**: `flash.nvim` — `s`=jump-by-label, `S`=treesitter-node, `<C-t>`=incremental treesitter selection; `tabout.nvim` — `<Tab>`/`<S-Tab>` to jump out of brackets/quotes (loads after `blink.cmp` via `dependencies`)
 - **Git**: `gitsigns.nvim` — inline blame on, hunk navigation `]c`/`[c`, hunk actions under `\h` prefix
 - **Claude**: `claudecode.nvim` — keymaps under `<leader>a`
@@ -56,7 +56,7 @@ This config uses `neovim-treesitter/nvim-treesitter` (the community fork, not th
 
 ### LSP notes
 
-- **Python**: `basedpyright` + `ruff` run together. Ruff's hover is disabled in `autocmds.lua` (basedpyright handles hover). `basedpyright` root detection uses `uv.lock` first (uv monorepo root), then `.git`, then `pyrightconfig.json`, then `pyproject.toml`.
+- **Python**: `jedi_language_server` + `ruff` run together. Ruff's hover is disabled in `autocmds.lua` (jedi handles hover). Jedi's own diagnostics are disabled via `init_options` since ruff handles linting. Root detection uses default lspconfig markers (`pyproject.toml`, `setup.py`, `setup.cfg`, `requirements.txt`, `Pipfile`, `.git`).
 - **Mason packages**: declared in `chadrc.lua` under `mason.pkgs`. `mypy`, `flake8`, and `black` are intentionally in `mason.skip` — they must be provided by the project's virtualenv.
 - All shell scripts are treated as Bash (`vim.b.is_bash = 1`); macOS uses `/usr/local/bin/bash` as the shell binary.
 
