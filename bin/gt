@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: gt [-h] TAB_TITLE
+
+Set the title of the current Ghostty tab.
+
+ARGUMENTS:
+    TAB_TITLE   Title to set
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# != 1)); then
+    kxue43::log_error "gt expects exactly one argument"
+
+    return 1
+  fi
+
+  # Sets Ghostty tab title
+  printf '\033]0;%s\007' "$1"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
