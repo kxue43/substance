@@ -6,10 +6,10 @@ _kxue43_module_set_rw=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-_kxue43_rw::setup() {
+_kxue43_rw::bootstrap() {
   ln -s ../registry-working-docs/ .working-docs
 
-  local files=(.env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml pyrightconfig.json)
+  local files=(.env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml)
   for file in "${files[@]}"; do
     ln -s ../"${file}" "$file"
   done
@@ -145,7 +145,7 @@ rw() {
 USAGE: rw [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:
-    setup         Set up a Jarvis Registry worktree; must be in a worktree folder
+    bootstrap     Bootstrap a Jarvis Registry worktree; must be in a worktree folder
     renew         Pull the latest commits on main; rebase parking branches; delete merged branches; must be in the workspace folder
     sync          Perform uv sync and activate the virtual environment; use -p flag to pull down latest commits; must be in a worktree folder
     branch        List all branches with worktree occupancy markings
@@ -158,8 +158,8 @@ EOF
     return 0
   fi
   case "$1" in
-  setup)
-    _kxue43_rw::setup
+  bootstrap)
+    _kxue43_rw::bootstrap
     ;;
   renew)
     _kxue43_rw::renew
@@ -185,7 +185,7 @@ EOF
 
 _kxue43_rw::complete() {
   local -a opts
-  opts=("'-h  (Show help message)'" "'setup  (Setup worktree)'" "'renew  (Renew workspace)'" "'sync  (Sync worktree)'" "'branch  (List branches)'" "'park  (Checkout parking branch)'")
+  opts=("'-h  (Show help message)'" "'bootstrap  (bootstrap worktree)'" "'renew  (Renew workspace)'" "'sync  (Sync worktree)'" "'branch  (List branches)'" "'park  (Checkout parking branch)'")
 
   if ((COMP_CWORD == 1)) && [[ $2 == "" ]]; then
     compgen -V COMPREPLY -W "${opts[*]}"
@@ -196,7 +196,7 @@ _kxue43_rw::complete() {
 
     return 0
   elif ((COMP_CWORD == 1)); then
-    compgen -V COMPREPLY -W "setup renew sync branch park" -- "$2"
+    compgen -V COMPREPLY -W "bootstrap renew sync branch park" -- "$2"
 
     return 0
   elif ((COMP_CWORD == 2)) && [[ $3 == "sync" ]]; then
