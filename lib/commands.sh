@@ -46,7 +46,8 @@ set-role-env() {
     profile=$(kxue43::prompt_aws_profile "$KXUE43_AWS_PROFILE_PREFIX")
   fi
 
-  eval "$(aws configure export-credentials --format env --profile "$profile")"
+  # Make sure system AWS CLI (guaranteed to be v2) is used. Sometimes a Python venv might have AWS CLI v1 installed.
+  PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" eval "$(aws configure export-credentials --format env --profile "$profile")"
 
   unset AWS_PROFILE
 }
