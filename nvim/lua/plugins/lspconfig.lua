@@ -29,6 +29,9 @@ return {
     -- Python LSP
     vim.lsp.config("jedi_language_server", {
       init_options = {
+        completion = {
+          disableSnippets = true,
+        },
         diagnostics = {
           enable = false, -- ruff handles diagnostics
         },
