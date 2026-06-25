@@ -31,7 +31,7 @@ local M = {
       "gopls",
       "bash-language-server",
       "prettier",
-      "basedpyright",
+      "jedi-language-server",
       "ruff",
       "typescript-language-server",
       "eslint-lsp",
