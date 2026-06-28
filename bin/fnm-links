@@ -65,9 +65,7 @@ EOF
     _clean "${2:-1d}"
     ;;
   list | ls)
-    shift 1
-
-    _list "$@"
+    _list "${2:-}"
     ;;
   *)
     kxue43::log_info "fnm-links requires a subcommand - list, count or clean."
