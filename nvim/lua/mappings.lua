@@ -22,10 +22,30 @@ del("n", "<leader>n")
 -- <C-x> is reserved for Readline.
 del("t", "<C-x>")
 
--- Show full path of the current buffer.
-map("n", "\\eb", function()
-  print(vim.fn.expand "%:p")
-end, { desc = "echo full file path of the current buffer." })
+local function buf_cwd_relpath()
+  local bufpath = vim.fn.resolve(vim.api.nvim_buf_get_name(0))
+  if bufpath == "" then
+    return nil
+  end
+  local cwd = vim.fn.resolve(vim.fn.getcwd()) .. "/"
+  return bufpath:sub(1, #cwd) == cwd and bufpath:sub(#cwd + 1) or bufpath
+end
+
+-- Show relative path of the current buffer to CWD.
+map("n", "\\be", function()
+  local relpath = buf_cwd_relpath()
+  if relpath then
+    print(relpath)
+  end
+end, { desc = "echo relative path of the current buffer to CWD." })
+
+-- Put relative path of the current buffer to CWD in the plus register.
+map("n", "\\bp", function()
+  local relpath = buf_cwd_relpath()
+  if relpath then
+    vim.fn.setreg("+", relpath)
+  end
+end, { desc = "put relative path of the current buffer to CWD in the plus register." })
 
 -- Telescope find file under certain directory.
 map("n", "<leader>fu", function()
