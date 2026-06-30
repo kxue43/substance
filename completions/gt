@@ -3,6 +3,8 @@ _kxue43_gt::complete() {
     COMPREPLY=("-h")
 
     return 0
+  elif ((COMP_CWORD == 1)) && [[ $2 != "" ]]; then
+    return 0
   elif ((COMP_CWORD == 1)); then
     COMPREPLY=("$(basename "$(pwd)")")
 
