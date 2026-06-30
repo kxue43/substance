@@ -8,21 +8,27 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/it-shell.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/acmd.sh"
 
-checkout-daily-branch() {
-  local sub_dir="$HOME/.config/substance"
+subp() {
+  git -C "$KXUE43_SUBSTANCE_DIR" fetch origin main:main
 
-  git -C "$sub_dir" pull
+  if [[ "$(git -C "$KXUE43_SUBSTANCE_DIR" branch --show-current)" != "main" ]]; then
+    git -C "$KXUE43_SUBSTANCE_DIR" pull
+  fi
+}
+
+checkout-daily-branch() {
+  git -C "$KXUE43_SUBSTANCE_DIR" pull
 
   local branch
   branch="kxue43/$(date +%m-%d)"
 
-  if ! git -C "$sub_dir" ls-remote --exit-code --heads origin "$branch" &>/dev/null; then
+  if ! git -C "$KXUE43_SUBSTANCE_DIR" ls-remote --exit-code --heads origin "$branch" &>/dev/null; then
     kxue43::log_error "There is no remote branch corresponding to '$branch'"
 
     return 1
   fi
 
-  git -C "$sub_dir" switch "$branch"
+  git -C "$KXUE43_SUBSTANCE_DIR" switch "$branch"
 }
 
 set-aws-region() {
