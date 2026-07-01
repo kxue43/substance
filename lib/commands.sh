@@ -9,9 +9,10 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/it-shell.
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/acmd.sh"
 
 subp() {
-  git -C "$KXUE43_SUBSTANCE_DIR" fetch origin main:main
-
-  if [[ "$(git -C "$KXUE43_SUBSTANCE_DIR" branch --show-current)" != "main" ]]; then
+  if [[ "$(git -C "$KXUE43_SUBSTANCE_DIR" branch --show-current)" == "main" ]]; then
+    git -C "$KXUE43_SUBSTANCE_DIR" pull
+  else
+    git -C "$KXUE43_SUBSTANCE_DIR" fetch origin main:main
     git -C "$KXUE43_SUBSTANCE_DIR" pull
   fi
 }
