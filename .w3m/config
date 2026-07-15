@@ -1,2 +1,0 @@
-extbrowser open -a "Google Chrome" %s &
-extbrowser2 open -a Safari %s &

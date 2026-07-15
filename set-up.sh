@@ -87,8 +87,6 @@ main() {
   # Make necessary directories first.
   mkdir -p "$HOME/.config/ghostty"
   mkdir -p "$HOME/.config/bat"
-  mkdir -p "$HOME/.newsboat"
-  mkdir -p "$HOME/.w3m"
   mkdir -p "$HOME/.vim"
   mkdir -p "$HOME/.claude/"
   mkdir -p "$HOME/.local/bin"
@@ -113,15 +111,9 @@ main() {
 
   _link_files "$HOME" "$substance_dir/dotfiles" "linked"
 
+  # shellcheck disable=SC2034 # used via nameref
   linked=(.config/ghostty/config .config/bat/config)
   _link_files "$HOME" "$substance_dir" "linked"
-
-  linked=(config urls)
-  _link_files "$HOME/.newsboat" "$substance_dir/.newsboat" "linked"
-
-  # shellcheck disable=SC2034 # used via nameref
-  linked=(bookmark.html config keymap)
-  _link_files "$HOME/.w3m" "$substance_dir/.w3m" "linked"
 
   # Symlinking nvim folder
   _ensure_symlink "$HOME/.config/nvim" "$substance_dir/nvim/"

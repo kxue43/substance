@@ -1,4 +1,0 @@
-browser "w3m %u"
-refresh-on-startup yes
-cleanup-on-quit yes
-max-items 50
