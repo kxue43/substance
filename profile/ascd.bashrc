@@ -18,6 +18,6 @@ source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-logs.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-dc.sh"
 
 sso-login() {
-  aws sso login --sso-session sso-ascending
+  PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending
 }
 # ------------------------------------------------------------------------
