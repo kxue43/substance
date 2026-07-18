@@ -8,7 +8,6 @@ export KXUE43_AWS_REGIONS="us-east-1"
 # Aliases.
 
 alias gs='git status'
-alias gjrw='cd ~/projects/jarvis-registry-workspace/'
 # ------------------------------------------------------------------------
 # Functions.
 
@@ -23,10 +22,16 @@ sso-login() {
 kjd() {
   export AWS_PROFILE=ascending-saas-admin
 
-  if ! aws sts get-caller-identity; then
+  if ! aws sts get-caller-identity &>/dev/null; then
     PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending
   fi
 
   k9s -n jarvis-demo
+}
+
+gjrw() {
+  cd "$HOME/projects/jarvis-registry-workspace/" || return 1
+
+  gt jarvis-registry-workspace
 }
 # ------------------------------------------------------------------------
