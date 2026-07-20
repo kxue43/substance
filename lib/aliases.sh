@@ -6,6 +6,8 @@ _kxue43_module_set_aliases=1
 
 alias ls='ls --color=auto'
 
+alias gsub='cd ~/.config/substance'
+
 alias gproj='cd ~/projects'
 
 alias gtemp='cd ~/temp'
