@@ -33,5 +33,15 @@ gjrw() {
   cd "$HOME/projects/jarvis-registry-workspace/" || return 1
 
   gt jarvis-registry-workspace
+
+  mkdir -p "$HOME/temp/dump"
+
+  gn "$HOME/projects/jarvis-registry-workspace/registry-working-docs/"
+
+  gn "$HOME/temp/dump" k9s
+
+  osascript -e 'tell application "Ghostty" to perform action "goto_tab:1" on focused terminal of selected tab of front window'
+
+  printf '\033[H\033[2J'
 }
 # ------------------------------------------------------------------------

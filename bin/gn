@@ -30,7 +30,10 @@ _open_tab() {
     local cmd="gt '$sq'"
     cmd="${cmd//\\/\\\\}"
     cmd="${cmd//\"/\\\"}"
-    input_line="  set initial input of cfg to \"$cmd\\n\""
+    # Trailing `character id 12` is a form-feed byte (0x0C) — the byte Ctrl-L
+    # sends — so readline clears the screen after `gt` runs, wiping the echoed
+    # command and leaving the new tab on a clean prompt.
+    input_line="  set initial input of cfg to \"$cmd\\n\" & (character id 12)"
   fi
 
   osascript <<EOF
