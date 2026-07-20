@@ -47,6 +47,14 @@ map("n", "\\bp", function()
   end
 end, { desc = "put relative path of the current buffer to CWD in the plus register." })
 
+-- Put absolute path of the current buffer in the plus register.
+map("n", "\\ba", function()
+  local bufpath = vim.fn.resolve(vim.api.nvim_buf_get_name(0))
+  if bufpath ~= "" then
+    vim.fn.setreg("+", bufpath)
+  end
+end, { desc = "put absolute path of the current buffer in the plus register." })
+
 -- Telescope find file under certain directory.
 map("n", "<leader>fu", function()
   local dir = vim.fn.input {
