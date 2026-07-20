@@ -1,5 +1,14 @@
 _kxue43_gn::complete() {
-  compgen -V COMPREPLY -d -- "$2"
+  if ((COMP_CWORD == 1)); then
+    compgen -V COMPREPLY -d -- "$2"
+
+    return 0
+  elif ((COMP_CWORD == 2)) && [[ -z $2 ]]; then
+    # Offer the directory's basename as a default tab title.
+    COMPREPLY=("$(basename "${COMP_WORDS[1]}")")
+
+    return 0
+  fi
 
   return 0
 } && complete -o bashdefault -F _kxue43_gn::complete gn

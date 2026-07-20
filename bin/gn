@@ -5,9 +5,11 @@ set -eu -o pipefail
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
 
 _open_tab() {
+  local dir=$1 title=${2:-}
+
   local target
-  target=$(cd "$1" 2>/dev/null && pwd) || {
-    kxue43::log_error "gn: directory not found: $1"
+  target=$(cd "$dir" 2>/dev/null && pwd) || {
+    kxue43::log_error "gn: directory not found: $dir"
 
     return 1
   }
@@ -15,10 +17,27 @@ _open_tab() {
   local escaped="${target//\\/\\\\}"
   escaped="${escaped//\"/\\\"}"
 
+  # When a TITLE is given, feed `gt <title>` (see bin/gt) to the new tab's shell
+  # as `initial input`. It is delivered to the shell's stdin and runs after init
+  # finishes, overriding the directory-basename title that shell integration
+  # sets at startup. Ghostty is configured with `shell-integration-features =
+  # no-title`, so nothing rewrites the title on later prompts and it sticks.
+  local input_line=""
+  if (($# == 2)); then
+    # Single-quote TITLE for the shell, then escape backslashes and double
+    # quotes so it embeds safely inside the AppleScript string literal below.
+    local sq="${title//\'/\'\\\'\'}"
+    local cmd="gt '$sq'"
+    cmd="${cmd//\\/\\\\}"
+    cmd="${cmd//\"/\\\"}"
+    input_line="  set initial input of cfg to \"$cmd\\n\""
+  fi
+
   osascript <<EOF
 tell application "Ghostty"
   set cfg to new surface configuration
   set initial working directory of cfg to "$escaped"
+$input_line
   try
     new tab with configuration cfg
   end try
@@ -29,12 +48,14 @@ EOF
 main() {
   if (($# > 0)) && [[ $1 == "-h" ]]; then
     cat <<'EOF'
-Usage: gn [-h] DIR_NAME [DIR_NAME ...]
+Usage: gn [-h] DIR_NAME [TITLE]
 
-Open new Ghostty tab(s), one per directory.
+Open a new Ghostty tab in DIR_NAME, optionally with a custom tab title.
 
 ARGUMENTS:
-    DIR_NAME    Directory to open in a new Ghostty tab
+    DIR_NAME    Directory to open in the new Ghostty tab (required)
+    TITLE       Title for the new tab (optional). When given, `gt` is run in
+                the new tab to set its title.
 
 OPTIONS:
     -h          Show this help message
@@ -43,17 +64,19 @@ EOF
     return 0
   fi
 
-  if (($# == 0)); then
-    kxue43::log_error "gn requires at least one argument."
+  if (($# < 1)); then
+    kxue43::log_error "gn requires a DIR_NAME argument."
 
     return 1
   fi
 
-  local dir
+  if (($# > 2)); then
+    kxue43::log_error "gn accepts at most two arguments: DIR_NAME [TITLE]."
 
-  for dir in "$@"; do
-    _open_tab "$dir"
-  done
+    return 1
+  fi
+
+  _open_tab "$@"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
