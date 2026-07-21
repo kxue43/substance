@@ -82,7 +82,7 @@ _kxue43_rw::renew() {
   mapfile -t to_delete < <(
     git -C "jarvis-registry" branch |
       awk '/^  / && !/  parking\// { sub(/^  /, ""); print }' |
-      fzf -m --height=50% --layout=reverse
+      fzf -m --height=50% --layout=reverse --bind 'load:select-all'
   )
 
   if ((${#to_delete[@]} == 0)); then
