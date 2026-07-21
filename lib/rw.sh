@@ -69,6 +69,10 @@ _kxue43_rw::renew() {
 
       kxue43::log_error "Failed to rebase parking branch of worktree ${target} onto main"
     fi
+
+    if ! (cd "$target" && uv run poe -q cleanup-artifacts); then
+      kxue43::log_error "Failed to clean up build artifacts in worktree ${target}"
+    fi
   done
 
   printf "\n"
