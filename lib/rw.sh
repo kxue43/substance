@@ -23,6 +23,8 @@ _kxue43_rw::renew() {
       exit 1
     fi
 
+    uv run poe -q cleanup-artifacts
+
     git pull
 
     printf "\n"
