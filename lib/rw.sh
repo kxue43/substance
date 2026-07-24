@@ -13,6 +13,10 @@ _kxue43_rw::bootstrap() {
   for file in "${files[@]}"; do
     ln -s ../"${file}" "$file"
   done
+
+  if ! playwright-cli install --skills; then
+    kxue43::log_error "Failed to install the playwright-cli Claude skill to project local"
+  fi
 }
 
 _kxue43_rw::renew() {
