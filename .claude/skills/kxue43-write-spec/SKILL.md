@@ -1,7 +1,6 @@
 ---
 name: kxue43-write-spec
 description: "Write a technical spec file as a Markdown. Two required arguments: path to write the output file, and a prompt string describing what the spec file should cover."
-disable-model-invocation: true
 argument-hint: "[output_file] [prompt]"
 arguments: [output_file, prompt]
 allowed-tools: Bash Read Write Edit Grep mcp__jarvis-registry__discover_agents mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_agent mcp__jarvis-registry__execute_prompt mcp__jarvis-registry__execute_tool mcp__jarvis-registry__read_resource
