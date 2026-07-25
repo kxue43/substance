@@ -33,7 +33,7 @@ _kxue43_jarvis_pf::open_pf() {
     return 0
   fi
 
-  kubectl port-forward -n "$1" "pod/$2" "$3:$4" &>/dev/null &
+  kubectl port-forward -n "$1" "pod/$2" "$3:$4" >/dev/null 2>>"$5" &
 }
 
 _kxue43_jarvis_pf::close_pf() {
@@ -72,13 +72,21 @@ _kxue43_jarvis_pf::up() {
 
   _kxue43_jarvis_pf::auth
 
-  _kxue43_jarvis_pf::open_pf "$namespace" mongodb-0 27018 27017
-  _kxue43_jarvis_pf::open_pf "$namespace" redis-0 27019 6379
-  _kxue43_jarvis_pf::open_pf "$namespace" weaviate-0 27020 8080
-  _kxue43_jarvis_pf::open_pf "$namespace" weaviate-0 50051 50051
+  local stderr_log
+  stderr_log="$(mktemp)"
 
-  # Give the backgrounded kubectl processes time to start before pgrep counts them.
+  _kxue43_jarvis_pf::open_pf "$namespace" mongodb-0 27018 27017 "$stderr_log"
+  _kxue43_jarvis_pf::open_pf "$namespace" redis-0 27019 6379 "$stderr_log"
+  _kxue43_jarvis_pf::open_pf "$namespace" weaviate-0 27020 8080 "$stderr_log"
+  _kxue43_jarvis_pf::open_pf "$namespace" weaviate-0 50051 50051 "$stderr_log"
+
+  # Give the backgrounded kubectl processes time to start before pgrep counts them
+  # and before checking whether any of them wrote to stderr.
   sleep 1
+
+  if [[ -s "$stderr_log" ]]; then
+    kxue43::log_error "Some port-forwarding commands reported errors; check $stderr_log"
+  fi
 
   local -a kprocs
   mapfile -t kprocs < <(pgrep -lf "kubectl port-forward -n $namespace pod/")
