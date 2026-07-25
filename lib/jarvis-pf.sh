@@ -247,11 +247,11 @@ _kxue43_jarvis_pf::complete() {
     fi
 
     return 0
-  elif ((COMP_CWORD == 2)) && [[ $3 =~ ^-h?$ ]]; then
+  elif ((COMP_CWORD == 2)) && [[ $2 =~ ^-h?$ ]]; then
     COMPREPLY=("-h")
 
     return 0
-  elif ((COMP_CWORD == 2)); then
+  elif ((COMP_CWORD == 2)) && [[ $2 =~ ^j ]]; then
     compgen -V COMPREPLY -W "jarvis-demo jarvis" -- "$2"
 
     return 0
