@@ -34,6 +34,8 @@ _kxue43_jarvis_pf::open_pf() {
   fi
 
   kubectl port-forward -n "$1" "pod/$2" "$3:$4" >/dev/null 2>>"$5" &
+
+  disown
 }
 
 _kxue43_jarvis_pf::close_pf() {
