@@ -41,7 +41,7 @@ _kxue43_jarvis_pf::close_pf() {
   mapfile -t kprocs < <(pgrep -lf "kubectl port-forward -n $1 pod/")
 
   if ((${#kprocs[@]} == 0)); then
-    kxue43::log_info "No existing port-forwarding for $1 namespace"
+    kxue43::log_info "No existing port-forwarding for $1"
 
     return 0
   fi
@@ -83,20 +83,18 @@ _kxue43_jarvis_pf::up() {
   local -a kprocs
   mapfile -t kprocs < <(pgrep -lf "kubectl port-forward -n $namespace pod/")
 
-  local line
+  local line command
 
   if ((${#kprocs[@]} == 4)); then
-    kxue43::log_info "Successfully started all four port-forwarding"
-
-    printf "\n"
+    printf "\nSuccessfully started all four port-forwarding:\n"
 
     for line in "${kprocs[@]}"; do
-      kxue43::log_info "$line"
+      command="$(cut -d' ' -f2- <<<"$line")"
+
+      kxue43::log_info "$command"
     done
   else
-    kxue43::log_error "Only started ${#kprocs[@]} port forwarding"
-
-    printf "\n"
+    printf "\nOnly started %s port-forwarding:\n" "${#kprocs[@]}"
 
     for line in "${kprocs[@]}"; do
       kxue43::log_error "$line"
@@ -125,12 +123,12 @@ _kxue43_jarvis_pf::ls() {
   mapfile -t kprocs < <(pgrep -lf "kubectl port-forward -n $namespace pod/")
 
   if ((${#kprocs[@]} == 0)); then
-    kxue43::log_info "No existing port-forwarding for $namespace namespace"
+    kxue43::log_info "No existing port-forwarding for $namespace"
 
     return 0
   fi
 
-  printf "Port-forwardings for namespace %s:\n" "$namespace"
+  printf "Port-forwardings for %s:\n" "$namespace"
 
   local line
   for line in "${kprocs[@]}"; do
