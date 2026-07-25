@@ -14,6 +14,7 @@ alias gs='git status'
 source "$KXUE43_SUBSTANCE_DIR/lib/rw.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-logs.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-dc.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-pf.sh"
 
 sso-login() {
   PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending
