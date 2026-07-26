@@ -35,6 +35,7 @@ local M = {
       "ruff",
       "typescript-language-server",
       "eslint-lsp",
+      "rust-analyzer",
     },
     -- Mypy, flake8 and black should be provided from the project's virtualenv rather than by Mason.
     -- Currently ruff is used for linting and formatting, but flake8 and black still remain in the skip list.
