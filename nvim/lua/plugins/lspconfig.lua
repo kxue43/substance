@@ -40,7 +40,7 @@ return {
 
     -- Enable configured LSPs.
     -- read :h vim.lsp.config for changing options of lsp servers
-    local servers = { "gopls", "lua_ls", "bashls", "jedi_language_server", "ruff", "ts_ls", "eslint" }
+    local servers = { "gopls", "lua_ls", "bashls", "jedi_language_server", "ruff", "ts_ls", "eslint", "rust_analyzer" }
     vim.lsp.enable(servers)
   end,
 }
