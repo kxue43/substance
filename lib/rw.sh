@@ -60,16 +60,12 @@ _kxue43_rw::renew() {
 
   worktrees=("${worktrees[@]#./}")
 
-  mapfile -t worktrees < <(printf "%s\n" "${worktrees[@]}" | fzf -m --height=50% --layout=reverse --bind 'load:select-all')
-
-  if ((${#worktrees[@]} == 0)); then
-    kxue43::log_info "No worktree selected"
-
-    return 0
-  fi
-
   local target
   for target in "${worktrees[@]}"; do
+    if [[ "parking/$(basename "$target")" != "$(git -C "$target" branch --show-current)" ]]; then
+      continue
+    fi
+
     if ! git -C "$target" rebase main; then
       git -C "$target" rebase --abort
 
