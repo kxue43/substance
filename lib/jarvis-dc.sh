@@ -50,7 +50,9 @@ EOF
       args+=("--build")
     fi
 
-    uv run poe -q cleanup-artifacts
+    if [[ "$1" != "-n" ]]; then
+      uv run poe -q cleanup-artifacts
+    fi
 
     if ! AWS_PROFILE=ascending-saas-admin aws sts get-caller-identity &>/dev/null; then
       PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending &>/dev/null
@@ -58,7 +60,9 @@ EOF
 
     set-role-env ascending-saas-admin
 
-    uv run poe build-artifacts
+    if [[ "$1" != "-n" ]]; then
+      uv run poe build-artifacts
+    fi
 
     docker compose "${args[@]}"
     ;;
@@ -79,8 +83,6 @@ EOF
     fi
 
     docker compose -f docker-compose.no-db.yml --profile full down
-
-    uv run poe -q cleanup-artifacts
 
     unset AWS_SESSION_TOKEN && unset AWS_SECRET_ACCESS_KEY && unset AWS_ACCESS_KEY_ID && unset AWS_PROFILE && unset AWS_CREDENTIAL_EXPIRATION
     ;;

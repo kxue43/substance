@@ -59,9 +59,39 @@ EOF
 
   case "$1" in
   cdk)
+    shift 1
+
+    if (($# > 0)) && [[ $1 == "-h" ]]; then
+      cat <<'EOF'
+USAGE: rm-images cdk [-h]
+
+Remove CDK asset images
+
+OPTIONS:
+    -h            Show this help message
+EOF
+
+      return 0
+    fi
+
     _kxue43_rm_images::cdk
     ;;
   docker)
+    shift 1
+
+    if (($# > 0)) && [[ $1 == "-h" ]]; then
+      cat <<'EOF'
+USAGE: rm-images docker [-h]
+
+Select and remove Docker images
+
+OPTIONS:
+    -h            Show this help message
+EOF
+
+      return 0
+    fi
+
     _kxue43_rm_images::docker
     ;;
   *)
@@ -86,6 +116,10 @@ _kxue43_rm_images::complete() {
     return 0
   elif ((COMP_CWORD == 1)); then
     compgen -V COMPREPLY -W "cdk docker" -- "$2"
+
+    return 0
+  elif ((COMP_CWORD == 2)) && [[ $2 =~ ^-h?$ ]]; then
+    COMPREPLY=("-h")
 
     return 0
   fi

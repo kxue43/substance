@@ -14,7 +14,11 @@ _clean() {
   if [[ -n "${FNM_MULTISHELL_PATH:+x}" ]]; then
     kxue43::log_info "Cleaning up the $HOME/.local/state/fnm_multishells directory of symlinks older than ${1}."
 
-    find "$(dirname "${FNM_MULTISHELL_PATH}")/" -type l -name '*_*' -mtime "+${1}" -exec rm {} +
+    if [[ -z "$1" ]]; then
+      find "$(dirname "${FNM_MULTISHELL_PATH}")/" -type l -name '*_*' -exec rm {} +
+    else
+      find "$(dirname "${FNM_MULTISHELL_PATH}")/" -type l -name '*_*' -mtime "+${1}" -exec rm {} +
+    fi
   fi
 }
 
@@ -62,7 +66,7 @@ EOF
     _count
     ;;
   clean)
-    _clean "${2:-1d}"
+    _clean "${2:-}"
     ;;
   list | ls)
     _list "${2:-}"
