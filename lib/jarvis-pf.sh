@@ -33,7 +33,7 @@ _kxue43_jarvis_pf::open_pf() {
     return 0
   fi
 
-  kubectl port-forward -n "$1" "pod/$2" "$3:$4" >/dev/null 2>>"$5" &
+  AWS_PROFILE=ascending-saas-admin kubectl port-forward -n "$1" "pod/$2" "$3:$4" >/dev/null 2>>"$5" &
 
   disown
 }
