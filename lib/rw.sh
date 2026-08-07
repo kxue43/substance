@@ -127,9 +127,13 @@ _kxue43_rw::park() {
   base="$(basename "$(pwd)")"
 
   if [[ "$base" == "jarvis-registry" ]]; then
-    kxue43::log_error "jarvis-registry is not a parked worktree"
+    if ! git checkout main; then
+      kxue43::log_error "Failed to check out the main branch"
 
-    return 1
+      return 1
+    fi
+
+    return 0
   fi
 
   if ! git rev-parse --verify "refs/heads/parking/$base" &>/dev/null; then
