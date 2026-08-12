@@ -30,8 +30,18 @@ EOF
   local branch
   branch=$(git rev-parse --abbrev-ref HEAD)
 
+  stderr_file=$(mktemp)
+  trap 'rm -f "$stderr_file"' EXIT
+
+  local ls_remote_output
+  if ! ls_remote_output=$(git ls-remote origin "refs/heads/$branch" 2>"$stderr_file"); then
+    echo "ERROR: $(<"$stderr_file")"
+
+    return 0
+  fi
+
   local remote_sha
-  remote_sha=$(git ls-remote origin "refs/heads/$branch" | awk '{print $1}')
+  remote_sha=$(awk '{print $1}' <<<"$ls_remote_output")
 
   if [[ -z $remote_sha ]]; then
     echo "VERIFY-SHA: FAIL — no remote ref found for branch $branch"
