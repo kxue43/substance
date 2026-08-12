@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+_pr_url_regex='^https://github\.com/[^/]+/[^/]+/pull/[0-9]+/?$'
+
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: fetch-pr-data [-h] PR_URL
+
+Fetch a GitHub pull request's title, base branch, and description via the `gh`
+CLI. Prints a fixed plain-text format to stdout for consumption by an LLM.
+Auth is assumed to already be set up; on any failure (including auth) prints
+`ERROR: <reason>` to stdout instead.
+
+ARGUMENTS:
+    PR_URL      Full URL to the GitHub pull request, e.g.
+                https://github.com/owner/repo/pull/123
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# != 1)); then
+    echo "ERROR: fetch-pr-data requires exactly one positional argument PR_URL"
+
+    return 0
+  fi
+
+  local pr_url=$1
+
+  if ! [[ $pr_url =~ $_pr_url_regex ]]; then
+    echo "ERROR: not a GitHub PR URL: $pr_url"
+
+    return 0
+  fi
+
+  local stderr_file
+  stderr_file=$(mktemp)
+
+  local json
+  if ! json=$(gh pr view "$pr_url" --json title,body,baseRefName 2>"$stderr_file"); then
+    echo "ERROR: $(<"$stderr_file")"
+    rm -f "$stderr_file"
+
+    return 0
+  fi
+
+  rm -f "$stderr_file"
+
+  local title base_branch body
+  title=$(jq -r '.title' <<<"$json")
+  base_branch=$(jq -r '.baseRefName' <<<"$json")
+  body=$(jq -r '(.body // "") | gsub("\r"; "")' <<<"$json")
+
+  cat <<EOF
+PR_TITLE: $title
+BASE_BRANCH: $base_branch
+
+PR_MESSAGE:
+<pr_message>
+$body
+</pr_message>
+EOF
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

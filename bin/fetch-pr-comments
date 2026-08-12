@@ -1,0 +1,226 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+_pr_url_regex='^https://github\.com/([^/]+)/([^/]+)/pull/([0-9]+)/?$'
+
+# Groups inline review comments into threads (root = comment with no
+# in_reply_to_id; GitHub disallows replies-to-replies, so in_reply_to_id
+# always points at the thread root), keeps only threads/comments with a
+# kxue43-authored "This is change request [Xn]." signal in the first
+# paragraph, and orders the result by severity tier (C, M, m) then number.
+# shellcheck disable=SC2016
+_jq_program='
+def norm: gsub("\r"; "");
+def first_para: (.body | norm | split("\n\n") | .[0]);
+def label_of:
+  first_para as $p
+  | if ($p | test("^This is change request \\[[A-Za-z0-9]+\\]\\.$"))
+    then ($p | capture("^This is change request \\[(?<l>[A-Za-z0-9]+)\\]\\.$") | .l)
+    else null
+    end;
+def tier_rank:
+  if (.[0:1] == "C") then 0
+  elif (.[0:1] == "M") then 1
+  elif (.[0:1] == "m") then 2
+  else 3
+  end;
+def num_part: (.[1:] | tonumber);
+
+(
+  $inline
+  | map(. + {author: .user.login, thread_root: (.in_reply_to_id // .id)})
+  | group_by(.thread_root)
+  | map(sort_by(.created_at))
+  | map(select(any(.[]; .author == "kxue43")))
+  | map(
+      (first((.[] | select(.author == "kxue43") | label_of) | select(. != null))) as $label
+      | select($label != null)
+      | {
+          label: $label,
+          created_at: .[0].created_at,
+          kind: "thread",
+          entries: map({author, path, line: (.line // .original_line // null), body: (.body|norm)})
+        }
+    )
+) as $thread_groups
+| (
+    $issue
+    | map(select(.user.login == "kxue43"))
+    | map(label_of as $l | select($l != null) | {label: $l, created_at, kind: "comment", body: (.body|norm)})
+  ) as $comment_groups
+| ($thread_groups + $comment_groups) as $all
+| (
+    $all
+    | group_by(.label)
+    | map({label: .[0].label, items: sort_by(.created_at)})
+    | sort_by([(.label|tier_rank), (.label|num_part)])
+    | map(.items)
+    | (add // [])
+  ) as $ordered_items
+| ([$ordered_items[].label] | unique) as $found_labels
+| {
+    items: $ordered_items,
+    label_map: ($ARGS.positional | map({label: ., found: (. as $r | ($found_labels | index($r)) != null)}))
+  }
+'
+
+_render_blockquote() {
+  sed -e 's/^/> /' -e 's/^> $/>/'
+}
+
+_gh_api_paginated() {
+  local endpoint=$1 stderr_file=$2
+  local raw
+
+  if ! raw=$(gh api "$endpoint" --paginate --slurp 2>"$stderr_file"); then
+    return 1
+  fi
+
+  jq 'flatten(1)' <<<"$raw"
+}
+
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: fetch-pr-comments [-h] PR_URL LABEL [LABEL...]
+
+Fetch kxue43-authored reviewer comments on a GitHub PR via the `gh` CLI:
+inline review threads and issue/PR-level comments (review-level "reviews"
+are not fetched). Only threads/comments whose kxue43 comment opens with the
+exact first paragraph `This is change request [Xn].` are kept. Prints a
+fixed plain-text format to stdout for consumption by an LLM. Auth is assumed
+to already be set up; on any failure (including auth) prints `ERROR:
+<reason>` to stdout instead.
+
+ARGUMENTS:
+    PR_URL      Full URL to the GitHub pull request, e.g.
+                https://github.com/owner/repo/pull/123
+    LABEL       One or more finding labels without brackets (e.g. C1 M2) to
+                check for a matching reviewer comment
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# < 1)); then
+    echo "ERROR: fetch-pr-comments requires at least a PR_URL argument"
+
+    return 0
+  fi
+
+  local pr_url=$1
+  shift 1
+
+  # Re-split every remaining arg on whitespace so labels work whether the
+  # caller passed them as separate words (C1 M2) or one quoted string ("C1 M2").
+  local -a labels=()
+  local raw_arg
+  for raw_arg in "$@"; do
+    local -a split_labels
+    read -r -a split_labels <<<"$raw_arg"
+    labels+=("${split_labels[@]}")
+  done
+
+  if ((${#labels[@]} == 0)); then
+    echo "ERROR: no finding labels provided"
+
+    return 0
+  fi
+
+  if ! [[ $pr_url =~ $_pr_url_regex ]]; then
+    echo "ERROR: not a GitHub PR URL: $pr_url"
+
+    return 0
+  fi
+
+  local owner=${BASH_REMATCH[1]} repo=${BASH_REMATCH[2]} number=${BASH_REMATCH[3]}
+
+  local stderr_file
+  stderr_file=$(mktemp)
+
+  local inline_flat issue_flat
+  if ! inline_flat=$(_gh_api_paginated "repos/$owner/$repo/pulls/$number/comments" "$stderr_file"); then
+    echo "ERROR: $(<"$stderr_file")"
+    rm -f "$stderr_file"
+
+    return 0
+  fi
+
+  if ! issue_flat=$(_gh_api_paginated "repos/$owner/$repo/issues/$number/comments" "$stderr_file"); then
+    echo "ERROR: $(<"$stderr_file")"
+    rm -f "$stderr_file"
+
+    return 0
+  fi
+
+  rm -f "$stderr_file"
+
+  local result
+  result=$(jq -n --argjson inline "$inline_flat" --argjson issue "$issue_flat" --args "$_jq_program" -- "${labels[@]}")
+
+  echo "LABEL_MAP:"
+  jq -r '.label_map[] | "  [" + .label + "] → " + (if .found then "FOUND" else "NOT_FOUND" end)' <<<"$result"
+  echo
+  echo "---"
+
+  local item
+  while IFS= read -r item; do
+    local kind label
+    kind=$(jq -r '.kind' <<<"$item")
+    label=$(jq -r '.label' <<<"$item")
+
+    echo
+    echo "## Thread: [$label]"
+    echo
+
+    if [[ $kind == thread ]]; then
+      local entry
+      while IFS= read -r entry; do
+        local author path line body
+        author=$(jq -r '.author' <<<"$entry")
+        path=$(jq -r '.path' <<<"$entry")
+        line=$(jq -r '.line // "(file)"' <<<"$entry")
+        body=$(jq -r '.body' <<<"$entry")
+
+        echo "- AUTHOR: $author; PATH: $path; LINE: $line"
+        echo
+        _render_blockquote <<<"$body"
+        echo
+      done < <(jq -c '.entries[]' <<<"$item")
+    else
+      local created_at body
+      created_at=$(jq -r '.created_at' <<<"$item")
+      body=$(jq -r '.body' <<<"$item")
+
+      echo "CREATED: $created_at"
+      echo
+      _render_blockquote <<<"$body"
+      echo
+    fi
+
+    echo "---"
+  done < <(jq -c '.items[]' <<<"$result")
+
+  local -a unlinked
+  mapfile -t unlinked < <(jq -r '.label_map[] | select(.found == false) | .label' <<<"$result")
+
+  if ((${#unlinked[@]} > 0)); then
+    echo
+    echo "## Unlinked labels (no matching reviewer comment found):"
+
+    local u
+    for u in "${unlinked[@]}"; do
+      echo "- [$u]"
+    done
+  fi
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

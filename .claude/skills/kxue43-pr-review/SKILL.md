@@ -4,7 +4,7 @@ description: "Review a GitHub pull request and manage follow-up reviews. Subcomm
 disable-model-invocation: true
 argument-hint: "start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt] | followup [session_file] [--force-pushed] [focus_prompt]"
 arguments: [subcommand]
-allowed-tools: Bash Read Write Edit Grep Skill Agent mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
+allowed-tools: Bash Read Write Edit Grep Skill mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
 ---
 
 ## Web Search
@@ -48,8 +48,8 @@ with standard review behavior.
 2. **Read the spec.** Open `$spec_file` with the `Read` tool. Extract the intended behavior,
    acceptance criteria, and any explicitly called-out focus areas. Keep these in mind throughout.
 
-3. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` subagent (not jarvis-registry directly), passing `$pr_url` as the
-   prompt. If the result starts with `ERROR:`, stop immediately and report the error to the user
+3. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` skill (not jarvis-registry directly), passing `$pr_url` as its
+   argument. If the result starts with `ERROR:`, stop immediately and report the error to the user
    verbatim. Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside `<pr_message>…</pr_message>`) from the output.
 
 4. **Collect full diff of all changed files**: use the base branch obtained from the PR data in Step 3 and run `git diff origin/<base_branch>...HEAD`.
@@ -250,8 +250,8 @@ and all findings from previous sessions. If you need to read additional source f
 
 1. Extract all finding labels from the `changes_requested` field of the report file's front
    matter (e.g. `changes_requested: [C1, M2]` parses to `["C1", "M2"]`) and join with spaces (e.g. `C1 M2`).
-   Invoke the `kxue43-fetch-pr-comments` subagent (not jarvis-registry directly), passing `$pr_url` followed by the label list
-   as the prompt. If the result starts with `ERROR:`, stop immediately and report the error to
+   Invoke the `kxue43-fetch-pr-comments` skill (not jarvis-registry directly), passing `$pr_url` followed by the label list
+   as its arguments. If the result starts with `ERROR:`, stop immediately and report the error to
    the user verbatim. Parse the returned output: `LABEL_MAP` entries show which labels have
    matching reviewer comments (`FOUND`) and which do not (`NOT_FOUND`). Each
    `## Thread: [Xn]` section is a reviewer comment thread for that label; multiple sections with
