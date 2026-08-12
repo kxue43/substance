@@ -123,7 +123,6 @@ main() {
 
   # Symlinking Claude related files and folders
   _ensure_symlink "$HOME/.claude/skills" "$substance_dir/.claude/skills/"
-  _ensure_symlink "$HOME/.claude/agents" "$substance_dir/.claude/agents/"
   _ensure_symlink "$HOME/.claude/CLAUDE.md" "$substance_dir/.claude/CLAUDE.md"
   _ensure_symlink "$HOME/.claude/settings.json" "$substance_dir/.claude/settings.json"
 
