@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: verify-sha [-h]
+
+Verify that the local HEAD SHA matches the remote branch SHA using `git`
+only. Derives the remote branch name from the current local branch — no
+arguments needed. Prints a fixed plain-text format to stdout for consumption
+by an LLM.
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# != 0)); then
+    echo "ERROR: verify-sha takes no positional arguments"
+
+    return 0
+  fi
+
+  local branch
+  branch=$(git rev-parse --abbrev-ref HEAD)
+
+  stderr_file=$(mktemp)
+  trap 'rm -f "$stderr_file"' EXIT
+
+  local ls_remote_output
+  if ! ls_remote_output=$(git ls-remote origin "refs/heads/$branch" 2>"$stderr_file"); then
+    echo "ERROR: $(<"$stderr_file")"
+
+    return 0
+  fi
+
+  local remote_sha
+  remote_sha=$(awk '{print $1}' <<<"$ls_remote_output")
+
+  if [[ -z $remote_sha ]]; then
+    echo "VERIFY-SHA: FAIL — no remote ref found for branch $branch"
+
+    return 0
+  fi
+
+  local local_sha
+  local_sha=$(git rev-parse HEAD)
+
+  if [[ $local_sha != "$remote_sha" ]]; then
+    echo "VERIFY-SHA: FAIL — local $local_sha ≠ remote $remote_sha"
+
+    return 0
+  fi
+
+  echo "VERIFY-SHA: PASS"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
