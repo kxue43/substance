@@ -27,7 +27,7 @@ def tier_rank:
   elif (.[0:1] == "m") then 2
   else 3
   end;
-def num_part: (.[1:] | tonumber);
+def num_part: (.[1:] | tonumber? // 0);
 
 (
   $inline
@@ -141,25 +141,21 @@ EOF
 
   local owner=${BASH_REMATCH[1]} repo=${BASH_REMATCH[2]} number=${BASH_REMATCH[3]}
 
-  local stderr_file
   stderr_file=$(mktemp)
+  trap 'rm -f "$stderr_file"' EXIT
 
   local inline_flat issue_flat
   if ! inline_flat=$(_gh_api_paginated "repos/$owner/$repo/pulls/$number/comments" "$stderr_file"); then
     echo "ERROR: $(<"$stderr_file")"
-    rm -f "$stderr_file"
 
     return 0
   fi
 
   if ! issue_flat=$(_gh_api_paginated "repos/$owner/$repo/issues/$number/comments" "$stderr_file"); then
     echo "ERROR: $(<"$stderr_file")"
-    rm -f "$stderr_file"
 
     return 0
   fi
-
-  rm -f "$stderr_file"
 
   local result
   result=$(jq -n --argjson inline "$inline_flat" --argjson issue "$issue_flat" --args "$_jq_program" -- "${labels[@]}")

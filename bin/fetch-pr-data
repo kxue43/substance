@@ -41,33 +41,23 @@ EOF
     return 0
   fi
 
-  local stderr_file
   stderr_file=$(mktemp)
+  trap 'rm -f "$stderr_file"' EXIT
 
   local json
   if ! json=$(gh pr view "$pr_url" --json title,body,baseRefName 2>"$stderr_file"); then
     echo "ERROR: $(<"$stderr_file")"
-    rm -f "$stderr_file"
 
     return 0
   fi
-
-  rm -f "$stderr_file"
 
   local title base_branch body
   title=$(jq -r '.title' <<<"$json")
   base_branch=$(jq -r '.baseRefName' <<<"$json")
   body=$(jq -r '(.body // "") | gsub("\r"; "")' <<<"$json")
 
-  cat <<EOF
-PR_TITLE: $title
-BASE_BRANCH: $base_branch
-
-PR_MESSAGE:
-<pr_message>
-$body
-</pr_message>
-EOF
+  printf 'PR_TITLE: %s\nBASE_BRANCH: %s\n\nPR_MESSAGE:\n<pr_message>\n%s\n</pr_message>\n' \
+    "$title" "$base_branch" "$body"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
