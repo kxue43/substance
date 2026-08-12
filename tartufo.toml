@@ -19,4 +19,5 @@ exclude-entropy-patterns = [
 exclude-signatures = [
     {signature = "f778aaca32f07db00e1a7ca8270caccb1007f7916aea3274313a9de29fd76e5e", reason = "false positive of GPG public key signature in .gitconfig file"},
     {signature = "2e24f3c6a6e0c19dd4000edca4cf9459f3b2537af98cb4be2fdb5814765cc137", reason = "GPG signing key ID is not credential"},
+    {signature = "aa37346ad20bbb6b2ff6dc5e077139dc3b15d1d6670f962189a90a943303be21", reason = "file path is not credential"},
 ]
