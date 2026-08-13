@@ -8,11 +8,9 @@ arguments: [pr_url]
 model: haiku
 ---
 
-Run:
+Redirect stdout to a temp file instead of printing it, and return only the file's path:
 
-```
-fetch-pr-data "$pr_url"
-```
+    outfile=$(mktemp)
+    fetch-pr-data "$pr_url" > "$outfile"
 
-Output its stdout **verbatim** as your entire response — no additional commentary, no
-reformatting, nothing before or after.
+Output `$outfile` — nothing else — as your entire response.

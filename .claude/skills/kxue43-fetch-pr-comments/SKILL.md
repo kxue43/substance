@@ -4,35 +4,20 @@ description: "INTERNAL wrapper skill of the kxue43-pr-review skill. Do NOT invok
 context: fork
 user-invocable: false
 allowed-tools: Bash
-arguments: [pr_url, labels]
 model: haiku
 ---
 
-## Arguments
-
-| Variable | Description |
-|----------|-------------|
-| `$pr_url` | Full URL to the GitHub pull request |
-| `$labels` | One or more finding labels without brackets, space-separated (e.g. `C1 M2`) |
-
 ## Run the CLI
 
-Split `$labels` on whitespace and pass each label as its own **separate, unquoted** word in
-the Bash command — never pass the whole label list as one quoted string. The CLI reads every
-argument after the URL as exactly one label, so quoting the list together turns multiple
-labels into a single label that will never match anything.
+`$ARGUMENTS` expands to the full argument string as typed: the PR URL followed by zero or more
+finding labels, space-separated (e.g. `https://github.com/owner/repo/pull/123 C1 M2`). This
+already matches the CLI's own positional signature token-for-token, so pass it straight through
+**unquoted** — wrapping it in quotes would collapse the whole thing into a single argument and
+break label matching.
 
-Given `$pr_url` = `https://github.com/owner/repo/pull/123` and `$labels` = `C1 M2`, run exactly:
+Redirect stdout to a temp file instead of printing it, and return only the file's path:
 
-```
-fetch-pr-comments https://github.com/owner/repo/pull/123 C1 M2
-```
+    outfile=$(mktemp)
+    fetch-pr-comments $ARGUMENTS > "$outfile"
 
-**Wrong** — do not do this (passes `"C1 M2"` as one argument, not two):
-
-```
-fetch-pr-comments https://github.com/owner/repo/pull/123 "C1 M2"
-```
-
-Output the command's stdout **verbatim** as your entire response — no additional commentary,
-no reformatting, nothing before or after.
+Output `$outfile` — nothing else — as your entire response.
