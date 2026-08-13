@@ -88,6 +88,15 @@
     "prefix": "JNO",
     "body": ["`json:\"$1\"`"],
     "description": "`json:\"\"`"
+  },
+  "Defer Body Close": {
+    "prefix": "DBC",
+    "body": [
+      "defer func() {",
+      "\t_, _ = io.Copy(io.Discard, resp.Body)",
+      "\t_ = resp.Body.Close()",
+      "}()"
+    ],
+    "description": "defer resp.Close"
   }
 }
-
