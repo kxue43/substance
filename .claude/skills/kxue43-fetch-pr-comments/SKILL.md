@@ -1,6 +1,6 @@
 ---
 name: kxue43-fetch-pr-comments
-description: "INTERNAL wrapper skill of the kxue43-pr-review skill. Do NOT invoke directly — only kxue43-pr-review may invoke this skill. Fetches kxue43-authored reviewer comments on a GitHub PR by delegating to the `fetch-pr-comments` CLI, and reports which of the given finding labels have a matching comment."
+description: "INTERNAL skill — invoked only by kxue43-pr-review, do NOT invoke directly. Fetches kxue43-authored reviewer comments on a GitHub PR by delegating to the `fetch-pr-comments` CLI, and reports which of the given finding labels have a matching comment."
 context: fork
 user-invocable: false
 allowed-tools: Bash
