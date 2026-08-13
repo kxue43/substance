@@ -8,9 +8,12 @@ arguments: [pr_url]
 model: haiku
 ---
 
-Redirect stdout to a temp file instead of printing it, and return only the file's path:
+Use the Bash tool to run this now:
 
-    outfile=$(mktemp)
-    fetch-pr-data "$pr_url" > "$outfile"
+```
+outfile=$(mktemp)
+fetch-pr-data "$pr_url" > "$outfile"
+echo "$outfile"
+```
 
-Output `$outfile` — nothing else — as your entire response.
+Output the printed path — nothing else — as your entire response.

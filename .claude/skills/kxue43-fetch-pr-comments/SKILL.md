@@ -15,9 +15,12 @@ already matches the CLI's own positional signature token-for-token, so pass it s
 **unquoted** — wrapping it in quotes would collapse the whole thing into a single argument and
 break label matching.
 
-Redirect stdout to a temp file instead of printing it, and return only the file's path:
+Use the Bash tool to run this now:
 
-    outfile=$(mktemp)
-    fetch-pr-comments $ARGUMENTS > "$outfile"
+```
+outfile=$(mktemp)
+fetch-pr-comments $ARGUMENTS > "$outfile"
+echo "$outfile"
+```
 
-Output `$outfile` — nothing else — as your entire response.
+Output the printed path — nothing else — as your entire response.
