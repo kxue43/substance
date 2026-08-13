@@ -6,7 +6,7 @@ In coding, code review, code research, or technical research sessions:
 - Use `Read`, `Grep`, and `Bash` to read local files and understand the codebase.
 - Use the `git` CLI to gather Git and repository information.
 - For GitHub information that cannot be obtained via the `git` CLI, discover "github" related tools from the `jarvis-registry` MCP server and use them.
-  The `gh` CLI may only be used inside dedicated Claude Code skills (e.g. wrapper skills delegating to executables) — never invoke `gh` yourself directly.
+  Never invoke `gh` yourself directly.
 
 ## Web search: tool priority
 

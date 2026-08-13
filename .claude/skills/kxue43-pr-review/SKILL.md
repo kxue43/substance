@@ -48,9 +48,11 @@ with standard review behavior.
 2. **Read the spec.** Open `$spec_file` with the `Read` tool. Extract the intended behavior,
    acceptance criteria, and any explicitly called-out focus areas. Keep these in mind throughout.
 
-3. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` skill (not jarvis-registry directly), passing `$pr_url` as its
-   argument. If the result starts with `ERROR:`, stop immediately and report the error to the user
-   verbatim. Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside `<pr_message>…</pr_message>`) from the output.
+3. **Fetch PR data** by invoking the `kxue43-fetch-pr-data` skill (not jarvis-registry directly),
+   passing `$pr_url` as its argument. The skill returns a file path — `Read` that file. If its
+   content starts with `ERROR:`, stop immediately and report the error to the user verbatim.
+   Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside
+   `<pr_message>…</pr_message>`) from the file's content.
 
 4. **Collect full diff of all changed files**: use the base branch obtained from the PR data in Step 3 and run `git diff origin/<base_branch>...HEAD`.
 
@@ -250,10 +252,12 @@ and all findings from previous sessions. If you need to read additional source f
 
 1. Extract all finding labels from the `changes_requested` field of the report file's front
    matter (e.g. `changes_requested: [C1, M2]` parses to `["C1", "M2"]`) and join with spaces (e.g. `C1 M2`).
-   Invoke the `kxue43-fetch-pr-comments` skill (not jarvis-registry directly), passing `$pr_url` followed by the label list
-   as its arguments. If the result starts with `ERROR:`, stop immediately and report the error to
-   the user verbatim. Parse the returned output: `LABEL_MAP` entries show which labels have
-   matching reviewer comments (`FOUND`) and which do not (`NOT_FOUND`). Each
+   Invoke the `kxue43-fetch-pr-comments` skill (not jarvis-registry directly), passing `$pr_url`
+   followed by the space-joined label list as its arguments.
+   The skill returns a file path — `Read` that file. If its content starts with `ERROR:`, stop
+   immediately and report the error to the user verbatim. Parse the file's content: `LABEL_MAP`
+   entries show which labels have matching reviewer comments (`FOUND`) and which do not
+   (`NOT_FOUND`). Each
    `## Thread: [Xn]` section is a reviewer comment thread for that label; multiple sections with
    the same label are separate threads for the same finding. The thread label matches the finding
    label because the reviewer (kxue43) opens each GitHub comment with a first paragraph of
