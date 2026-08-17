@@ -4,7 +4,7 @@ description: "Review a GitHub pull request and manage follow-up reviews. Subcomm
 disable-model-invocation: true
 argument-hint: "start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt] | followup [session_file] [focus_prompt]"
 arguments: [subcommand]
-allowed-tools: Bash Read Write Edit Grep mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
+allowed-tools: Bash Read Write Edit Grep Skill mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
 ---
 
 ## Web Search
@@ -53,7 +53,8 @@ When `$subcommand` is `start`:
 
 **The first four arguments are required.** If any are missing, stop and tell the user exactly
 which are absent before doing anything else. `$focus_prompt` is optional; if absent, proceed
-with standard review behavior.
+with standard review behavior. If present and it asks you to look at a specific PR comment by
+URL, invoke the `kxue43-fetch-single-comment` skill with that URL to obtain its content.
 
 ### Review Process
 
@@ -232,6 +233,9 @@ When `$subcommand` is `followup`:
 - If the argument is absent, stop and tell the user it is missing.
 - If the argument is provided but no file exists at that path, stop and tell the user the file was not found.
 Do not proceed past this check in either case.
+
+If `$focus_prompt` asks you to look at a specific PR comment by URL, invoke the
+`kxue43-fetch-single-comment` skill with that URL to obtain its content.
 
 ### Step 1 — Verify SHA
 
