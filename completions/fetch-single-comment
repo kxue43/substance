@@ -1,0 +1,9 @@
+_kxue43_fetch_single_comment::complete() {
+  if ((COMP_CWORD == 1)) && [[ $2 == @(|-|-h) ]]; then
+    COMPREPLY=("-h")
+  fi
+
+  return 0
+} && complete -o bashdefault -F _kxue43_fetch_single_comment::complete fetch-single-comment
+
+# vim: set ft=bash :

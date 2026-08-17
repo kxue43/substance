@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+_pr_comment_url_regex='^https://github\.com/([^/]+)/([^/]+)/pull/[0-9]+/?#(issuecomment-[0-9]+|discussion_r[0-9]+)$'
+
+_render_blockquote() {
+  sed -e 's/^/> /' -e 's/^> $/>/'
+}
+
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: fetch-single-comment [-h] COMMENT_URL
+
+Fetch a single GitHub PR comment via the `gh` CLI — either a conversation
+comment (URL fragment `#issuecomment-<id>`) or an inline review comment
+(URL fragment `#discussion_r<id>`) — and write it as a markdown snippet to a
+temp file. Prints the absolute path to that temp file to stdout for
+consumption by an LLM. Auth is assumed to already be set up; on any failure
+(including auth) prints `ERROR: <reason>` to stdout instead.
+
+ARGUMENTS:
+    COMMENT_URL   Full URL to a GitHub PR comment, e.g.
+                  https://github.com/owner/repo/pull/123#issuecomment-456
+                  https://github.com/owner/repo/pull/123#discussion_r456
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# != 1)); then
+    echo "ERROR: fetch-single-comment requires exactly one positional argument COMMENT_URL"
+
+    return 0
+  fi
+
+  local comment_url=$1
+
+  if ! [[ $comment_url =~ $_pr_comment_url_regex ]]; then
+    echo "ERROR: not a recognized PR comment URL: $comment_url"
+
+    return 0
+  fi
+
+  local owner=${BASH_REMATCH[1]} repo=${BASH_REMATCH[2]} fragment=${BASH_REMATCH[3]}
+
+  local endpoint
+  if [[ $fragment =~ ^issuecomment-([0-9]+)$ ]]; then
+    endpoint="repos/$owner/$repo/issues/comments/${BASH_REMATCH[1]}"
+  else
+    [[ $fragment =~ ^discussion_r([0-9]+)$ ]]
+    endpoint="repos/$owner/$repo/pulls/comments/${BASH_REMATCH[1]}"
+  fi
+
+  stderr_file=$(mktemp)
+  trap 'rm -f "$stderr_file"' EXIT
+
+  local json
+  if ! json=$(gh api "$endpoint" 2>"$stderr_file"); then
+    echo "ERROR: $(<"$stderr_file")"
+
+    return 0
+  fi
+
+  local author body
+  author=$(jq -r '.user.login' <<<"$json")
+  body=$(jq -r '.body | gsub("\r"; "")' <<<"$json")
+
+  local comment_file
+  comment_file=$(mktemp)
+
+  {
+    echo "## PR comment $fragment"
+    echo
+    if [[ $fragment == discussion_r* ]]; then
+      local path line
+      path=$(jq -r '.path' <<<"$json")
+      line=$(jq -r '.line // .original_line // "(file)"' <<<"$json")
+      echo "AUTHOR: $author; PATH: $path; LINE: $line"
+    else
+      echo "AUTHOR: $author"
+    fi
+    echo
+    _render_blockquote <<<"$body"
+  } >"$comment_file"
+
+  echo "$comment_file"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
