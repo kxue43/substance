@@ -17,10 +17,9 @@ Usage: fetch-single-comment [-h] COMMENT_URL
 
 Fetch a single GitHub PR comment via the `gh` CLI — either a conversation
 comment (URL fragment `#issuecomment-<id>`) or an inline review comment
-(URL fragment `#discussion_r<id>`) — and write it as a markdown snippet to a
-temp file. Prints the absolute path to that temp file to stdout for
-consumption by an LLM. Auth is assumed to already be set up; on any failure
-(including auth) prints `ERROR: <reason>` to stdout instead.
+(URL fragment `#discussion_r<id>`) — and print it as a markdown snippet to
+stdout for consumption by an LLM. Auth is assumed to already be set up; on
+any failure (including auth) prints `ERROR: <reason>` to stdout instead.
 
 ARGUMENTS:
     COMMENT_URL   Full URL to a GitHub PR comment, e.g.
@@ -72,25 +71,18 @@ EOF
   author=$(jq -r '.user.login' <<<"$json")
   body=$(jq -r '.body | gsub("\r"; "")' <<<"$json")
 
-  local comment_file
-  comment_file=$(mktemp)
-
-  {
-    echo "## PR comment $fragment"
-    echo
-    if [[ $fragment == discussion_r* ]]; then
-      local path line
-      path=$(jq -r '.path' <<<"$json")
-      line=$(jq -r '.line // .original_line // "(file)"' <<<"$json")
-      echo "AUTHOR: $author; PATH: $path; LINE: $line"
-    else
-      echo "AUTHOR: $author"
-    fi
-    echo
-    _render_blockquote <<<"$body"
-  } >"$comment_file"
-
-  echo "$comment_file"
+  echo "## PR comment $fragment"
+  echo
+  if [[ $fragment == discussion_r* ]]; then
+    local path line
+    path=$(jq -r '.path' <<<"$json")
+    line=$(jq -r '.line // .original_line // "(file)"' <<<"$json")
+    echo "AUTHOR: $author; PATH: $path; LINE: $line"
+  else
+    echo "AUTHOR: $author"
+  fi
+  echo
+  _render_blockquote <<<"$body"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
