@@ -315,8 +315,8 @@ Perform the following two review tracks **in order, completing the first before 
 2. **New findings:** Examine the diff and surrounding code for any bug, regression, security
    issue, or quality problem not already covered by an existing finding label in the report.
    First reason through (internally, not shown to the user) one bullet per label in
-   `changes_requested` with its Track 1 rating, so you don't re-flag something already tracked
-   as a comment-resolution finding. Then, with fresh eyes and the benefit of the loaded context,
+   `changes_requested` with its comment-resolution rating, so you don't re-flag something already
+   tracked as a comment-resolution finding. Then, with fresh eyes and the benefit of the loaded context,
    look for anything else — including areas not directly touched by the latest changes. Do
    not re-surface findings whose labels are in `findings_dismissed`.
 
