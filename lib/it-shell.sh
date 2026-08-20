@@ -58,6 +58,8 @@ _kxue43_it_shell::set_path() {
   if [[ -z "${KXUE43_SHELL_INIT+x}" ]]; then
     export KXUE43_SHELL_INIT=1
 
+    _kxue43_it_shell::ensure_path_components "/usr/local/bin"
+
     local own_path="$HOME/go/bin:$HOME/.cargo/bin:$HOME/.local/bin"
 
     PATH="$own_path:$PATH"
@@ -73,6 +75,22 @@ _kxue43_it_shell::set_path() {
   fi
 }
 
+_kxue43_it_shell::ensure_path_components() {
+  local component
+
+  for component in "$@"; do
+    case ":$PATH:" in
+
+    *":$component:"*) ;;
+
+    *)
+      PATH="$PATH:$component"
+      ;;
+
+    esac
+  done
+}
+
 _kxue43_it_shell::enable_completion() {
   export BASH_COMPLETION_USER_DIR="$KXUE43_SUBSTANCE_DIR:$HOME/.local/share/bash-completion"
 
@@ -84,9 +102,6 @@ _kxue43_it_shell::enable_completion() {
     source /opt/local/etc/profile.d/bash_completion.sh
 
     source /opt/local/share/git/git-prompt.sh
-
-    # Activate completion manually for AWS CLI because it's not installed by port.
-    complete -C '/usr/local/bin/aws_completer' aws
   elif [[ "$(hostname)" == "fedora" ]]; then
     # On Fedora Server, this file doesn't seem to be automatically sourced.
     source /etc/profile.d/bash_completion.sh
@@ -101,6 +116,9 @@ _kxue43_it_shell::enable_completion() {
 
     return 0
   fi
+
+  # Activate completion manually for AWS CLI because it's not installed by brew or port on macOS.
+  complete -C aws_completer aws
 
   PS1='\[\033[94m\]\u@\t: \[\033[96m\]\w\[\033[93m\]$(__git_ps1 " (%s)")\n$(if [ $? -eq 0 ]; then echo -e "\[\033[92m\]\U2714"; else echo -e "\[\033[91m\]\U2718"; fi)\[\033[0m\]\$ '
 }
