@@ -101,8 +101,24 @@ _kxue43_rw::renew() {
 }
 
 _kxue43_rw::sync() {
-  if [[ "$1" == "-p" ]]; then
+  if ((${#@} > 0)); then
+    if ! git ls-remote --exit-code --heads origin "$1" >/dev/null; then
+      kxue43::log_error "The remote branch '$1' does not exist."
+
+      return 1
+    fi
+
+    git fetch origin
+
+    git switch "$1"
+
     git pull
+  elif [[ "$(git branch --show-current)" != "parking/$(basename "$(pwd)")" ]]; then
+    if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null; then
+      git pull
+    else
+      kxue43::log_info "The current branch does not track any remote one. Skip git pull."
+    fi
   fi
 
   uv sync
@@ -155,11 +171,11 @@ rw() {
 USAGE: rw [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:
-    bootstrap     Bootstrap a Jarvis Registry worktree; must be in a worktree folder
-    renew         Pull the latest commits on main; rebase parking branches; delete merged branches; must be in the workspace folder
-    sync          Perform uv sync and activate the virtual environment; use -p flag to pull down latest commits; must be in a worktree folder
-    branch        List all branches with worktree occupancy markings
-    park          Checkout the corresponding parking branch of the worktree
+    bootstrap               Bootstrap a Jarvis Registry worktree; must be in a worktree folder
+    renew                   Pull the latest commits on main; rebase parking branches; delete merged branches; must be in the workspace folder
+    sync        [BRANCH]    Pull from the remote branch or switch and pull. Then perform uv sync and activate the virtual environment; must be in a worktree folder
+    branch                  List all branches with worktree occupancy markings
+    park                    Checkout the corresponding parking branch of the worktree
 
 OPTIONS:
     -h            Show this help message
@@ -176,6 +192,23 @@ EOF
     ;;
   sync)
     shift 1
+
+    if (($# > 0)) && [[ $1 == "-h" ]]; then
+      cat <<'EOF'
+Usage: rw sync [-h] [BRANCH]
+
+If BRANCH is given, git switch to this remote branch. Then perform git pull, uv sync and activate the virtual environment.
+Must be used in a git worktree folder.
+
+ARGUMENTS:
+    BRANCH      The remote branch to git switch to
+
+OPTIONS:
+    -h          Show this help message
+EOF
+
+      return 0
+    fi
 
     _kxue43_rw::sync "$@"
     ;;
@@ -209,8 +242,16 @@ _kxue43_rw::complete() {
     compgen -V COMPREPLY -W "bootstrap renew sync branch park" -- "$2"
 
     return 0
+  elif ((COMP_CWORD == 2)) && [[ $3 == "sync" ]] && [[ $2 =~ ^-h?$ ]]; then
+    compgen -V COMPREPLY -W "-h" -- "$2"
+
+    return 0
   elif ((COMP_CWORD == 2)) && [[ $3 == "sync" ]]; then
-    compgen -V COMPREPLY -W "-p" -- "$2"
+    local -a remote_branches
+
+    mapfile -t remote_branches < <(git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin | grep -v '^HEAD$')
+
+    compgen -V COMPREPLY -W "${remote_branches[*]}" -- "$2"
 
     return 0
   fi
