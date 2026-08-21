@@ -8,7 +8,7 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
 _kxue43_jarvis_pf::auth() {
   if ! AWS_PROFILE=ascending-saas-admin aws sts get-caller-identity &>/dev/null; then
-    PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending &>/dev/null
+    PATH="$HOME/.local/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending &>/dev/null
   fi
 }
 

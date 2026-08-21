@@ -17,14 +17,14 @@ source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-dc.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-pf.sh"
 
 sso-login() {
-  PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending
+  PATH="$HOME/.local/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending
 }
 
 kjd() {
   export AWS_PROFILE=ascending-saas-admin
 
   if ! aws sts get-caller-identity &>/dev/null; then
-    PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending
+    PATH="$HOME/.local/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending
   fi
 
   k9s -n jarvis-demo

@@ -51,7 +51,7 @@ set-role-env() {
   fi
 
   # Make sure system AWS CLI (guaranteed to be v2) is used. Sometimes a Python venv might have AWS CLI v1 installed.
-  eval "$(PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" aws configure export-credentials --format env --profile "$profile")"
+  eval "$(PATH="$HOME/.local/bin:/usr/local/bin:$PATH" aws configure export-credentials --format env --profile "$profile")"
 
   unset AWS_PROFILE
 }
