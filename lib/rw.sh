@@ -101,7 +101,7 @@ _kxue43_rw::renew() {
 }
 
 _kxue43_rw::sync() {
-  if ((${#@} > 0)); then
+  if (($# > 0)); then
     if ! git ls-remote --exit-code --heads origin "$1" >/dev/null; then
       kxue43::log_error "The remote branch '$1' does not exist."
 
