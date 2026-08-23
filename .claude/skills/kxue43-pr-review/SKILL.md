@@ -78,9 +78,9 @@ URL, invoke the `kxue43-fetch-single-comment` skill with that URL to obtain its 
 
 4. **Collect full diff of all changed files**: use the base branch obtained from the PR data in Step 3 and run `git diff origin/<base_branch>...HEAD`.
 
-5. **Explore local context** using `Bash` (`git log`, `git blame`) and `Read`/`Grep` to understand
-   how the changed code fits into the surrounding codebase. Check tests, related modules, and any
-   configuration touched by the PR.
+5. **Explore local context** using `Read`/`Grep` and `Bash` — including `git log` and `git blame`
+   for history and authorship context — to understand how the changed code fits into the
+   surrounding codebase. Check tests, related modules, and any configuration touched by the PR.
 
 6. **Evaluate against the spec:**
    - Does the implementation match the spec's intent and acceptance criteria?
