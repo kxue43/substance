@@ -29,6 +29,12 @@ When uncertain about a library, API, or technology, perform web search to verify
 
 Do not post comments, create issues, or take any action visible on GitHub unless the user explicitly asks for it. All output defaults to local files.
 
+## Git operations
+
+Default to updating files only; the user owns all state-changing git operations — `add`, `commit`, `push`, `branch`, `checkout`, `reset`, `merge`, `rebase`, etc. Run them only when the user explicitly asks for those operations in the current turn.
+
+Read-only git commands (`status`, `diff`, `log`, `blame`, `show`, etc.) remain allowed for gathering context, per the tool-priority rule above.
+
 ## Spec Writing Standards
 
 When writing a spec or note file during a research session:
