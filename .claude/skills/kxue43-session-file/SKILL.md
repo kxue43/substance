@@ -2,14 +2,19 @@
 name: kxue43-session-file
 description: "Create or load a session manifest file for structured research workflows. Subcommands: `new <path>` scaffolds a boilerplate session file; `load <path>` reads it and all listed spec files to prime context before beginning work."
 disable-model-invocation: true
-allowed-tools: Read, Write, Bash(mkdir)
 argument-hint: "new <rel-path> | load <rel-path>"
 arguments: [subcommand, path]
+allowed-tools: Read Write Bash
 ---
 
-You are executing the `kxue43-session-file` skill.
-Subcommand: `$subcommand`
-Path (relative to CWD): `$path`
+## Arguments
+
+| Variable | Description |
+|----------|-------------|
+| `$subcommand` | Either `new` or `load` |
+| `$path` | Path relative to CWD of the session manifest file |
+
+**Both arguments are required.** If either is missing, stop and tell the user which is absent before doing anything else.
 
 ---
 
@@ -17,8 +22,11 @@ Path (relative to CWD): `$path`
 
 When `$subcommand` is `new`:
 
-1. Run `mkdir -p` on the parent directory of `$path`.
-2. Write the following content to `$path` exactly:
+1. **Never overwrite an existing session file.** Check whether a file already exists at `$path`
+   (e.g. via `Bash test -e "$path"`). If it does, stop immediately and tell the user a session
+   file already exists at that path — do not proceed.
+2. Run `mkdir -p` on the parent directory of `$path`.
+3. Write the following content to `$path` exactly:
 
 ```
 ---
@@ -36,7 +44,7 @@ goal: "TODO: describe what you want to research or accomplish this session"
 -->
 ```
 
-3. Print: `Created: $path`. Do nothing else. Do not start a session.
+4. Print: `Created: $path`. Do nothing else. Do not start a session.
 
 ---
 
@@ -44,7 +52,7 @@ goal: "TODO: describe what you want to research or accomplish this session"
 
 When `$subcommand` is `load`:
 
-1. Read the session file at `$path`.
+1. Read the session file at `$path`. If no file exists at that path, stop immediately and tell the user it was not found.
 2. Parse its YAML front matter. Extract:
    - `load:` — list of file paths relative to CWD
    - `goal:` — the session objective string
@@ -60,8 +68,8 @@ When `$subcommand` is `load`:
 ---
 **Session loaded**
 
-| File | Scope |
-|------|-------|
+| File | Summary |
+|------|---------|
 | `specs/A1.md` | one-sentence summary inferred from content |
 | `specs/B2.md` | one-sentence summary inferred from content |
 
