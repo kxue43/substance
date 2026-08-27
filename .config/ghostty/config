@@ -32,3 +32,5 @@ keybind = cmd+8=goto_tab:8
 keybind = cmd+9=goto_tab:9
 keybind = cmd+page_down=next_tab
 keybind = cmd+page_up=previous_tab
+
+keybind = shift+alt+-=text:—
