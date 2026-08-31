@@ -20,6 +20,8 @@ alias gdump='cd ~/temp/dump'
 
 alias rdump='pushd ~/temp >/dev/null ; rm -rf dump && mkdir dump ; popd >/dev/null'
 
+alias pcwd='printf "%s" "$(pwd)" | pbcopy'
+
 alias venvact='. .venv/bin/activate'
 
 alias clean-aws-cache="unset AWS_SESSION_TOKEN && unset AWS_SECRET_ACCESS_KEY && unset AWS_ACCESS_KEY_ID && unset AWS_CREDENTIAL_EXPIRATION && rm -rf ~/.aws/toolkit-cache && rm -rf ~/.aws/sso/cache && rm -rf ~/.aws/cli/cache && rm -rf ~/.aws/boto/cache"
