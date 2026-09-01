@@ -307,20 +307,34 @@ map({ "n" }, "<leader>dp", function()
   vim.fn.setreg("+", table.concat(lines, "\n"))
 end, { desc = "dedent the string in the plug register." })
 
-local function buf_relpath()
+local kxue43_kpath_absolute = false
+
+local function buf_path()
   local bufpath = vim.fn.resolve(vim.api.nvim_buf_get_name(0))
   if bufpath == "" then
     return nil
+  end
+  if kxue43_kpath_absolute then
+    return bufpath
   end
   local git_root = vim.fs.root(bufpath, { ".git" })
   local root = (git_root or vim.fn.resolve(vim.fn.getcwd())) .. "/"
   return bufpath:sub(1, #root) == root and bufpath:sub(#root + 1) or bufpath
 end
 
+-- toggle absolute/relative path in <leader>ks and <leader>kb
+map({ "n" }, "<leader>kt", function()
+  kxue43_kpath_absolute = not kxue43_kpath_absolute
+  vim.notify(
+    "<leader>ks/<leader>kb now use " .. (kxue43_kpath_absolute and "absolute" or "relative") .. " path.",
+    vim.log.levels.INFO
+  )
+end, { desc = "toggle absolute/relative path in <leader>ks and <leader>kb." })
+
 -- put Claude Code style line range reference in the plus register
 map({ "x" }, "<leader>ks", function()
-  local relpath = buf_relpath()
-  if not relpath then
+  local path = buf_path()
+  if not path then
     return
   end
   local start_line = vim.fn.line "v"
@@ -328,15 +342,15 @@ map({ "x" }, "<leader>ks", function()
   if start_line > end_line then
     start_line, end_line = end_line, start_line
   end
-  vim.fn.setreg("+", string.format("@%s#L%d-%d", relpath, start_line, end_line))
+  vim.fn.setreg("+", string.format("@%s#L%d-%d", path, start_line, end_line))
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
 end, { desc = "put Claude Code line range reference in the plus register." })
 
 -- put Claude Code style file reference in the plus register
 map({ "n" }, "<leader>kb", function()
-  local relpath = buf_relpath()
-  if not relpath then
+  local path = buf_path()
+  if not path then
     return
   end
-  vim.fn.setreg("+", "@" .. relpath)
+  vim.fn.setreg("+", "@" .. path)
 end, { desc = "put Claude Code file reference in the plus register." })
