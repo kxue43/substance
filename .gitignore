@@ -2,4 +2,5 @@
 /.gitignore.override
 /.claude/settings.local.json
 /_acmd_cache
+/.claude/skills/kxue43-load-jarvis-context/
 
