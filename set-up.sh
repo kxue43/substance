@@ -83,12 +83,38 @@ _ensure_symlink() {
   ln -s "$target_path" "$link_path"
 }
 
+# Ensure none of the given paths is a symlink, removing it if present.
+# Non-existent paths are skipped without error.
+# Logs an error and returns early with non-zero exit code if any path
+# exists as a regular file or directory (not a symlink).
+# Args:
+#   $@: paths to check
+# Returns: None
+_ensure_no_symlink() {
+  local path
+
+  for path in "$@"; do
+    if [[ -L "$path" ]]; then
+      kxue43::log_info "Removing symlink $path"
+
+      unlink "$path"
+    elif [[ -e "$path" ]]; then
+      kxue43::log_error "$path already exists and is not a symlink"
+
+      return 1
+    fi
+  done
+}
+
 main() {
+  # Tear down the old whole-folder Claude skills symlink, if present
+  _ensure_no_symlink "$HOME/.claude/skills"
+
   # Make necessary directories first.
   mkdir -p "$HOME/.config/ghostty"
   mkdir -p "$HOME/.config/bat"
   mkdir -p "$HOME/.vim"
-  mkdir -p "$HOME/.claude/"
+  mkdir -p "$HOME/.claude/skills"
   mkdir -p "$HOME/.local/bin"
 
   local substance_dir
@@ -121,8 +147,25 @@ main() {
   # Symlinking own Vim plugin scripts
   _ensure_symlink "$HOME/.vim/plugin" "$substance_dir/.vim/plugin/"
 
+  local name
+
   # Symlinking Claude related files and folders
-  _ensure_symlink "$HOME/.claude/skills" "$substance_dir/.claude/skills/"
+  local -a skills
+  mapfile -t skills < <(ls -1 "$substance_dir/.claude/skills")
+
+  _link_files "$HOME/.claude/skills" "$substance_dir/.claude/skills" "skills"
+
+  mapfile -t skills < <(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type l)
+
+  # Clean up stale symlinks in ~/.claude/skills
+  for name in "${skills[@]}"; do
+    if [[ ! -e "$(readlink "$name")" ]]; then
+      kxue43::log_info "Skill symlink $name should no longer exist. Removing"
+
+      unlink "$name"
+    fi
+  done
+
   _ensure_symlink "$HOME/.claude/CLAUDE.md" "$substance_dir/.claude/CLAUDE.md"
   _ensure_symlink "$HOME/.claude/settings.json" "$substance_dir/.claude/settings.json"
 
@@ -132,8 +175,6 @@ main() {
 
     echo '{}' >"$substance_dir/.claude/settings.local.json"
   fi
-
-  local name
 
   local -a binaries
 
