@@ -2,28 +2,36 @@
 
 ## Getting started
 
-Install dependencies according to [GitHub Pages](https://kxue43.github.io/notes-and-blogs/).
+- Install dependencies according to [MacBook with Homebrew](https://kxue43.github.io/notes-and-blogs/notes/macbook-with-homebrew/).
 
-```bash
-mkdir -p ~/.config
-git clone https://github.com/kxue43/substance ~/.config/substance
-~/.config/substance/set-up.sh
-```
+- Clone `substance` repo and run set-up script.
 
-Open up `nvim` and run `:MasonInstallAll`, `:TSInstallAll`, `:checkhealth`.
+  ```bash
+  mkdir -p ~/.config
+  git clone https://github.com/kxue43/substance ~/.config/substance
+  ~/.config/substance/set-up.sh
+  ```
 
-Install [Jarvis Registry CLI](https://github.com/ascending-llc/jarvis-registry-cli) and sync skills.
+- Open up `nvim` and run `:MasonInstallAll`, `:TSInstallAll`, `:checkhealth`.
 
-```bash
-brew tap ascending-llc/jarvis
-brew install ascending-llc/jarvis/jarvis-registry
+- Install [Jarvis Registry CLI](https://github.com/ascending-llc/jarvis-registry-cli) and set up config file.
 
-mkdir -p ~/.jarvis-registry
-cat >~/.jarvis-registry/config.yaml <<'EOF'
-registry:
-  base_url: https://jarvis-demo.ascendingdc.com
-EOF
+  ```bash
+  brew tap ascending-llc/jarvis
+  brew install ascending-llc/jarvis/jarvis-registry
+  
+  mkdir -p ~/.jarvis-registry
 
-jarvis-registry auth login
-jarvis-registry sync-skills
-```
+  cat >~/.jarvis-registry/config.yaml <<'EOF'
+  registry:
+    base_url: https://jarvis-demo.ascendingdc.com
+  EOF
+  ```
+
+- Sync additional Claude Code skills via Jarvis Registry CLI.
+  
+  ```bash
+  jarvis-registry auth login
+
+  jarvis-registry sync-skills
+  ```
