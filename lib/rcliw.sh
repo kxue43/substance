@@ -1,33 +1,22 @@
-if [[ -n "${_kxue43_module_set_rw+x}" ]]; then
+if [[ -n "${_kxue43_module_set_rcliw+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_rw=1
+_kxue43_module_set_rcliw=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-_kxue43_rw::bootstrap() {
+_kxue43_rcliw::bootstrap() {
   ln -s ../registry-working-docs/ .working-docs
-
-  local files=(.env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml)
-  for file in "${files[@]}"; do
-    ln -s ../"${file}" "$file"
-  done
-
-  if ! playwright-cli install --skills; then
-    kxue43::log_error "Failed to install the playwright-cli Claude skill to project local"
-  fi
 }
 
-_kxue43_rw::renew() {
+_kxue43_rcliw::renew() {
   if ! (
-    if ! cd "jarvis-registry"; then
-      kxue43::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
+    if ! cd "jarvis-registry-cli"; then
+      kxue43::log_error "Failed to cd into jarvis-registry-cli. You are probably not in the correct directory"
 
       exit 1
     fi
-
-    uv run poe -q cleanup-artifacts
 
     git pull
 
@@ -50,7 +39,7 @@ _kxue43_rw::renew() {
 
   local -a worktrees
 
-  mapfile -t worktrees < <(find . -maxdepth 1 -mindepth 1 -type d -name "*-reviews*" ! -name "cli-*")
+  mapfile -t worktrees < <(find . -maxdepth 1 -mindepth 1 -type d -name "cli-*-reviews")
 
   if ((${#worktrees[@]} == 0)); then
     kxue43::log_info "No worktree directories found"
@@ -71,10 +60,6 @@ _kxue43_rw::renew() {
 
       kxue43::log_error "Failed to rebase parking branch of worktree ${target} onto main"
     fi
-
-    if ! (cd "$target" && uv run poe -q cleanup-artifacts); then
-      kxue43::log_error "Failed to clean up build artifacts in worktree ${target}"
-    fi
   done
 
   printf "\n"
@@ -86,7 +71,7 @@ _kxue43_rw::renew() {
 
   local -a to_delete
   mapfile -t to_delete < <(
-    git -C "jarvis-registry" branch |
+    git -C "jarvis-registry-cli" branch |
       awk '/^  / && !/  parking\// { sub(/^  /, ""); print }' |
       fzf -m --height=50% --layout=reverse --bind 'load:select-all'
   )
@@ -97,10 +82,10 @@ _kxue43_rw::renew() {
     return 0
   fi
 
-  git -C "jarvis-registry" branch -D "${to_delete[@]}"
+  git -C "jarvis-registry-cli" branch -D "${to_delete[@]}"
 }
 
-_kxue43_rw::sync() {
+_kxue43_rcliw::sync() {
   if (($# > 0)); then
     if ! git ls-remote --exit-code --heads origin "$1" >/dev/null; then
       kxue43::log_error "The remote branch '$1' does not exist."
@@ -120,16 +105,12 @@ _kxue43_rw::sync() {
       kxue43::log_info "The current branch does not track any remote one. Skip git pull."
     fi
   fi
-
-  uv sync
-
-  source .venv/bin/activate
 }
 
-_kxue43_rw::branch() {
+_kxue43_rcliw::branch() {
   (
-    if ! cd "jarvis-registry"; then
-      kxue43::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
+    if ! cd "jarvis-registry-cli"; then
+      kxue43::log_error "Failed to cd into jarvis-registry-cli. You are probably not in the correct directory"
 
       exit 1
     fi
@@ -138,11 +119,11 @@ _kxue43_rw::branch() {
   )
 }
 
-_kxue43_rw::park() {
+_kxue43_rcliw::park() {
   local base
   base="$(basename "$(pwd)")"
 
-  if [[ "$base" == "jarvis-registry" ]]; then
+  if [[ "$base" == "jarvis-registry-cli" ]]; then
     if ! git checkout main; then
       kxue43::log_error "Failed to check out the main branch"
 
@@ -165,15 +146,15 @@ _kxue43_rw::park() {
   fi
 }
 
-rw() {
+rcliw() {
   if (($# == 0)) || [[ $1 == "-h" ]]; then
     cat <<'EOF'
-USAGE: rw [-h] [SUBCOMMAND]
+USAGE: rcliw [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:
-    bootstrap               Bootstrap a Jarvis Registry worktree; must be in a worktree folder
+    bootstrap               Bootstrap a Jarvis Registry CLI worktree; must be in a worktree folder
     renew                   Pull the latest commits on main; rebase parking branches; delete merged branches; must be in the workspace folder
-    sync        [BRANCH]    Pull from the remote branch or switch and pull. Then perform uv sync and activate the virtual environment; must be in a worktree folder
+    sync        [BRANCH]    Pull from the remote branch or switch and pull; must be in a worktree folder
     branch                  List all branches with worktree occupancy markings
     park                    Checkout the corresponding parking branch of the worktree
 
@@ -185,19 +166,19 @@ EOF
   fi
   case "$1" in
   bootstrap)
-    _kxue43_rw::bootstrap
+    _kxue43_rcliw::bootstrap
     ;;
   renew)
-    _kxue43_rw::renew
+    _kxue43_rcliw::renew
     ;;
   sync)
     shift 1
 
     if (($# > 0)) && [[ $1 == "-h" ]]; then
       cat <<'EOF'
-Usage: rw sync [-h] [BRANCH]
+Usage: rcliw sync [-h] [BRANCH]
 
-If BRANCH is given, git switch to this remote branch. Then perform git pull, uv sync and activate the virtual environment.
+If BRANCH is given, git switch to this remote branch. Then perform git pull.
 Must be used in a git worktree folder.
 
 ARGUMENTS:
@@ -210,13 +191,13 @@ EOF
       return 0
     fi
 
-    _kxue43_rw::sync "$@"
+    _kxue43_rcliw::sync "$@"
     ;;
   branch)
-    _kxue43_rw::branch
+    _kxue43_rcliw::branch
     ;;
   park)
-    _kxue43_rw::park
+    _kxue43_rcliw::park
     ;;
   *)
     kxue43::log_error "Unknown subcommand $1"
@@ -226,7 +207,7 @@ EOF
   esac
 }
 
-_kxue43_rw::complete() {
+_kxue43_rcliw::complete() {
   local -a opts
   opts=("'-h  (Show help message)'" "'bootstrap  (bootstrap worktree)'" "'renew  (Renew workspace)'" "'sync  (Sync worktree)'" "'branch  (List branches)'" "'park  (Checkout parking branch)'")
 
@@ -255,6 +236,6 @@ _kxue43_rw::complete() {
 
     return 0
   fi
-} && complete -o bashdefault -F _kxue43_rw::complete rw
+} && complete -o bashdefault -F _kxue43_rcliw::complete rcliw
 
-_kxue43_commands_list+=("rw")
+_kxue43_commands_list+=("rcliw")
