@@ -9,7 +9,7 @@ description: >
 pr_url: https://github.com/kxue43/substance/pull/18
 changes_requested: []
 findings_dismissed: []
-merged:
+merged: true
 notes:
 ---
 # PR Review: Feature: inline skill-only scripts

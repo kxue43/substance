@@ -12,6 +12,7 @@ alias gs='git status'
 # Functions.
 
 source "$KXUE43_SUBSTANCE_DIR/lib/rw.sh"
+source "$KXUE43_SUBSTANCE_DIR/lib/rcliw.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-logs.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-dc.sh"
 source "$KXUE43_SUBSTANCE_DIR/lib/jarvis-pf.sh"
