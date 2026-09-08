@@ -67,14 +67,13 @@ URL, invoke the `kxue43-fetch-single-comment` skill with that URL to obtain its 
 3. **Fetch PR data** (not jarvis-registry directly). Run via `Bash`:
 
    ```
-   outfile=$(mktemp)
-   fetch-pr-data "$pr_url" > "$outfile"
-   echo "$outfile"
+   result=$(${CLAUDE_SKILL_DIR}/scripts/fetch-pr-data "$pr_url")
    ```
 
-   `Read` the printed file path. If its content starts with `ERROR:`, stop immediately and
-   report the error to the user verbatim. Otherwise, parse `PR_TITLE`, `BASE_BRANCH`, and
-   `PR_MESSAGE` (the content inside `<pr_message>…</pr_message>`) from the file's content.
+   If `$result` starts with `ERROR:`, stop immediately and relay the error reported by the
+   script to the user verbatim. Otherwise, `$result` is the absolute path to a file — `Read`
+   it and parse `PR_TITLE`, `BASE_BRANCH`, and `PR_MESSAGE` (the content inside
+   `<pr_message>…</pr_message>`) from its content.
 
 4. **Collect full diff of all changed files**: use the base branch obtained from the PR data in Step 3 and run `git diff origin/<base_branch>...HEAD`.
 
@@ -267,9 +266,7 @@ matter (e.g. `changes_requested: [C1, M2]` parses to `["C1", "M2"]`) and join wi
 Run via `Bash` (not jarvis-registry directly):
 
 ```
-outfile=$(mktemp)
-fetch-pr-comments $pr_url $labels > "$outfile"
-echo "$outfile"
+result=$(${CLAUDE_SKILL_DIR}/scripts/fetch-pr-comments $pr_url $labels)
 ```
 
 substituting `$pr_url` with the PR URL and `$labels` with the space-joined label list from
@@ -277,14 +274,18 @@ above, passed **unquoted** — this matches the CLI's own positional signature t
 wrapping them in quotes would collapse everything into a single argument and break label
 matching.
 
-`Read` the printed file path. If its content starts with `ERROR:`, stop
-immediately and report the error to the user verbatim. Parse the file's content: `LABEL_MAP`
+If `$result` starts with `ERROR:`, stop immediately and relay the error reported by the script
+to the user verbatim — this covers GitHub API failures as well as the script's own `gh` CLI
+checks (missing `gh`, an unsupported `gh` version, or not being logged in; the script resolves
+the current GitHub login itself, nothing is hardcoded). Otherwise, `$result` is the absolute
+path to a file — `Read` it. Parse the file's content: `LABEL_MAP`
 entries show which labels have matching reviewer comments (`FOUND`) and which do not
 (`NOT_FOUND`). Each
 `## Thread: [Xn]` section is a reviewer comment thread for that label; multiple sections with
 the same label are separate threads for the same finding. The thread label matches the finding
-label because the reviewer (kxue43) opens each GitHub comment with a first paragraph of
-exactly `This is change request [Xn].`, echoing back the finding label assigned during triage.
+label because the reviewer (the current `gh`-authenticated GitHub user) opens each GitHub
+comment with a first paragraph of exactly `This is change request [Xn].`, echoing back the
+finding label assigned during triage.
 
 If no such comment is found for a label (i.e. `NOT_FOUND` in `LABEL_MAP`), treat that finding
 as **fully unaddressed** — there is no reviewer comment to resolve. Record this internally —

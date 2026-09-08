@@ -83,10 +83,12 @@ _ensure_symlink() {
   ln -s "$target_path" "$link_path"
 }
 
-# Ensure none of the given paths is a symlink, removing it if present.
-# Non-existent paths are skipped without error.
-# Logs an error and returns early with non-zero exit code if any path
-# exists as a regular file or directory (not a symlink).
+# Ensure none of the given paths is a leftover symlink from an old scheme,
+# removing it if present. A real directory is the happy default (the current
+# scheme's steady state) and is left untouched. Non-existent paths are
+# skipped without error. Logs an error and returns early with non-zero exit
+# code if any path exists as something other than a directory or a symlink
+# (e.g. a regular file).
 # Args:
 #   $@: paths to check
 # Returns: None
@@ -98,8 +100,10 @@ _ensure_no_symlink() {
       kxue43::log_info "Removing symlink $path"
 
       unlink "$path"
+    elif [[ -d "$path" ]]; then
+      continue
     elif [[ -e "$path" ]]; then
-      kxue43::log_error "$path already exists and is not a symlink"
+      kxue43::log_error "$path already exists and is not a directory or symlink"
 
       return 1
     fi
@@ -107,7 +111,9 @@ _ensure_no_symlink() {
 }
 
 main() {
-  # Tear down the old whole-folder Claude skills symlink, if present
+  # Tear down the old whole-folder Claude skills symlink, if present. A real
+  # directory here is the current scheme's steady state (see mkdir -p below)
+  # and is left alone.
   _ensure_no_symlink "$HOME/.claude/skills"
 
   # Make necessary directories first.

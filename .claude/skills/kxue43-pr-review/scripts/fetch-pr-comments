@@ -2,14 +2,12 @@
 
 set -eu -o pipefail
 
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
-
 _pr_url_regex='^https://github\.com/([^/]+)/([^/]+)/pull/([0-9]+)/?$'
 
 # Groups inline review comments into threads (root = comment with no
 # in_reply_to_id; GitHub disallows replies-to-replies, so in_reply_to_id
-# always points at the thread root), keeps only threads/comments with a
-# kxue43-authored "This is change request [Xn]." signal in the first
+# always points at the thread root), keeps only threads/comments with the
+# current gh user's "This is change request [Xn]." signal in the first
 # paragraph, and orders the result by severity tier (C, M, m) then number.
 # shellcheck disable=SC2016
 _jq_program='
@@ -34,9 +32,9 @@ def num_part: (.[1:] | tonumber? // 0);
   | map(. + {author: .user.login, thread_root: (.in_reply_to_id // .id)})
   | group_by(.thread_root)
   | map(sort_by(.created_at))
-  | map(select(any(.[]; .author == "kxue43")))
+  | map(select(any(.[]; .author == $login)))
   | map(
-      (first((.[] | select(.author == "kxue43") | label_of) | select(. != null))) as $label
+      (first((.[] | select(.author == $login) | label_of) | select(. != null))) as $label
       | select($label != null)
       | {
           label: $label,
@@ -48,7 +46,7 @@ def num_part: (.[1:] | tonumber? // 0);
 ) as $thread_groups
 | (
     $issue
-    | map(select(.user.login == "kxue43"))
+    | map(select(.user.login == $login))
     | map(label_of as $l | select($l != null) | {label: $l, created_at, kind: "comment", body: (.body|norm)})
   ) as $comment_groups
 | ($thread_groups + $comment_groups) as $all
@@ -82,18 +80,47 @@ _gh_api_paginated() {
   jq 'flatten(1)' <<<"$raw"
 }
 
+_resolve_login() {
+  if ! command -v gh &>/dev/null; then
+    echo "ERROR: gh CLI not found. Install it: https://cli.github.com/"
+    return 1
+  fi
+
+  local raw
+  if ! raw=$(gh auth status --json hosts --jq '.hosts."github.com"[0].login' 2>&1); then
+    if [[ $raw == *"unknown flag"* ]]; then
+      echo "ERROR: gh CLI is too old (needs >= 2.81.0 for 'gh auth status --json'). Upgrade gh and try again."
+    else
+      echo "ERROR: $raw"
+    fi
+    return 1
+  fi
+
+  local login
+  login=$(head -n1 <<<"$raw")
+
+  if [[ -z $login ]] || [[ $login == "null" ]] || ! [[ $login =~ ^[A-Za-z0-9-]+$ ]]; then
+    echo "ERROR: not logged into GitHub via gh. Run: gh auth login"
+    return 1
+  fi
+
+  printf '%s' "$login"
+}
+
 main() {
   if (($# > 0)) && [[ $1 == "-h" ]]; then
     cat <<'EOF'
 Usage: fetch-pr-comments [-h] PR_URL LABEL [LABEL...]
 
-Fetch kxue43-authored reviewer comments on a GitHub PR via the `gh` CLI:
-inline review threads and issue/PR-level comments (review-level "reviews"
-are not fetched). Only threads/comments whose kxue43 comment opens with the
-exact first paragraph `This is change request [Xn].` are kept. Prints a
-fixed plain-text format to stdout for consumption by an LLM. Auth is assumed
-to already be set up; on any failure (including auth) prints `ERROR:
-<reason>` to stdout instead.
+Fetch reviewer comments — authored by the current `gh`-authenticated GitHub
+user — on a GitHub PR via the `gh` CLI: inline review threads and issue/PR-
+level comments (review-level "reviews" are not fetched). Only threads/
+comments whose comment opens with the exact first paragraph `This is change
+request [Xn].` are kept. On success, writes a fixed plain-text format to a
+temporary file and prints that file's absolute path to stdout. Requires the
+`gh` CLI (>= 2.81.0) to be installed and authenticated; on any failure
+(missing gh, unsupported gh version, not logged in, or a GitHub API error)
+prints `ERROR: <reason>` to stdout instead.
 
 ARGUMENTS:
     PR_URL      Full URL to the GitHub pull request, e.g.
@@ -139,6 +166,13 @@ EOF
     return 0
   fi
 
+  local login
+  if ! login=$(_resolve_login); then
+    echo "$login"
+
+    return 0
+  fi
+
   local owner=${BASH_REMATCH[1]} repo=${BASH_REMATCH[2]} number=${BASH_REMATCH[3]}
 
   stderr_file=$(mktemp)
@@ -158,63 +192,70 @@ EOF
   fi
 
   local result
-  result=$(jq -n --argjson inline "$inline_flat" --argjson issue "$issue_flat" --args "$_jq_program" -- "${labels[@]}")
+  result=$(jq -n --argjson inline "$inline_flat" --argjson issue "$issue_flat" --arg login "$login" --args "$_jq_program" -- "${labels[@]}")
 
-  echo "LABEL_MAP:"
-  jq -r '.label_map[] | "  [" + .label + "] → " + (if .found then "FOUND" else "NOT_FOUND" end)' <<<"$result"
-  echo
-  echo "---"
+  local outfile
+  outfile=$(mktemp)
 
-  local item
-  while IFS= read -r item; do
-    local kind label
-    kind=$(jq -r '.kind' <<<"$item")
-    label=$(jq -r '.label' <<<"$item")
-
+  {
+    echo "LABEL_MAP:"
+    jq -r '.label_map[] | "  [" + .label + "] → " + (if .found then "FOUND" else "NOT_FOUND" end)' <<<"$result"
     echo
-    echo "## Thread: [$label]"
-    echo
+    echo "---"
 
-    if [[ $kind == thread ]]; then
-      local entry
-      while IFS= read -r entry; do
-        local author path line body
-        author=$(jq -r '.author' <<<"$entry")
-        path=$(jq -r '.path' <<<"$entry")
-        line=$(jq -r '.line // "(file)"' <<<"$entry")
-        body=$(jq -r '.body' <<<"$entry")
+    local item
+    while IFS= read -r item; do
+      local kind label
+      kind=$(jq -r '.kind' <<<"$item")
+      label=$(jq -r '.label' <<<"$item")
 
-        echo "- AUTHOR: $author; PATH: $path; LINE: $line"
+      echo
+      echo "## Thread: [$label]"
+      echo
+
+      if [[ $kind == thread ]]; then
+        local entry
+        while IFS= read -r entry; do
+          local author path line body
+          author=$(jq -r '.author' <<<"$entry")
+          path=$(jq -r '.path' <<<"$entry")
+          line=$(jq -r '.line // "(file)"' <<<"$entry")
+          body=$(jq -r '.body' <<<"$entry")
+
+          echo "- AUTHOR: $author; PATH: $path; LINE: $line"
+          echo
+          _render_blockquote <<<"$body"
+          echo
+        done < <(jq -c '.entries[]' <<<"$item")
+      else
+        local created_at body
+        created_at=$(jq -r '.created_at' <<<"$item")
+        body=$(jq -r '.body' <<<"$item")
+
+        echo "CREATED: $created_at"
         echo
         _render_blockquote <<<"$body"
         echo
-      done < <(jq -c '.entries[]' <<<"$item")
-    else
-      local created_at body
-      created_at=$(jq -r '.created_at' <<<"$item")
-      body=$(jq -r '.body' <<<"$item")
+      fi
 
-      echo "CREATED: $created_at"
+      echo "---"
+    done < <(jq -c '.items[]' <<<"$result")
+
+    local -a unlinked
+    mapfile -t unlinked < <(jq -r '.label_map[] | select(.found == false) | .label' <<<"$result")
+
+    if ((${#unlinked[@]} > 0)); then
       echo
-      _render_blockquote <<<"$body"
-      echo
+      echo "## Unlinked labels (no matching reviewer comment found):"
+
+      local u
+      for u in "${unlinked[@]}"; do
+        echo "- [$u]"
+      done
     fi
+  } > "$outfile"
 
-    echo "---"
-  done < <(jq -c '.items[]' <<<"$result")
-
-  local -a unlinked
-  mapfile -t unlinked < <(jq -r '.label_map[] | select(.found == false) | .label' <<<"$result")
-
-  if ((${#unlinked[@]} > 0)); then
-    echo
-    echo "## Unlinked labels (no matching reviewer comment found):"
-
-    local u
-    for u in "${unlinked[@]}"; do
-      echo "- [$u]"
-    done
-  fi
+  echo "$outfile"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
