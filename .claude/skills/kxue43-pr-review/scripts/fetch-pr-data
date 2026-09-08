@@ -2,8 +2,6 @@
 
 set -eu -o pipefail
 
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
-
 _pr_url_regex='^https://github\.com/[^/]+/[^/]+/pull/[0-9]+/?$'
 
 main() {
@@ -12,9 +10,10 @@ main() {
 Usage: fetch-pr-data [-h] PR_URL
 
 Fetch a GitHub pull request's title, base branch, and description via the `gh`
-CLI. Prints a fixed plain-text format to stdout for consumption by an LLM.
-Auth is assumed to already be set up; on any failure (including auth) prints
-`ERROR: <reason>` to stdout instead.
+CLI. On success, writes a fixed plain-text format to a temporary file and
+prints that file's absolute path to stdout. Auth is assumed to already be set
+up; on any failure (including auth) prints `ERROR: <reason>` to stdout
+instead.
 
 ARGUMENTS:
     PR_URL      Full URL to the GitHub pull request, e.g.
@@ -56,8 +55,13 @@ EOF
   base_branch=$(jq -r '.baseRefName' <<<"$json")
   body=$(jq -r '(.body // "") | gsub("\r"; "")' <<<"$json")
 
+  local outfile
+  outfile=$(mktemp)
+
   printf 'PR_TITLE: %s\nBASE_BRANCH: %s\n\nPR_MESSAGE:\n<pr_message>\n%s\n</pr_message>\n' \
-    "$title" "$base_branch" "$body"
+    "$title" "$base_branch" "$body" > "$outfile"
+
+  echo "$outfile"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
