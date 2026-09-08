@@ -1,8 +1,8 @@
 ---
 name: kxue43-pr-review
-description: "Review a GitHub pull request and manage follow-up reviews. Subcommands: `start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt]` runs the initial review; `followup [session_file] [focus_prompt]` validates and follows up on a previous review session."
+description: "Review a GitHub pull request and manage follow-up reviews. Subcommands: `start <pr_url> <spec_file> <report_file> <session_file> [focus_prompt]` runs the initial review; `followup <session_file> [focus_prompt]` validates and follows up on a previous review session."
 disable-model-invocation: true
-argument-hint: "start [pr_url] [spec_file] [report_file] [session_file] [focus_prompt] | followup [session_file] [focus_prompt]"
+argument-hint: "start <pr_url> <spec_file> <report_file> <session_file> [focus_prompt] | followup <session_file> [focus_prompt]"
 arguments: [subcommand]
 allowed-tools: Bash Read Write Edit Grep Skill mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
 ---

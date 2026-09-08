@@ -2,7 +2,7 @@
 name: kxue43-write-specs
 description: "Write one or more technical spec files as Markdown, at caller-specified paths, using context already established in this session (typically invoked at the end of a design/planning conversation). Takes a path-to-topic mapping plus a shared prompt of overall instructions."
 disable-model-invocation: true
-argument-hint: "[path_mapping] [prompt]"
+argument-hint: "<path_mapping> <prompt>"
 arguments: [path_mapping, prompt]
 allowed-tools: Bash Read Write Edit Grep mcp__jarvis-registry__discover_servers mcp__jarvis-registry__execute_tool
 ---
