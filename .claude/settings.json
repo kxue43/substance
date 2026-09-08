@@ -1,4 +1,48 @@
 {
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$KXUE43_SUBSTANCE_DIR/bin/claude-notify",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$KXUE43_SUBSTANCE_DIR/bin/claude-notify",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$KXUE43_SUBSTANCE_DIR/bin/claude-notify",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "elicitation_url_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$KXUE43_SUBSTANCE_DIR/bin/claude-notify",
+            "async": true
+          }
+        ]
+      }
+    ]
+  },
   "attribution": {
     "commit": "",
     "pr": ""
