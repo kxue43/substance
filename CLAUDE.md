@@ -8,6 +8,10 @@ Personal platform for AI-assisted workflow.
 `set-up.sh` creates symlinks from `$HOME` (and `~/.config/nvim`) pointing into this repo,
 so edits here take effect immediately for the running shell (after re-sourcing the relevant file).
 
+`BOOTSTRAP.md` documents the macOS + Homebrew dependency installation that must be done before
+`./set-up.sh` is run for the first time on a new machine. Consult it when in doubt about what tools,
+languages, and CLIs are assumed to be present.
+
 ## Common commands
 
 ```bash
