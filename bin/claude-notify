@@ -27,18 +27,21 @@ EOF
   cwd="$(jq -r '.cwd // empty' <<<"$stdin_json" 2>/dev/null || true)"
   [[ -n "$cwd" ]] || cwd="${CLAUDE_PROJECT_DIR:-$PWD}"
 
-  local dir_name branch reason message
+  local dir_name branch notification_message message
 
   dir_name="$(basename "$cwd")"
   branch="$(git -C "$cwd" branch --show-current 2>/dev/null || echo "no-branch")"
-  reason="$(jq -r '.message // "ready for prompt"' <<<"$stdin_json" 2>/dev/null || echo "ready for prompt")"
-  message="[${dir_name} · ${branch}] ${reason}"
+  notification_message="$(jq -r '.message // "ready for prompt"' <<<"$stdin_json" 2>/dev/null || echo "ready for prompt")"
+  message="[${dir_name} · ${branch}] ${notification_message}"
 
-  terminal-notifier \
+  if ! terminal-notifier \
     -title "Claude Code" \
     -message "$message" \
     -sticky \
-    >/dev/null
+    >/dev/null; then
+    kxue43::log_error "claude-notify: terminal-notifier failed"
+    return 1
+  fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
