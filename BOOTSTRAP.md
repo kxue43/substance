@@ -3,7 +3,7 @@
 ## Introduction
 
 This document covers how to set up an ARM64 MacBook as a developer machine, geared towards Go, Python,
-JavaScript, and Java development. Work through it before running `./set-up.sh` for the first time on a new
+and JavaScript development. Work through it before running `./set-up.sh` for the first time on a new
 machine.
 
 All commands on this page should be executed from the user's home directory.
