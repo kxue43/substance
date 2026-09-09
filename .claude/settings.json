@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$KXUE43_SUBSTANCE_DIR/bin/claude-notify",
+            "command": "claude-notify",
             "async": true
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$KXUE43_SUBSTANCE_DIR/bin/claude-notify",
+            "command": "claude-notify",
             "async": true
           }
         ]
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$KXUE43_SUBSTANCE_DIR/bin/claude-notify",
+            "command": "claude-notify",
             "async": true
           }
         ]
@@ -36,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$KXUE43_SUBSTANCE_DIR/bin/claude-notify",
+            "command": "claude-notify",
             "async": true
           }
         ]

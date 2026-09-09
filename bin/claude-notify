@@ -9,7 +9,7 @@ main() {
     cat <<'EOF'
 Usage: claude-notify [-h]
 
-Send a sticky macOS notification for a Claude Code hook event, with the
+Send a macOS notification for a Claude Code hook event, with the
 worktree directory name and current git branch folded into the message.
 Reads Claude Code's hook JSON payload from stdin.
 
@@ -32,12 +32,13 @@ EOF
   dir_name="$(basename "$cwd")"
   branch="$(git -C "$cwd" branch --show-current 2>/dev/null || echo "no-branch")"
   notification_message="$(jq -r '.message // "ready for prompt"' <<<"$stdin_json" 2>/dev/null || echo "ready for prompt")"
-  message="[${dir_name} · ${branch}] ${notification_message}"
+  # terminal-notifier's arg parser rejects -message values starting with [, (, { or a
+  # quote unless escaped; this message always starts with "[" (dir · branch).
+  message="\\[${dir_name} · ${branch}] ${notification_message}"
 
   if ! terminal-notifier \
     -title "Claude Code" \
     -message "$message" \
-    -sticky \
     >/dev/null; then
     kxue43::log_error "claude-notify: terminal-notifier failed"
     return 1
