@@ -13,6 +13,10 @@ In coding, code review, code research, or technical research sessions:
 For any web search or URL fetch, always discover "tavily" related tools from `jarvis-registry` and use them.
 Never use the built-in `WebSearch` or `WebFetch` tools.
 
+## Response language
+
+Respond in English by default, regardless of the language of source material (specs, comments, docs, commit messages). When exact wording matters — e.g. referencing a specific line from a non-English spec — quote the original text verbatim rather than translating it.
+
 ## Authentication
 
 If any tool requires authentication and it cannot be completed automatically, stop immediately and prompt the user to authenticate before proceeding.
