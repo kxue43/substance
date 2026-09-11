@@ -5,8 +5,7 @@
 In coding, code review, code research, or technical research sessions:
 - Use `Read`, `Grep`, and `Bash` to read local files and understand the codebase.
 - Use the `git` CLI to gather Git and repository information.
-- For GitHub information that cannot be obtained via the `git` CLI, discover "github" related tools from the `jarvis-registry` MCP server and use them.
-  Never invoke `gh` yourself directly.
+- For GitHub information, prefer "github" related tools discovered from the `jarvis-registry` MCP server; fall back to the `gh` CLI directly for anything those tools can't provide (e.g. Actions workflow run logs).
 
 ## Web search: tool priority
 
@@ -32,6 +31,8 @@ When uncertain about a library, API, or technology, perform web search to verify
 ## GitHub side effects
 
 Do not post comments, create issues, or take any action visible on GitHub unless the user explicitly asks for it. All output defaults to local files.
+
+PR-related write operations (comments, reviews, merges, approvals, etc.) are never performed by any tool or skill, no exceptions — the user always handles these manually.
 
 ## Git operations
 
