@@ -13,7 +13,7 @@ jarvis-dc() {
 USAGE: jarvis-dc [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:
-    up    [-n]     docker compose up with the right options
+    up    [-n|-s]  docker compose up with the right options
     down           docker compose down with the right options
     logs           docker logs -f against a container
 
@@ -30,12 +30,13 @@ EOF
 
     if (($# > 0)) && [[ $1 == "-h" ]]; then
       cat <<'EOF'
-Usage: jarvis-dc up [-n] [-h]
+Usage: jarvis-dc up [-n|-s] [-h]
 
 docker compose up with the right options.
 
 OPTIONS:
     -n          --no-build
+    -s          Pick services via fzf and only rebuild those before starting
     -h          Show this help message
 EOF
 
@@ -43,14 +44,45 @@ EOF
     fi
 
     local -a args=("-f" "docker-compose.no-db.yml" "--profile" "full" "up" "-d")
+    local -a services=()
 
-    if [[ "$1" == "-n" ]]; then
+    if [[ "$1" == "-s" ]]; then
+      mapfile -t services < <(
+        docker compose -f docker-compose.no-db.yml --profile full config --format json 2>/dev/null |
+          jq -r '.services | to_entries[] | select(.value.build != null) | .key' |
+          fzf -m --height=50% --layout=reverse
+      )
+
+      if ((${#services[@]} == 0)); then
+        kxue43::log_info "No service selected. Exit"
+
+        return 0
+      fi
+
+      args+=("--no-build")
+    elif [[ "$1" == "-n" ]]; then
       args+=("--no-build")
     else
       args+=("--build")
     fi
 
-    if [[ "$1" != "-n" ]]; then
+    local need_artifacts=1
+
+    if [[ "$1" == "-n" ]]; then
+      need_artifacts=0
+    elif [[ "$1" == "-s" ]]; then
+      need_artifacts=0
+
+      local service
+      for service in "${services[@]}"; do
+        if [[ "$service" != "registry-frontend" ]]; then
+          need_artifacts=1
+          break
+        fi
+      done
+    fi
+
+    if ((need_artifacts)); then
       uv run poe -q cleanup-artifacts
     fi
 
@@ -60,8 +92,12 @@ EOF
 
     set-role-env ascending-saas-admin
 
-    if [[ "$1" != "-n" ]]; then
+    if ((need_artifacts)); then
       uv run poe build-artifacts
+    fi
+
+    if [[ "$1" == "-s" ]]; then
+      docker compose -f docker-compose.no-db.yml --profile full build "${services[@]}"
     fi
 
     docker compose "${args[@]}"
@@ -138,7 +174,7 @@ _kxue43_jarvis_dc::complete() {
 
     return 0
   elif ((COMP_CWORD == 2)) && [[ $3 == "up" ]]; then
-    compgen -V COMPREPLY -W "-n -h" -- "$2"
+    compgen -V COMPREPLY -W "-n -s -h" -- "$2"
 
     return 0
   elif ((COMP_CWORD == 2)) && [[ $3 != "up" ]]; then
