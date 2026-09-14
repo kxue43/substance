@@ -38,6 +38,8 @@ PR-related write operations (comments, reviews, merges, approvals, etc.) are nev
 
 Default to updating files only; the user owns all state-changing git operations — `add`, `commit`, `push`, `branch`, `checkout`, `reset`, `merge`, `rebase`, etc. Run them only when the user explicitly asks for those operations in the current turn.
 
+Exception: `git stash` and its subcommands (`push`/`save`, `pop`, `apply`, `list`, `drop`) may be run without asking when needed for local experimentation or verification, since they don't create commits. Never pop or drop a stash entry that predates the current task, and clean up (pop or drop) any new stash entries before finishing.
+
 Read-only git commands (`status`, `diff`, `log`, `blame`, `show`, etc.) remain allowed for gathering context, per the tool-priority rule above.
 
 ## Spec Writing Standards
