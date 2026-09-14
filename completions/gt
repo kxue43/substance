@@ -4,6 +4,8 @@ _kxue43_gt::complete() {
 
     return 0
   elif ((COMP_CWORD == 1)) && [[ $2 != "" ]]; then
+    compgen -V COMPREPLY -W "$(basename "$(pwd)")" -- "$2"
+
     return 0
   elif ((COMP_CWORD == 1)); then
     COMPREPLY=("$(basename "$(pwd)")")
