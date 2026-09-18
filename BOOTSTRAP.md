@@ -216,22 +216,9 @@ curl -fsSL https://claude.ai/install.sh | bash
 ```bash
 brew tap ascending-llc/jarvis
 brew install ascending-llc/jarvis/jarvis-registry
-
-mkdir -p ~/.jarvis-registry
-
-cat >~/.jarvis-registry/config.yaml <<'EOF'
-registry:
-  base_url: https://jarvis-demo.ascendingdc.com
-EOF
 ```
 
-Authenticate and sync skills.
-
-```bash
-jarvis-registry auth login
-
-jarvis-registry sync-skills
-```
+Then follow the steps listed in the Homebrew formulae caveats.
 
 ## Set Up `terminal-notifier` for Claude Code Notifications
 
