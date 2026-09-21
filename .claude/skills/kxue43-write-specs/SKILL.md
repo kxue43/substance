@@ -22,6 +22,8 @@ This skill is invoked at the end of a back-and-forth design/planning conversatio
 
 **Never overwrite an existing spec.** Before any research or exploration begins, parse `$path_mapping` into `(local_file_path, topic)` pairs and check every `local_file_path` (e.g. via `Bash test -e`, or `Read`). If any already exists, stop immediately and tell the user which path(s) already have a spec — do not write any file, even the ones that don't yet exist.
 
+**Symlinked destinations.** If `local_file_path` — or a parent directory in its path — is a symlink, resolve it (e.g. `readlink -f`) and use the resolved path for both the existence check above and the eventual write. A symlinked destination is not a separate project to investigate — just follow the link and write there like any other target.
+
 ---
 
 ## Hard constraints — apply for the entire duration of this skill, not just at the start
@@ -29,6 +31,7 @@ This skill is invoked at the end of a back-and-forth design/planning conversatio
 - Do every step yourself, directly, in this conversation. **Never use the Task/Agent tool** for any part of this workflow — esp. for parallelizing independent pairs via subagents, since they don't inherit this session's context.
 - **Never call the Skill tool** for any skill while running this workflow. Everything needed is inlined below.
 - Process pairs **strictly one at a time, in the order given**. Fully finish and confirm one spec file before starting research on the next.
+- **Never read other spec files purely to copy their formatting, tone, or style.** The Output Format section below is the only format to follow; matching neighboring files' conventions is not part of this workflow and wastes session context. This does not forbid reading a spec written earlier *in this same invocation* when a later pair is genuinely inter-related and needs the content of a decision or interface that spec established — that's a content dependency, not style-matching.
 
 ---
 
