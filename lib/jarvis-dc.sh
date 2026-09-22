@@ -216,12 +216,32 @@ _kxue43_jarvis_dc::complete() {
     compgen -V COMPREPLY -W "up down logs" -- "$2"
 
     return 0
-  elif ((COMP_CWORD == 2)) && [[ $3 == "up" ]]; then
-    compgen -V COMPREPLY -W "-n -s --local-db -h" -- "$2"
+  elif ((COMP_CWORD >= 2)) && [[ ${COMP_WORDS[1]} == @(up|down) ]]; then
+    local -a flags remaining=()
 
-    return 0
-  elif ((COMP_CWORD == 2)) && [[ $3 == "down" ]]; then
-    compgen -V COMPREPLY -W "--local-db -h" -- "$2"
+    if [[ ${COMP_WORDS[1]} == "up" ]]; then
+      flags=("-n" "-s" "--local-db")
+    else
+      flags=("--local-db")
+    fi
+
+    if ((COMP_CWORD == 2)); then
+      flags+=("-h")
+    fi
+
+    # Drop flags already on the command line; -n and -s are mutually exclusive.
+    local flag word
+    for flag in "${flags[@]}"; do
+      for word in "${COMP_WORDS[@]:2:COMP_CWORD-2}"; do
+        if [[ $word == "$flag" ]] || [[ $flag == @(-n|-s) && $word == @(-n|-s) ]]; then
+          continue 2
+        fi
+      done
+
+      remaining+=("$flag")
+    done
+
+    compgen -V COMPREPLY -W "${remaining[*]}" -- "$2"
 
     return 0
   elif ((COMP_CWORD == 2)) && [[ $3 == "logs" ]]; then
