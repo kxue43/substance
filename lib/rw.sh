@@ -6,7 +6,40 @@ _kxue43_module_set_rw=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-_kxue43_rw::bootstrap() {
+_kxue43_rw::detect_project() {
+  local remote_url
+  if ! remote_url="$(git remote get-url origin 2>/dev/null)"; then
+    kxue43::log_error "Not inside a git repository with an 'origin' remote"
+
+    return 1
+  fi
+
+  case "$(basename "$remote_url" .git)" in
+  jarvis-registry)
+    printf 'registry\n'
+    ;;
+  jarvis-registry-cli)
+    printf 'cli\n'
+    ;;
+  *)
+    kxue43::log_error "Unrecognized remote repository: $(basename "$remote_url" .git)"
+
+    return 1
+    ;;
+  esac
+}
+
+_kxue43_rw::select_projects() {
+  local -a selected
+  mapfile -t selected < <(
+    printf '%s\n' "jarvis-registry" "jarvis-registry-cli" |
+      fzf -m --height=50% --layout=reverse --bind 'load:select-all'
+  )
+
+  printf '%s\n' "${selected[@]}"
+}
+
+_kxue43_rw::bootstrap_registry() {
   ln -s ../registry-working-docs/ .working-docs
 
   local files=(.env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml)
@@ -19,7 +52,25 @@ _kxue43_rw::bootstrap() {
   fi
 }
 
-_kxue43_rw::renew() {
+_kxue43_rw::bootstrap_cli() {
+  ln -s ../registry-working-docs/ .working-docs
+}
+
+_kxue43_rw::bootstrap() {
+  local project
+  project="$(_kxue43_rw::detect_project)" || return 1
+
+  case "$project" in
+  registry)
+    _kxue43_rw::bootstrap_registry
+    ;;
+  cli)
+    _kxue43_rw::bootstrap_cli
+    ;;
+  esac
+}
+
+_kxue43_rw::renew_registry() {
   if ! (
     if ! cd "jarvis-registry"; then
       kxue43::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
@@ -100,7 +151,109 @@ _kxue43_rw::renew() {
   git -C "jarvis-registry" branch -D "${to_delete[@]}"
 }
 
-_kxue43_rw::sync() {
+_kxue43_rw::renew_cli() {
+  if ! (
+    if ! cd "jarvis-registry-cli"; then
+      kxue43::log_error "Failed to cd into jarvis-registry-cli. You are probably not in the correct directory"
+
+      exit 1
+    fi
+
+    git pull
+
+    printf "\n"
+
+    kxue43::log_info "Current git worktree status:"
+
+    git branch
+
+    printf "\n"
+
+    read -r -p "Rebase parking branches? [Y/n] " reply
+
+    [[ "${reply:-Y}" =~ ^[Yy]$ ]] || exit 1
+  ); then
+    kxue43::log_error "Do nothing. Exit"
+
+    return 1
+  fi
+
+  local -a worktrees
+
+  mapfile -t worktrees < <(find . -maxdepth 1 -mindepth 1 -type d -name "cli-*-reviews")
+
+  if ((${#worktrees[@]} == 0)); then
+    kxue43::log_info "No worktree directories found"
+
+    return 0
+  fi
+
+  worktrees=("${worktrees[@]#./}")
+
+  local target
+  for target in "${worktrees[@]}"; do
+    if [[ "parking/$(basename "$target")" != "$(git -C "$target" branch --show-current)" ]]; then
+      continue
+    fi
+
+    if ! git -C "$target" rebase main; then
+      git -C "$target" rebase --abort
+
+      kxue43::log_error "Failed to rebase parking branch of worktree ${target} onto main"
+    fi
+  done
+
+  printf "\n"
+
+  local reply
+  read -r -p "Delete merged branches? [Y/n] " reply
+
+  [[ "${reply:-Y}" =~ ^[Yy]$ ]] || return 1
+
+  local -a to_delete
+  mapfile -t to_delete < <(
+    git -C "jarvis-registry-cli" branch |
+      awk '/^  / && !/  parking\// { sub(/^  /, ""); print }' |
+      fzf -m --height=50% --layout=reverse --bind 'load:select-all'
+  )
+
+  if ((${#to_delete[@]} == 0)); then
+    kxue43::log_info "No branches selected for deletion"
+
+    return 0
+  fi
+
+  git -C "jarvis-registry-cli" branch -D "${to_delete[@]}"
+}
+
+_kxue43_rw::renew() {
+  local -a projects
+  mapfile -t projects < <(_kxue43_rw::select_projects)
+
+  if ((${#projects[@]} == 0)); then
+    kxue43::log_info "No project selected"
+
+    return 0
+  fi
+
+  local project
+  for project in "${projects[@]}"; do
+    if ((${#projects[@]} > 1)); then
+      printf '\n== %s ==\n\n' "$project"
+    fi
+
+    case "$project" in
+    jarvis-registry)
+      _kxue43_rw::renew_registry
+      ;;
+    jarvis-registry-cli)
+      _kxue43_rw::renew_cli
+      ;;
+    esac
+  done
+}
+
+_kxue43_rw::sync_registry() {
   if (($# > 0)); then
     if ! git ls-remote --exit-code --heads origin "$1" >/dev/null; then
       kxue43::log_error "The remote branch '$1' does not exist."
@@ -126,7 +279,43 @@ _kxue43_rw::sync() {
   source .venv/bin/activate
 }
 
-_kxue43_rw::branch() {
+_kxue43_rw::sync_cli() {
+  if (($# > 0)); then
+    if ! git ls-remote --exit-code --heads origin "$1" >/dev/null; then
+      kxue43::log_error "The remote branch '$1' does not exist."
+
+      return 1
+    fi
+
+    git fetch origin
+
+    git switch "$1"
+
+    git pull
+  elif [[ "$(git branch --show-current)" != "parking/$(basename "$(pwd)")" ]]; then
+    if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null; then
+      git pull
+    else
+      kxue43::log_info "The current branch does not track any remote one. Skip git pull."
+    fi
+  fi
+}
+
+_kxue43_rw::sync() {
+  local project
+  project="$(_kxue43_rw::detect_project)" || return 1
+
+  case "$project" in
+  registry)
+    _kxue43_rw::sync_registry "$@"
+    ;;
+  cli)
+    _kxue43_rw::sync_cli "$@"
+    ;;
+  esac
+}
+
+_kxue43_rw::branch_registry() {
   (
     if ! cd "jarvis-registry"; then
       kxue43::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
@@ -138,7 +327,46 @@ _kxue43_rw::branch() {
   )
 }
 
-_kxue43_rw::park() {
+_kxue43_rw::branch_cli() {
+  (
+    if ! cd "jarvis-registry-cli"; then
+      kxue43::log_error "Failed to cd into jarvis-registry-cli. You are probably not in the correct directory"
+
+      exit 1
+    fi
+
+    git branch
+  )
+}
+
+_kxue43_rw::branch() {
+  local -a projects
+  mapfile -t projects < <(_kxue43_rw::select_projects)
+
+  if ((${#projects[@]} == 0)); then
+    kxue43::log_info "No project selected"
+
+    return 0
+  fi
+
+  local project
+  for project in "${projects[@]}"; do
+    if ((${#projects[@]} > 1)); then
+      printf '\n== %s ==\n\n' "$project"
+    fi
+
+    case "$project" in
+    jarvis-registry)
+      _kxue43_rw::branch_registry
+      ;;
+    jarvis-registry-cli)
+      _kxue43_rw::branch_cli
+      ;;
+    esac
+  done
+}
+
+_kxue43_rw::park_registry() {
   local base
   base="$(basename "$(pwd)")"
 
@@ -165,17 +393,58 @@ _kxue43_rw::park() {
   fi
 }
 
+_kxue43_rw::park_cli() {
+  local base
+  base="$(basename "$(pwd)")"
+
+  if [[ "$base" == "jarvis-registry-cli" ]]; then
+    if ! git checkout main; then
+      kxue43::log_error "Failed to check out the main branch"
+
+      return 1
+    fi
+
+    return 0
+  fi
+
+  if ! git rev-parse --verify "refs/heads/parking/$base" &>/dev/null; then
+    kxue43::log_error "No parking branch named 'parking/$base'"
+
+    return 1
+  fi
+
+  if ! git checkout "parking/$base"; then
+    kxue43::log_error "Failed to check out parking/$base branch"
+
+    return 1
+  fi
+}
+
+_kxue43_rw::park() {
+  local project
+  project="$(_kxue43_rw::detect_project)" || return 1
+
+  case "$project" in
+  registry)
+    _kxue43_rw::park_registry
+    ;;
+  cli)
+    _kxue43_rw::park_cli
+    ;;
+  esac
+}
+
 rw() {
   if (($# == 0)) || [[ $1 == "-h" ]]; then
     cat <<'EOF'
 USAGE: rw [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:
-    bootstrap               Bootstrap a Jarvis Registry worktree; must be in a worktree folder
-    renew                   Pull the latest commits on main; rebase parking branches; delete merged branches; must be in the workspace folder
-    sync        [BRANCH]    Pull from the remote branch or switch and pull. Then perform uv sync and activate the virtual environment; must be in a worktree folder
-    branch                  List all branches with worktree occupancy markings
-    park                    Checkout the corresponding parking branch of the worktree
+    bootstrap               Bootstrap a jarvis-registry or jarvis-registry-cli worktree (project auto-detected via git remote); must be in a worktree folder
+    renew                   Pull the latest commits on main; rebase parking branches; delete merged branches, for the selected project(s); must be in the workspace folder
+    sync        [BRANCH]    Pull from the remote branch or switch and pull (project auto-detected via git remote; additionally runs uv sync and activates the virtual environment for jarvis-registry only); must be in a worktree folder
+    branch                  List all branches with worktree occupancy markings, for the selected project(s); must be in the workspace folder
+    park                    Checkout the corresponding parking branch of the worktree (project auto-detected via git remote)
 
 OPTIONS:
     -h            Show this help message
@@ -197,8 +466,9 @@ EOF
       cat <<'EOF'
 Usage: rw sync [-h] [BRANCH]
 
-If BRANCH is given, git switch to this remote branch. Then perform git pull, uv sync and activate the virtual environment.
-Must be used in a git worktree folder.
+If BRANCH is given, git switch to this remote branch. Then perform git pull.
+Must be used in a git worktree folder. For jarvis-registry worktrees, this additionally runs
+uv sync and activates the virtual environment; jarvis-registry-cli worktrees skip this step.
 
 ARGUMENTS:
     BRANCH      The remote branch to git switch to
