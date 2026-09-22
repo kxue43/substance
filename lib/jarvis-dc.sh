@@ -13,12 +13,14 @@ jarvis-dc() {
 USAGE: jarvis-dc [-h] [SUBCOMMAND]
 
 SUBCOMMANDS:
-    up    [-n|-s]  docker compose up with the right options
-    down           docker compose down with the right options
-    logs           docker logs -f against a container
+    up    [-n|-s] [--local-db]  docker compose up with the right options
+    down  [--local-db]          docker compose down with the right options
+    logs                        docker logs -f against a container
 
 OPTIONS:
-    -h             Show this help message
+    -h                          Show this help message
+
+    --local-db (up/down)        Use local Mongo/Redis/Weaviate containers instead of the default EKS port-forwarded ones
 EOF
 
     return 0
@@ -28,27 +30,52 @@ EOF
   up)
     shift 1
 
-    if (($# > 0)) && [[ $1 == "-h" ]]; then
-      cat <<'EOF'
-Usage: jarvis-dc up [-n|-s] [-h]
+    local compose_file="docker-compose.no-db.yml"
+    local build_mode="build"
+    local -a services=()
+
+    while (($# > 0)); do
+      case "$1" in
+      -h)
+        cat <<'EOF'
+Usage: jarvis-dc up [-n|-s] [--local-db] [-h]
 
 docker compose up with the right options.
 
 OPTIONS:
-    -n          --no-build
-    -s          Pick services via fzf and only rebuild those before starting
-    -h          Show this help message
+    -n            --no-build
+    -s            Pick services via fzf and only rebuild those before starting
+    --local-db    Use local Mongo/Redis/Weaviate containers instead of the default EKS port-forwarded ones
+    -h            Show this help message
 EOF
 
-      return 0
-    fi
+        return 0
+        ;;
+      -n)
+        build_mode="no-build"
+        shift 1
+        ;;
+      -s)
+        build_mode="selective"
+        shift 1
+        ;;
+      --local-db)
+        compose_file="docker-compose.kxue43.yml"
+        shift 1
+        ;;
+      *)
+        kxue43::log_error "Unknown option $1"
 
-    local -a args=("-f" "docker-compose.no-db.yml" "--profile" "full" "up" "-d")
-    local -a services=()
+        return 1
+        ;;
+      esac
+    done
 
-    if [[ "$1" == "-s" ]]; then
+    local -a args=("-f" "$compose_file" "--profile" "full" "up" "-d")
+
+    if [[ "$build_mode" == "selective" ]]; then
       mapfile -t services < <(
-        docker compose -f docker-compose.no-db.yml --profile full config --format json 2>/dev/null |
+        docker compose -f "$compose_file" --profile full config --format json 2>/dev/null |
           jq -r '.services | to_entries[] | select(.value.build != null) | .key' |
           fzf -m --height=50% --layout=reverse
       )
@@ -60,7 +87,7 @@ EOF
       fi
 
       args+=("--no-build")
-    elif [[ "$1" == "-n" ]]; then
+    elif [[ "$build_mode" == "no-build" ]]; then
       args+=("--no-build")
     else
       args+=("--build")
@@ -68,9 +95,9 @@ EOF
 
     local need_artifacts=1
 
-    if [[ "$1" == "-n" ]]; then
+    if [[ "$build_mode" == "no-build" ]]; then
       need_artifacts=0
-    elif [[ "$1" == "-s" ]]; then
+    elif [[ "$build_mode" == "selective" ]]; then
       need_artifacts=0
 
       local service
@@ -96,8 +123,8 @@ EOF
       uv run poe build-artifacts
     fi
 
-    if [[ "$1" == "-s" ]]; then
-      docker compose -f docker-compose.no-db.yml --profile full build "${services[@]}"
+    if [[ "$build_mode" == "selective" ]]; then
+      docker compose -f "$compose_file" --profile full build "${services[@]}"
     fi
 
     docker compose "${args[@]}"
@@ -105,20 +132,36 @@ EOF
   down)
     shift 1
 
-    if (($# > 0)) && [[ $1 == "-h" ]]; then
-      cat <<'EOF'
-Usage: jarvis-dc down [-h]
+    local compose_file="docker-compose.no-db.yml"
+
+    while (($# > 0)); do
+      case "$1" in
+      -h)
+        cat <<'EOF'
+Usage: jarvis-dc down [--local-db] [-h]
 
 docker compose down with the right options.
 
 OPTIONS:
-    -h          Show this help message
+    --local-db    Use local Mongo/Redis/Weaviate containers instead of the default EKS port-forwarded ones
+    -h            Show this help message
 EOF
 
-      return 0
-    fi
+        return 0
+        ;;
+      --local-db)
+        compose_file="docker-compose.kxue43.yml"
+        shift 1
+        ;;
+      *)
+        kxue43::log_error "Unknown option $1"
 
-    docker compose -f docker-compose.no-db.yml --profile full down
+        return 1
+        ;;
+      esac
+    done
+
+    docker compose -f "$compose_file" --profile full down
 
     unset AWS_SESSION_TOKEN && unset AWS_SECRET_ACCESS_KEY && unset AWS_ACCESS_KEY_ID && unset AWS_PROFILE && unset AWS_CREDENTIAL_EXPIRATION
     ;;
@@ -173,11 +216,35 @@ _kxue43_jarvis_dc::complete() {
     compgen -V COMPREPLY -W "up down logs" -- "$2"
 
     return 0
-  elif ((COMP_CWORD == 2)) && [[ $3 == "up" ]]; then
-    compgen -V COMPREPLY -W "-n -s -h" -- "$2"
+  elif ((COMP_CWORD >= 2)) && [[ ${COMP_WORDS[1]} == @(up|down) ]]; then
+    local -a flags remaining=()
+
+    if [[ ${COMP_WORDS[1]} == "up" ]]; then
+      flags=("-n" "-s" "--local-db")
+    else
+      flags=("--local-db")
+    fi
+
+    if ((COMP_CWORD == 2)); then
+      flags+=("-h")
+    fi
+
+    # Drop flags already on the command line; -n and -s are mutually exclusive.
+    local flag word
+    for flag in "${flags[@]}"; do
+      for word in "${COMP_WORDS[@]:2:COMP_CWORD-2}"; do
+        if [[ $word == "$flag" ]] || [[ $flag == @(-n|-s) && $word == @(-n|-s) ]]; then
+          continue 2
+        fi
+      done
+
+      remaining+=("$flag")
+    done
+
+    compgen -V COMPREPLY -W "${remaining[*]}" -- "$2"
 
     return 0
-  elif ((COMP_CWORD == 2)) && [[ $3 != "up" ]]; then
+  elif ((COMP_CWORD == 2)) && [[ $3 == "logs" ]]; then
     COMPREPLY=("-h")
 
     return 0
