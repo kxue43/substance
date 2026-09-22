@@ -42,7 +42,7 @@ _kxue43_rw::select_projects() {
 _kxue43_rw::bootstrap_registry() {
   ln -s ../registry-working-docs/ .working-docs
 
-  local files=(.env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml)
+  local files=(.env .env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml)
   for file in "${files[@]}"; do
     ln -s ../"${file}" "$file"
   done
