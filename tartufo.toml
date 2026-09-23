@@ -22,4 +22,7 @@ exclude-signatures = [
     {signature = "d15c86f2fa2e7cc609065f6cef0a3e14c0109d1b7294ec91ad2767523132efb3", reason = "GPG signing key ID is not credential"},
     {signature = "aa37346ad20bbb6b2ff6dc5e077139dc3b15d1d6670f962189a90a943303be21", reason = "file path is not credential"},
     {signature = "5a258374c1924e68e05ad2125aa0ba0a58c821c3537417b5eb13cddd2043d0f1", reason = "file path is not credential"},
+    {signature = "4c99be33752cec2d001de7b906d74033bb84b1ad512f59cc84ea46d8d5c31648", reason = "file path is not credential"},
+    {signature = "19311f7f6c157bd2db29f414393a68fac56484cc1400589437c0d4deee454325", reason = "file path is not credential"},
+    {signature = "4f25eeb2ea6ec005b3cc38d5e54f4e58c425b405b4b096624ef41a3e90d0c156", reason = "file path is not credential"},
 ]
