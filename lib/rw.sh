@@ -39,6 +39,14 @@ _kxue43_rw::select_projects() {
   printf '%s\n' "${selected[@]}"
 }
 
+_kxue43_rw::print_header() {
+  if [[ -t 1 ]]; then
+    printf '\n\033[33m%s\033[0m\n\n' "== $1 =="
+  else
+    printf '\n%s\n\n' "== $1 =="
+  fi
+}
+
 _kxue43_rw::bootstrap_registry() {
   ln -s ../registry-working-docs/ .working-docs
 
@@ -239,7 +247,7 @@ _kxue43_rw::renew() {
   local project
   for project in "${projects[@]}"; do
     if ((${#projects[@]} > 1)); then
-      printf '\n== %s ==\n\n' "$project"
+      _kxue43_rw::print_header "$project"
     fi
 
     case "$project" in
@@ -352,7 +360,7 @@ _kxue43_rw::branch() {
   local project
   for project in "${projects[@]}"; do
     if ((${#projects[@]} > 1)); then
-      printf '\n== %s ==\n\n' "$project"
+      _kxue43_rw::print_header "$project"
     fi
 
     case "$project" in
