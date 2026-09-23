@@ -29,11 +29,13 @@ derives the branch to check from the current git state.
 Run via `Bash`:
 
 ```
-verify-sha
+${CLAUDE_SKILL_DIR}/scripts/verify-sha
 ```
 
-If its stdout starts with `VERIFY-SHA: FAIL`, stop immediately and relay the output verbatim to
-the user — it already reports the mismatch details needed to act on. Otherwise continue.
+Continue only if its stdout is exactly `VERIFY-SHA: PASS`. On anything else — a
+`VERIFY-SHA: FAIL …` line, an `ERROR: …` message, or empty stdout — stop immediately and relay
+the output verbatim to the user; if stdout is empty, include any stderr. The output already
+reports the details needed to act on.
 
 ---
 
