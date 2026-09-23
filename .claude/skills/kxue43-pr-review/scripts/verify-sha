@@ -52,7 +52,14 @@ EOF
     return 0
   fi
 
-  local remote_sha=${ls_remote_output%%[[:space:]]*}
+  # `ls-remote` matches patterns against the tail of ref names, so it can also list
+  # decoys such as `refs/heads/x/refs/heads/$branch`. Keep only the exact ref.
+  local remote_sha="" sha ref
+  while read -r sha ref; do
+    if [[ $ref == "refs/heads/$branch" ]]; then
+      remote_sha=$sha
+    fi
+  done <<<"$ls_remote_output"
 
   if [[ -z $remote_sha ]]; then
     echo "VERIFY-SHA: FAIL — no remote ref found for branch $branch"
