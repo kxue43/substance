@@ -1,0 +1,28 @@
+_kxue43_skip_skill_ids::complete() {
+  if ((COMP_CWORD != 1)); then
+    return 0
+  fi
+
+  if [[ $2 == @(-|-h) ]]; then
+    COMPREPLY=("-h")
+
+    return 0
+  fi
+
+  # Where jarvis-registry-cli writes skill-lock.json for each skills mode, relative to a project root.
+  local -a candidates=()
+  local path
+  for path in skill-lock.json .claude/skills/jarvis-registry/skill-lock.json .agents/skills/skill-lock.json .github/skills/skill-lock.json; do
+    if [[ -f "$path" ]]; then
+      candidates+=("$path")
+    fi
+  done
+
+  if ((${#candidates[@]} > 0)); then
+    compgen -V COMPREPLY -W "${candidates[*]}" -- "$2"
+  fi
+
+  return 0
+} && complete -o bashdefault -F _kxue43_skip_skill_ids::complete skip-skill-ids
+
+# vim: set ft=bash :
