@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/../lib/utils.sh"
+
+main() {
+  if (($# > 0)) && [[ $1 == "-h" ]]; then
+    cat <<'EOF'
+Usage: skip-skill-ids [-h] SKILL_LOCK_FILE
+
+Select skills listed in a jarvis-registry-cli skill-lock.json with fzf and record their IDs under
+local.skills.skip_ids in ~/.jarvis-registry/config.yaml.
+
+All skills start selected; deselect the ones that should keep syncing. Skip IDs of skills listed in
+SKILL_LOCK_FILE are replaced by the selection; all other existing skip IDs are kept. Pressing Enter
+with nothing selected, Esc, or Ctrl-C leaves the config file unchanged.
+
+ARGUMENTS:
+    SKILL_LOCK_FILE   Path to a skill-lock.json file, absolute or relative to CWD
+
+OPTIONS:
+    -h                Show this help message
+EOF
+
+    return 0
+  fi
+
+  if (($# != 1)); then
+    kxue43::log_error "skip-skill-ids requires exactly one argument SKILL_LOCK_FILE."
+
+    return 1
+  fi
+
+  local lock_file="$1"
+  if [[ ! -f "$lock_file" || ! -r "$lock_file" ]]; then
+    kxue43::log_error "$lock_file is not a readable file."
+
+    return 1
+  fi
+
+  if ! jq -e '.skills | type == "array" and all(.[]; (.id | type == "string") and (.name | type == "string"))' "$lock_file" &>/dev/null; then
+    kxue43::log_error "$lock_file is not a skill-lock.json file: .skills must be an array of objects with string id and name."
+
+    return 1
+  fi
+
+  local config_file="$HOME/.jarvis-registry/config.yaml"
+  if [[ ! -f "$config_file" ]]; then
+    kxue43::log_error "$config_file does not exist. Run 'jarvis-registry configure' first."
+
+    return 1
+  fi
+
+  local rows
+  rows="$(jq -r '.skills[] | [.id, .name] | @tsv' "$lock_file")"
+
+  if [[ -z "$rows" ]]; then
+    kxue43::log_info "No skills listed in $lock_file. $config_file unchanged."
+
+    return 0
+  fi
+
+  # With nothing selected, fzf's accept returns the highlighted item. The enter guard aborts
+  # instead, so deselecting everything cannot silently skip one skill.
+  local selected
+  if ! selected="$(
+    fzf -m --height=50% --layout=reverse --with-shell 'bash -c' \
+      --delimiter='\t' --with-nth=2 --accept-nth=1 \
+      --bind 'load:select-all' \
+      --bind 'enter:transform:((FZF_SELECT_COUNT)) && echo accept || echo abort' <<<"$rows"
+  )"; then
+    kxue43::log_info "Nothing selected. $config_file unchanged."
+
+    return 0
+  fi
+
+  local lock_ids
+  lock_ids="$(jq -r '.skills[].id' "$lock_file")"
+
+  # Skipped skills are never written to skill-lock.json, so only the IDs listed in it are
+  # replaced by the selection; every other existing skip ID is kept.
+  if ! LOCK_IDS="$lock_ids" IDS="$selected" yq -i -I4 \
+    '.local.skills.skip_ids = (((.local.skills.skip_ids // []) - (strenv(LOCK_IDS) | split("\n"))) + (strenv(IDS) | split("\n")))' \
+    "$config_file"; then
+    kxue43::log_error "Failed to update local.skills.skip_ids in $config_file."
+
+    return 1
+  fi
+
+  local -a ids
+  mapfile -t ids <<<"$selected"
+
+  kxue43::log_info "Wrote ${#ids[@]} skill IDs from $lock_file to local.skills.skip_ids in $config_file."
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
