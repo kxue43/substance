@@ -64,15 +64,24 @@ EOF
   # With nothing selected, fzf's accept returns the highlighted item. The enter guard aborts
   # instead, so deselecting everything cannot silently skip one skill.
   local selected
-  if ! selected="$(
+  local -i rc=0
+  selected="$(
     fzf -m --height=50% --layout=reverse --with-shell 'bash -c' \
       --delimiter='\t' --with-nth=2 --accept-nth=1 \
       --bind 'load:select-all' \
       --bind 'enter:transform:((FZF_SELECT_COUNT)) && echo accept || echo abort' <<<"$rows"
-  )"; then
+  )" || rc=$?
+
+  # fzf exits 130 on abort (Esc, Ctrl-C, or the enter guard). Any other non-zero exit is an fzf
+  # error, e.g. an fzf too old for --accept-nth or no usable /dev/tty.
+  if ((rc == 130)); then
     kxue43::log_info "Nothing selected. $config_file unchanged."
 
     return 0
+  elif ((rc != 0)); then
+    kxue43::log_error "fzf failed with exit code $rc. $config_file unchanged."
+
+    return 1
   fi
 
   local lock_ids
