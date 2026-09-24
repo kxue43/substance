@@ -25,4 +25,7 @@ exclude-signatures = [
     {signature = "4c99be33752cec2d001de7b906d74033bb84b1ad512f59cc84ea46d8d5c31648", reason = "file path is not credential"},
     {signature = "19311f7f6c157bd2db29f414393a68fac56484cc1400589437c0d4deee454325", reason = "file path is not credential"},
     {signature = "4f25eeb2ea6ec005b3cc38d5e54f4e58c425b405b4b096624ef41a3e90d0c156", reason = "file path is not credential"},
+    {signature = "46e00f6450d6aab228048f45bfe258a2aa32a983f3e02f7a001c63febb7fe4f7", reason = "Jarvis Registry skill ID is not credential"},
+    {signature = "1a24211be21e35d5b20a88000daed61423df7b6bc11d5bafaef7bf0dd2d37a07", reason = "Jarvis Registry skill ID is not credential"},
+    {signature = "6b35104acf7ab1420f21e1fa26a9d988fb79cfe38efe3409ce1e9bdb56140ba0", reason = "made-up skill ID in spec test case is not credential"},
 ]
