@@ -66,81 +66,57 @@ Go to the [download page](https://ghostty.org/download). Download the package in
 
 From now on perform all CLI operations in Ghostty.
 
-## Install Essential Utilities
+## Install Development Tooling
 
 ```bash
-brew install fzf bat tree jq yq
-```
+brew install fzf bat tree jq yq git \
+  neovim ripgrep luarocks \
+  go uv fnm \
+  gh shellcheck pre-commit \
+  mongosh redis hugo
 
-## Install Coding Tools
-
-```bash
-brew install git neovim ripgrep luarocks pre-commit
-```
-
-## Install Go
-
-```bash
-brew install go
-```
-
-## Install `uv`
-
-```bash
-brew install uv
-```
-
-## Install Documentation Tools
-
-```bash
-brew install hugo
-```
-
-## Install `fnm`
-
-`fnm` is a Node versions manager that doesn't cause a noticeable slow down at activation.
-The CLI interface is largely similar to that of `nvm`.
-
-```bash
-brew install fnm
-```
-
-Then install at least one LTS node version via `fnm`.
-
-## Install AWS CLI v2
-
-```bash
 curl -fsSL https://awscli.amazonaws.com/v2/install.sh | bash
-```
 
-Update via `aws update` when needed.
-
-## Install GitHub CLI
-
-For authentication against GitHub, the most convenient option is to use the GitHub CLI. To install, run the
-following commands.
-
-```bash
-brew install gh
-```
-
-Login immediately.
-
-```bash
-gh auth login
-```
-
-## Install `shellcheck`
-
-```bash
-brew install shellcheck
-```
-
-## Install `rustup`
-
-```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+curl -fsSL https://claude.ai/install.sh | bash
 ```
+
+Then
+- install at least one LTS Nodejs version via `fnm`;
+- login to GitHub via `gh auth login`;
+- update AWS CLI v2 via `aws update` when needed.
+
+## Install Go Executables
+
+```bash
+go install github.com/kxue43/cli-toolkit/cmd/toolkit@latest
+go install github.com/kxue43/cli-toolkit/cmd/toolkit-assume-role@latest
+go install github.com/kxue43/cli-toolkit/cmd/toolkit-serve-static@latest
+go install github.com/kxue43/cli-toolkit/cmd/toolkit-show-md@latest
+go install mvdan.cc/sh/v3/cmd/shfmt@latest
+go install golang.org/x/tools/cmd/godoc@latest
+go install golang.org/x/pkgsite
+go install github.com/air-verse/air@latest
+```
+
+## Install Rust Executables
+
+```bash
+cargo install --locked tree-sitter-cli
+```
+
+## Install Jarvis Registry CLI
+
+[Jarvis Registry CLI](https://github.com/ascending-llc/jarvis-registry-cli) is the companion CLI for the
+`jarvis-registry` MCP server; it also syncs additional Claude Code skills.
+
+```bash
+brew tap ascending-llc/jarvis
+brew install ascending-llc/jarvis/jarvis-registry
+```
+
+Then follow the steps listed in the Homebrew formulae caveats.
 
 ## Set Up GPG to Sign Git Commits
 
@@ -182,43 +158,6 @@ sec>  rsa4096 2025-12-24 [SC]
 uid           [ unknown] Sato Seinosuke (kxue43.github.io) <kxue43@gmail.com>
 ssb>  rsa4096 2025-12-24 [E]
 ```
-
-## Install Go Executables
-
-```bash
-go install github.com/kxue43/cli-toolkit/cmd/toolkit@latest
-go install github.com/kxue43/cli-toolkit/cmd/toolkit-assume-role@latest
-go install github.com/kxue43/cli-toolkit/cmd/toolkit-serve-static@latest
-go install github.com/kxue43/cli-toolkit/cmd/toolkit-show-md@latest
-go install mvdan.cc/sh/v3/cmd/shfmt@latest
-go install golang.org/x/tools/cmd/godoc@latest
-go install golang.org/x/pkgsite
-go install github.com/air-verse/air@latest
-```
-
-## Install Rust Executables
-
-```bash
-cargo install --locked tree-sitter-cli
-```
-
-## Install Claude Code
-
-```bash
-curl -fsSL https://claude.ai/install.sh | bash
-```
-
-## Install Jarvis Registry CLI
-
-[Jarvis Registry CLI](https://github.com/ascending-llc/jarvis-registry-cli) is the companion CLI for the
-`jarvis-registry` MCP server; it also syncs additional Claude Code skills.
-
-```bash
-brew tap ascending-llc/jarvis
-brew install ascending-llc/jarvis/jarvis-registry
-```
-
-Then follow the steps listed in the Homebrew formulae caveats.
 
 ## Set Up `terminal-notifier` for Claude Code Notifications
 
