@@ -137,11 +137,6 @@ _kxue43_it_shell::shell_integration() {
 }
 
 _kxue43_it_shell::activate_fnm() {
-  # FNM is not used in devcontainers.
-  if [[ "$(whoami)" == "vscode" ]]; then
-    return 0
-  fi
-
   if [[ -z "${KXUE43_SHELL_INIT+x}" ]]; then
     eval "$(fnm env --use-on-cd --shell bash)"
   else

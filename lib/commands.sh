@@ -76,18 +76,6 @@ gtc() {
   go tool cover -html=${profile}
 }
 
-init-devcon-files() {
-  if [[ ! -d "$KXUE43_SUBSTANCE_DIR/.devcontainer" ]]; then
-    kxue43::log_error "The $KXUE43_SUBSTANCE_DIR/.devcontainer/ folder does not exist."
-
-    return 1
-  fi
-
-  kxue43::log_info "Creating .devcontainer/ folder in the current working directory."
-
-  cp -R "$KXUE43_SUBSTANCE_DIR/.devcontainer/" ./.devcontainer/
-}
-
 enter-work-mode() {
   # Enter work mode in the current shell and all sub-processes.
   # Current work mode env prefix is `ascd`.

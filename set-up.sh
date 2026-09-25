@@ -211,19 +211,6 @@ main() {
     fi
   done
 
-  # Disable Git commit signing in devcontainer.
-  if [[ "$(whoami)" == "vscode" && ! -r "$HOME/.gitconfig.override" ]]; then
-    cat >"$HOME/.gitconfig.override" <<'EOF'
-[user]
-	name = kxue43
-	email = kxue43@gmail.com
-[commit]
-	gpgsign = false
-[tag]
-	gpgSign = false
-EOF
-  fi
-
   if ! type pre-commit &>/dev/null; then
     return 0
   fi
