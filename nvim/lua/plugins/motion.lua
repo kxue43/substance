@@ -101,7 +101,7 @@ return {
     end,
     dependencies = {
       "saghen/blink.cmp",
-      "neovim-treesitter/nvim-treesitter",
+      "nvim-treesitter/nvim-treesitter",
     },
   },
 }

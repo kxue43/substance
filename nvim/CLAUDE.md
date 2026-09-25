@@ -52,7 +52,7 @@ options → autocmds → commands → mappings
 
 ### Treesitter
 
-This config uses `neovim-treesitter/nvim-treesitter` (the community fork, not the original `nvim-treesitter/nvim-treesitter`). Always reference it as `"neovim-treesitter/nvim-treesitter"` in plugin specs and dependencies. It requires `neovim-treesitter/treesitter-parser-registry` as a dependency.
+This config uses upstream `nvim-treesitter/nvim-treesitter` on the `main` branch (the rewrite; `master` is frozen). Do not use the deprecated `neovim-treesitter/nvim-treesitter` fork or its `neovim-treesitter/treesitter-parser-registry` dependency.
 
 ### LSP notes
 

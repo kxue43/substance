@@ -27,8 +27,7 @@ return {
 
   -- Ensure tree-sitter parsers.
   {
-    "neovim-treesitter/nvim-treesitter",
-    dependencies = { "neovim-treesitter/treesitter-parser-registry" },
+    "nvim-treesitter/nvim-treesitter",
     opts = {
       ensure_installed = {
         "go",
