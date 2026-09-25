@@ -1,5 +1,5 @@
 ---
-name: kxue43-fetch-single-comment
+name: sei-fetch-single-comment
 description: "Fetch a single GitHub PR comment by its URL — either a conversation comment (`#issuecomment-<id>` fragment) or an inline review comment (`#discussion_r<id>` fragment) — and load its contents into context, optionally acting on it per given instructions. Use whenever asked to look at, read, or check a specific PR comment by URL."
 argument-hint: "<comment-url> [instructions]"
 arguments: [comment_url, instructions]

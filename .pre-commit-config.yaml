@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: tartufo
 
-  - repo: https://github.com/kxue43/shell-cmd-on-change
+  - repo: https://github.com/satoseino/shell-cmd-on-change
     rev: "2.1.0"
     hooks:
       - id: shell-cmd-on-change

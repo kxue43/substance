@@ -27,26 +27,26 @@ _link_files() {
 
   for name in "${base_names[@]}"; do
     if [[ -L "$1/$name" ]] && ! target_now="$(_get_symlink_target "$1/$name")"; then
-      kxue43::log_info "Symlink target $target_now does not exist. Removing symlink"
+      sei::log_info "Symlink target $target_now does not exist. Removing symlink"
 
       unlink "$1/$name"
     elif [[ -L "$1/$name" ]] && [[ "$2/$name" -ef "$target_now" ]]; then
       # If already correctly symlinked, continue.
       continue
     elif [[ -L "$1/$name" ]]; then
-      kxue43::log_info "$name is symlinked to $target_now. Removing symlink"
+      sei::log_info "$name is symlinked to $target_now. Removing symlink"
 
       unlink "$1/$name"
     elif [[ -f "$1/$name" ]]; then
       # If the ln target already exists as a regular file, remove it.
-      kxue43::log_info "Removing existing file $name"
+      sei::log_info "Removing existing file $name"
 
       rm "$1/$name"
     fi
 
     ln -s "$2/$name" "$1/$name"
 
-    kxue43::log_info "$name has been correctly symlinked"
+    sei::log_info "$name has been correctly symlinked"
   done
 }
 
@@ -63,22 +63,22 @@ _ensure_symlink() {
   local target_now
 
   if [[ -L "$link_path" ]] && ! target_now="$(_get_symlink_target "$link_path")"; then
-    kxue43::log_info "Symlink target $target_now does not exist. Removing symlink"
+    sei::log_info "Symlink target $target_now does not exist. Removing symlink"
 
     unlink "$link_path"
   elif [[ -L "$link_path" ]] && [[ "$target_now" -ef "$target_path" ]]; then
     return 0
   elif [[ -L "$link_path" ]]; then
-    kxue43::log_info "$link_path is incorrectly symlinked to $target_now. Removing symlink"
+    sei::log_info "$link_path is incorrectly symlinked to $target_now. Removing symlink"
 
     unlink "$link_path"
   elif [[ -e "$link_path" ]]; then
-    kxue43::log_error "$link_path already exists and is not a symlink"
+    sei::log_error "$link_path already exists and is not a symlink"
 
     return 0
   fi
 
-  kxue43::log_info "Symlinking $link_path to $target_path"
+  sei::log_info "Symlinking $link_path to $target_path"
 
   ln -s "$target_path" "$link_path"
 }
@@ -97,13 +97,13 @@ _ensure_no_symlink() {
 
   for path in "$@"; do
     if [[ -L "$path" ]]; then
-      kxue43::log_info "Removing symlink $path"
+      sei::log_info "Removing symlink $path"
 
       unlink "$path"
     elif [[ -d "$path" ]]; then
       continue
     elif [[ -e "$path" ]]; then
-      kxue43::log_error "$path already exists and is not a directory or symlink"
+      sei::log_error "$path already exists and is not a directory or symlink"
 
       return 1
     fi
@@ -127,7 +127,7 @@ main() {
   substance_dir="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}")")" && pwd)"
 
   local prefix
-  kxue43::get_env_prefix "prefix"
+  sei::get_env_prefix "prefix"
 
   local -a linked=(
     .bash_logout
@@ -166,7 +166,7 @@ main() {
   # Clean up stale symlinks in ~/.claude/skills
   for name in "${skills[@]}"; do
     if [[ ! -e "$(readlink "$name")" ]]; then
-      kxue43::log_info "Skill symlink $name should no longer exist. Removing"
+      sei::log_info "Skill symlink $name should no longer exist. Removing"
 
       unlink "$name"
     fi
@@ -177,7 +177,7 @@ main() {
 
   # settings.local.json must exist in the substance folder because settings.json is symlinked
   if ! [[ -e "$substance_dir/.claude/settings.local.json" ]]; then
-    kxue43::log_info "Creating .claude/settings.local.json in substance directory"
+    sei::log_info "Creating .claude/settings.local.json in substance directory"
 
     echo '{}' >"$substance_dir/.claude/settings.local.json"
   fi
@@ -193,7 +193,7 @@ main() {
   # Clean up symlinks in ~/.local/bin
   for name in "${binaries[@]}"; do
     if [[ ! -x "$(readlink "$name")" ]]; then
-      kxue43::log_info "Script $name should no longer exist. Removing"
+      sei::log_info "Script $name should no longer exist. Removing"
 
       unlink "$name"
     fi
@@ -205,7 +205,7 @@ main() {
   # Clean up symlinks to dot files
   for name in "${dotfiles[@]}"; do
     if [[ ! -e "$(readlink "$name")" ]] || [[ "$prefix" != "fedora" && "$name" == "$HOME/.tmux.conf" ]]; then
-      kxue43::log_info "Dot file $name should no longer exist. Removing"
+      sei::log_info "Dot file $name should no longer exist. Removing"
 
       unlink "$name"
     fi

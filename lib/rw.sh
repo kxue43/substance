@@ -1,15 +1,15 @@
-if [[ -n "${_kxue43_module_set_rw+x}" ]]; then
+if [[ -n "${_sei_module_set_rw+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_rw=1
+_sei_module_set_rw=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-_kxue43_rw::detect_project() {
+_sei_rw::detect_project() {
   local remote_url
   if ! remote_url="$(git remote get-url origin 2>/dev/null)"; then
-    kxue43::log_error "Not inside a git repository with an 'origin' remote"
+    sei::log_error "Not inside a git repository with an 'origin' remote"
 
     return 1
   fi
@@ -22,14 +22,14 @@ _kxue43_rw::detect_project() {
     printf 'cli\n'
     ;;
   *)
-    kxue43::log_error "Unrecognized remote repository: $(basename "$remote_url" .git)"
+    sei::log_error "Unrecognized remote repository: $(basename "$remote_url" .git)"
 
     return 1
     ;;
   esac
 }
 
-_kxue43_rw::select_projects() {
+_sei_rw::select_projects() {
   local -a selected
   mapfile -t selected < <(
     printf '%s\n' "jarvis-registry" "jarvis-registry-cli" |
@@ -39,7 +39,7 @@ _kxue43_rw::select_projects() {
   printf '%s\n' "${selected[@]}"
 }
 
-_kxue43_rw::print_header() {
+_sei_rw::print_header() {
   if [[ -t 1 ]]; then
     printf '\n\033[33m%s\033[0m\n\n' "== $1 =="
   else
@@ -47,41 +47,41 @@ _kxue43_rw::print_header() {
   fi
 }
 
-_kxue43_rw::bootstrap_registry() {
+_sei_rw::bootstrap_registry() {
   ln -s ../registry-working-docs/ .working-docs
 
-  local files=(.env .env.no-db .env.mongodb docker-compose.kxue43.yml docker-compose.no-db.yml)
+  local files=(.env .env.no-db .env.mongodb docker-compose.sei.yml docker-compose.no-db.yml)
   for file in "${files[@]}"; do
     ln -s ../"${file}" "$file"
   done
 
   if ! playwright-cli install --skills; then
-    kxue43::log_error "Failed to install the playwright-cli Claude skill to project local"
+    sei::log_error "Failed to install the playwright-cli Claude skill to project local"
   fi
 }
 
-_kxue43_rw::bootstrap_cli() {
+_sei_rw::bootstrap_cli() {
   ln -s ../registry-working-docs/ .working-docs
 }
 
-_kxue43_rw::bootstrap() {
+_sei_rw::bootstrap() {
   local project
-  project="$(_kxue43_rw::detect_project)" || return 1
+  project="$(_sei_rw::detect_project)" || return 1
 
   case "$project" in
   registry)
-    _kxue43_rw::bootstrap_registry
+    _sei_rw::bootstrap_registry
     ;;
   cli)
-    _kxue43_rw::bootstrap_cli
+    _sei_rw::bootstrap_cli
     ;;
   esac
 }
 
-_kxue43_rw::renew_registry() {
+_sei_rw::renew_registry() {
   if ! (
     if ! cd "jarvis-registry"; then
-      kxue43::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
+      sei::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
 
       exit 1
     fi
@@ -92,7 +92,7 @@ _kxue43_rw::renew_registry() {
 
     printf "\n"
 
-    kxue43::log_info "Current git worktree status:"
+    sei::log_info "Current git worktree status:"
 
     git branch
 
@@ -102,7 +102,7 @@ _kxue43_rw::renew_registry() {
 
     [[ "${reply:-Y}" =~ ^[Yy]$ ]] || exit 1
   ); then
-    kxue43::log_error "Do nothing. Exit"
+    sei::log_error "Do nothing. Exit"
 
     return 1
   fi
@@ -112,7 +112,7 @@ _kxue43_rw::renew_registry() {
   mapfile -t worktrees < <(find . -maxdepth 1 -mindepth 1 -type d -name "*-reviews*" ! -name "cli-*")
 
   if ((${#worktrees[@]} == 0)); then
-    kxue43::log_info "No worktree directories found"
+    sei::log_info "No worktree directories found"
 
     return 0
   fi
@@ -128,11 +128,11 @@ _kxue43_rw::renew_registry() {
     if ! git -C "$target" rebase main; then
       git -C "$target" rebase --abort
 
-      kxue43::log_error "Failed to rebase parking branch of worktree ${target} onto main"
+      sei::log_error "Failed to rebase parking branch of worktree ${target} onto main"
     fi
 
     if ! (cd "$target" && uv run poe -q cleanup-artifacts); then
-      kxue43::log_error "Failed to clean up build artifacts in worktree ${target}"
+      sei::log_error "Failed to clean up build artifacts in worktree ${target}"
     fi
   done
 
@@ -151,7 +151,7 @@ _kxue43_rw::renew_registry() {
   )
 
   if ((${#to_delete[@]} == 0)); then
-    kxue43::log_info "No branches selected for deletion"
+    sei::log_info "No branches selected for deletion"
 
     return 0
   fi
@@ -159,10 +159,10 @@ _kxue43_rw::renew_registry() {
   git -C "jarvis-registry" branch -D "${to_delete[@]}"
 }
 
-_kxue43_rw::renew_cli() {
+_sei_rw::renew_cli() {
   if ! (
     if ! cd "jarvis-registry-cli"; then
-      kxue43::log_error "Failed to cd into jarvis-registry-cli. You are probably not in the correct directory"
+      sei::log_error "Failed to cd into jarvis-registry-cli. You are probably not in the correct directory"
 
       exit 1
     fi
@@ -171,7 +171,7 @@ _kxue43_rw::renew_cli() {
 
     printf "\n"
 
-    kxue43::log_info "Current git worktree status:"
+    sei::log_info "Current git worktree status:"
 
     git branch
 
@@ -181,7 +181,7 @@ _kxue43_rw::renew_cli() {
 
     [[ "${reply:-Y}" =~ ^[Yy]$ ]] || exit 1
   ); then
-    kxue43::log_error "Do nothing. Exit"
+    sei::log_error "Do nothing. Exit"
 
     return 1
   fi
@@ -191,7 +191,7 @@ _kxue43_rw::renew_cli() {
   mapfile -t worktrees < <(find . -maxdepth 1 -mindepth 1 -type d -name "cli-*-reviews")
 
   if ((${#worktrees[@]} == 0)); then
-    kxue43::log_info "No worktree directories found"
+    sei::log_info "No worktree directories found"
 
     return 0
   fi
@@ -207,7 +207,7 @@ _kxue43_rw::renew_cli() {
     if ! git -C "$target" rebase main; then
       git -C "$target" rebase --abort
 
-      kxue43::log_error "Failed to rebase parking branch of worktree ${target} onto main"
+      sei::log_error "Failed to rebase parking branch of worktree ${target} onto main"
     fi
   done
 
@@ -226,7 +226,7 @@ _kxue43_rw::renew_cli() {
   )
 
   if ((${#to_delete[@]} == 0)); then
-    kxue43::log_info "No branches selected for deletion"
+    sei::log_info "No branches selected for deletion"
 
     return 0
   fi
@@ -234,12 +234,12 @@ _kxue43_rw::renew_cli() {
   git -C "jarvis-registry-cli" branch -D "${to_delete[@]}"
 }
 
-_kxue43_rw::renew() {
+_sei_rw::renew() {
   local -a projects
-  mapfile -t projects < <(_kxue43_rw::select_projects)
+  mapfile -t projects < <(_sei_rw::select_projects)
 
   if ((${#projects[@]} == 0)); then
-    kxue43::log_info "No project selected"
+    sei::log_info "No project selected"
 
     return 0
   fi
@@ -247,24 +247,24 @@ _kxue43_rw::renew() {
   local project
   for project in "${projects[@]}"; do
     if ((${#projects[@]} > 1)); then
-      _kxue43_rw::print_header "$project"
+      _sei_rw::print_header "$project"
     fi
 
     case "$project" in
     jarvis-registry)
-      _kxue43_rw::renew_registry
+      _sei_rw::renew_registry
       ;;
     jarvis-registry-cli)
-      _kxue43_rw::renew_cli
+      _sei_rw::renew_cli
       ;;
     esac
   done
 }
 
-_kxue43_rw::sync_registry() {
+_sei_rw::sync_registry() {
   if (($# > 0)); then
     if ! git ls-remote --exit-code --heads origin "$1" >/dev/null; then
-      kxue43::log_error "The remote branch '$1' does not exist."
+      sei::log_error "The remote branch '$1' does not exist."
 
       return 1
     fi
@@ -278,7 +278,7 @@ _kxue43_rw::sync_registry() {
     if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null; then
       git pull
     else
-      kxue43::log_info "The current branch does not track any remote one. Skip git pull."
+      sei::log_info "The current branch does not track any remote one. Skip git pull."
     fi
   fi
 
@@ -287,10 +287,10 @@ _kxue43_rw::sync_registry() {
   source .venv/bin/activate
 }
 
-_kxue43_rw::sync_cli() {
+_sei_rw::sync_cli() {
   if (($# > 0)); then
     if ! git ls-remote --exit-code --heads origin "$1" >/dev/null; then
-      kxue43::log_error "The remote branch '$1' does not exist."
+      sei::log_error "The remote branch '$1' does not exist."
 
       return 1
     fi
@@ -304,29 +304,29 @@ _kxue43_rw::sync_cli() {
     if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null; then
       git pull
     else
-      kxue43::log_info "The current branch does not track any remote one. Skip git pull."
+      sei::log_info "The current branch does not track any remote one. Skip git pull."
     fi
   fi
 }
 
-_kxue43_rw::sync() {
+_sei_rw::sync() {
   local project
-  project="$(_kxue43_rw::detect_project)" || return 1
+  project="$(_sei_rw::detect_project)" || return 1
 
   case "$project" in
   registry)
-    _kxue43_rw::sync_registry "$@"
+    _sei_rw::sync_registry "$@"
     ;;
   cli)
-    _kxue43_rw::sync_cli "$@"
+    _sei_rw::sync_cli "$@"
     ;;
   esac
 }
 
-_kxue43_rw::branch_registry() {
+_sei_rw::branch_registry() {
   (
     if ! cd "jarvis-registry"; then
-      kxue43::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
+      sei::log_error "Failed to cd into jarvis-registry. You are probably not in the correct directory"
 
       exit 1
     fi
@@ -335,10 +335,10 @@ _kxue43_rw::branch_registry() {
   )
 }
 
-_kxue43_rw::branch_cli() {
+_sei_rw::branch_cli() {
   (
     if ! cd "jarvis-registry-cli"; then
-      kxue43::log_error "Failed to cd into jarvis-registry-cli. You are probably not in the correct directory"
+      sei::log_error "Failed to cd into jarvis-registry-cli. You are probably not in the correct directory"
 
       exit 1
     fi
@@ -347,12 +347,12 @@ _kxue43_rw::branch_cli() {
   )
 }
 
-_kxue43_rw::branch() {
+_sei_rw::branch() {
   local -a projects
-  mapfile -t projects < <(_kxue43_rw::select_projects)
+  mapfile -t projects < <(_sei_rw::select_projects)
 
   if ((${#projects[@]} == 0)); then
-    kxue43::log_info "No project selected"
+    sei::log_info "No project selected"
 
     return 0
   fi
@@ -360,27 +360,27 @@ _kxue43_rw::branch() {
   local project
   for project in "${projects[@]}"; do
     if ((${#projects[@]} > 1)); then
-      _kxue43_rw::print_header "$project"
+      _sei_rw::print_header "$project"
     fi
 
     case "$project" in
     jarvis-registry)
-      _kxue43_rw::branch_registry
+      _sei_rw::branch_registry
       ;;
     jarvis-registry-cli)
-      _kxue43_rw::branch_cli
+      _sei_rw::branch_cli
       ;;
     esac
   done
 }
 
-_kxue43_rw::park_registry() {
+_sei_rw::park_registry() {
   local base
   base="$(basename "$(pwd)")"
 
   if [[ "$base" == "jarvis-registry" ]]; then
     if ! git checkout main; then
-      kxue43::log_error "Failed to check out the main branch"
+      sei::log_error "Failed to check out the main branch"
 
       return 1
     fi
@@ -389,25 +389,25 @@ _kxue43_rw::park_registry() {
   fi
 
   if ! git rev-parse --verify "refs/heads/parking/$base" &>/dev/null; then
-    kxue43::log_error "No parking branch named 'parking/$base'"
+    sei::log_error "No parking branch named 'parking/$base'"
 
     return 1
   fi
 
   if ! git checkout "parking/$base"; then
-    kxue43::log_error "Failed to check out parking/$base branch"
+    sei::log_error "Failed to check out parking/$base branch"
 
     return 1
   fi
 }
 
-_kxue43_rw::park_cli() {
+_sei_rw::park_cli() {
   local base
   base="$(basename "$(pwd)")"
 
   if [[ "$base" == "jarvis-registry-cli" ]]; then
     if ! git checkout main; then
-      kxue43::log_error "Failed to check out the main branch"
+      sei::log_error "Failed to check out the main branch"
 
       return 1
     fi
@@ -416,28 +416,28 @@ _kxue43_rw::park_cli() {
   fi
 
   if ! git rev-parse --verify "refs/heads/parking/$base" &>/dev/null; then
-    kxue43::log_error "No parking branch named 'parking/$base'"
+    sei::log_error "No parking branch named 'parking/$base'"
 
     return 1
   fi
 
   if ! git checkout "parking/$base"; then
-    kxue43::log_error "Failed to check out parking/$base branch"
+    sei::log_error "Failed to check out parking/$base branch"
 
     return 1
   fi
 }
 
-_kxue43_rw::park() {
+_sei_rw::park() {
   local project
-  project="$(_kxue43_rw::detect_project)" || return 1
+  project="$(_sei_rw::detect_project)" || return 1
 
   case "$project" in
   registry)
-    _kxue43_rw::park_registry
+    _sei_rw::park_registry
     ;;
   cli)
-    _kxue43_rw::park_cli
+    _sei_rw::park_cli
     ;;
   esac
 }
@@ -462,10 +462,10 @@ EOF
   fi
   case "$1" in
   bootstrap)
-    _kxue43_rw::bootstrap
+    _sei_rw::bootstrap
     ;;
   renew)
-    _kxue43_rw::renew
+    _sei_rw::renew
     ;;
   sync)
     shift 1
@@ -488,23 +488,23 @@ EOF
       return 0
     fi
 
-    _kxue43_rw::sync "$@"
+    _sei_rw::sync "$@"
     ;;
   branch)
-    _kxue43_rw::branch
+    _sei_rw::branch
     ;;
   park)
-    _kxue43_rw::park
+    _sei_rw::park
     ;;
   *)
-    kxue43::log_error "Unknown subcommand $1"
+    sei::log_error "Unknown subcommand $1"
 
     return 1
     ;;
   esac
 }
 
-_kxue43_rw::complete() {
+_sei_rw::complete() {
   local -a opts
   opts=("'-h  (Show help message)'" "'bootstrap  (bootstrap worktree)'" "'renew  (Renew workspace)'" "'sync  (Sync worktree)'" "'branch  (List branches)'" "'park  (Checkout parking branch)'")
 
@@ -533,6 +533,6 @@ _kxue43_rw::complete() {
 
     return 0
   fi
-} && complete -o bashdefault -F _kxue43_rw::complete rw
+} && complete -o bashdefault -F _sei_rw::complete rw
 
-_kxue43_commands_list+=("rw")
+_sei_commands_list+=("rw")

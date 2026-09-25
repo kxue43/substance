@@ -1,8 +1,8 @@
-if [[ -n "${_kxue43_module_set_jarvis_logs+x}" ]]; then
+if [[ -n "${_sei_module_set_jarvis_logs+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_jarvis_logs=1
+_sei_module_set_jarvis_logs=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
@@ -24,7 +24,7 @@ EOF
   namespace="$(printf "%s\n" "jarvis-demo" "jarvis" | fzf --height=50% --layout=reverse)"
 
   if [[ -z "$namespace" ]]; then
-    kxue43::log_info "No namespace selected. Exit"
+    sei::log_info "No namespace selected. Exit"
 
     return 0
   fi
@@ -42,7 +42,7 @@ EOF
   pod="$(printf "%s\n" "${pods[@]}" | fzf --height=50% --layout=reverse)"
 
   if [[ -z "$pod" ]]; then
-    kxue43::log_info "No pod selected. Exit"
+    sei::log_info "No pod selected. Exit"
 
     return 0
   fi
@@ -76,4 +76,4 @@ EOF
   fi
 }
 
-_kxue43_commands_list+=("jarvis-logs")
+_sei_commands_list+=("jarvis-logs")

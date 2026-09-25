@@ -9,7 +9,7 @@ _open_tab() {
 
   local target
   target=$(cd "$dir" 2>/dev/null && pwd) || {
-    kxue43::log_error "gn: directory not found: $dir"
+    sei::log_error "gn: directory not found: $dir"
 
     return 1
   }
@@ -68,13 +68,13 @@ EOF
   fi
 
   if (($# < 1)); then
-    kxue43::log_error "gn requires a DIR_NAME argument."
+    sei::log_error "gn requires a DIR_NAME argument."
 
     return 1
   fi
 
   if (($# > 2)); then
-    kxue43::log_error "gn accepts at most two arguments: DIR_NAME [TITLE]."
+    sei::log_error "gn accepts at most two arguments: DIR_NAME [TITLE]."
 
     return 1
   fi

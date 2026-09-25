@@ -31,12 +31,12 @@ EOF
     tree_root="$1"
 
     if ! [[ -d "$tree_root" ]]; then
-      kxue43::log_error "$tree_root is not an existing directory"
+      sei::log_error "$tree_root is not an existing directory"
 
       return 1
     fi
   else
-    kxue43::log_error "wdocs new accepts only one optional positional argument ROOT_DIR"
+    sei::log_error "wdocs new accepts only one optional positional argument ROOT_DIR"
 
     return 1
   fi
@@ -44,7 +44,7 @@ EOF
   cd "$tree_root"
 
   if [[ -r "README.md" ]]; then
-    kxue43::log_error "A README.md file already exists at working docs root folder $tree_root"
+    sei::log_error "A README.md file already exists at working docs root folder $tree_root"
 
     return 1
   fi
@@ -86,19 +86,19 @@ EOF
   fi
 
   if (($# != 1)); then
-    kxue43::log_error "wdocs link requires exactly one positional argument LINK_TARGET"
+    sei::log_error "wdocs link requires exactly one positional argument LINK_TARGET"
 
     return 1
   fi
 
   if ! [[ -d "$1" ]]; then
-    kxue43::log_error "LINK_TARGET $1 is not an existing directory"
+    sei::log_error "LINK_TARGET $1 is not an existing directory"
 
     return 1
   fi
 
   if [[ -e ".working-docs" ]]; then
-    kxue43::log_error ".working-docs is an existing file or directory"
+    sei::log_error ".working-docs is an existing file or directory"
 
     return 1
   fi
@@ -136,7 +136,7 @@ EOF
     _link "$@"
     ;;
   *)
-    kxue43::log_error "Unknown command ${1}."
+    sei::log_error "Unknown command ${1}."
 
     return 1
     ;;

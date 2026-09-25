@@ -1,20 +1,20 @@
-if [[ -n "${_kxue43_module_set_jarvis_pf+x}" ]]; then
+if [[ -n "${_sei_module_set_jarvis_pf+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_jarvis_pf=1
+_sei_module_set_jarvis_pf=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-_kxue43_jarvis_pf::auth() {
+_sei_jarvis_pf::auth() {
   if ! AWS_PROFILE=ascending-saas-admin aws sts get-caller-identity &>/dev/null; then
     PATH="$HOME/.local/bin:/usr/local/bin:$PATH" aws sso login --sso-session sso-ascending &>/dev/null
   fi
 }
 
-_kxue43_jarvis_pf::get_namespace() {
+_sei_jarvis_pf::get_namespace() {
   if [[ "$1" != "jarvis-demo" ]] && [[ "$1" != "jarvis" ]]; then
-    kxue43::log_error "Unknown namespace '$1'. Must be jarvis-demo or jarvis"
+    sei::log_error "Unknown namespace '$1'. Must be jarvis-demo or jarvis"
 
     return 1
   fi
@@ -22,13 +22,13 @@ _kxue43_jarvis_pf::get_namespace() {
   echo "$1"
 }
 
-_kxue43_jarvis_pf::open_pf() {
+_sei_jarvis_pf::open_pf() {
   local output
 
   if output="$(pgrep -lf "kubectl port-forward -n $1 pod/$2 $3:$4")"; then
     echo "Port-forwarding $3:$4 for $1/$2 already exists."
 
-    kxue43::log_info "${output:-missing pgrep output}"
+    sei::log_info "${output:-missing pgrep output}"
 
     return 0
   fi
@@ -38,12 +38,12 @@ _kxue43_jarvis_pf::open_pf() {
   disown
 }
 
-_kxue43_jarvis_pf::close_pf() {
+_sei_jarvis_pf::close_pf() {
   local -a kprocs
   mapfile -t kprocs < <(pgrep -lf "kubectl port-forward -n $1 pod/")
 
   if ((${#kprocs[@]} == 0)); then
-    kxue43::log_info "No existing port-forwarding for $1"
+    sei::log_info "No existing port-forwarding for $1"
 
     return 0
   fi
@@ -57,37 +57,37 @@ _kxue43_jarvis_pf::close_pf() {
     if kill "$pid"; then
       printf "Successfully closed port-forwarding "
 
-      kxue43::log_info "$command"
+      sei::log_info "$command"
     else
       printf "Failed to close port-forwarding "
 
-      kxue43::log_error "$command"
+      sei::log_error "$command"
     fi
   done
 }
 
-_kxue43_jarvis_pf::up() {
+_sei_jarvis_pf::up() {
   local namespace
-  if ! namespace="$(_kxue43_jarvis_pf::get_namespace "${1:-jarvis-demo}")"; then
+  if ! namespace="$(_sei_jarvis_pf::get_namespace "${1:-jarvis-demo}")"; then
     return 1
   fi
 
-  _kxue43_jarvis_pf::auth
+  _sei_jarvis_pf::auth
 
   local stderr_log
   stderr_log="$(mktemp)"
 
-  _kxue43_jarvis_pf::open_pf "$namespace" mongodb-0 27018 27017 "$stderr_log"
-  _kxue43_jarvis_pf::open_pf "$namespace" redis-0 27019 6379 "$stderr_log"
-  _kxue43_jarvis_pf::open_pf "$namespace" weaviate-0 27020 8080 "$stderr_log"
-  _kxue43_jarvis_pf::open_pf "$namespace" weaviate-0 50051 50051 "$stderr_log"
+  _sei_jarvis_pf::open_pf "$namespace" mongodb-0 27018 27017 "$stderr_log"
+  _sei_jarvis_pf::open_pf "$namespace" redis-0 27019 6379 "$stderr_log"
+  _sei_jarvis_pf::open_pf "$namespace" weaviate-0 27020 8080 "$stderr_log"
+  _sei_jarvis_pf::open_pf "$namespace" weaviate-0 50051 50051 "$stderr_log"
 
   # Give the backgrounded kubectl processes time to start before pgrep counts them
   # and before checking whether any of them wrote to stderr.
   sleep 1
 
   if [[ -s "$stderr_log" ]]; then
-    kxue43::log_error "Some port-forwarding commands reported errors; check $stderr_log"
+    sei::log_error "Some port-forwarding commands reported errors; check $stderr_log"
   fi
 
   local -a kprocs
@@ -101,31 +101,31 @@ _kxue43_jarvis_pf::up() {
     for line in "${kprocs[@]}"; do
       command="$(cut -d' ' -f2- <<<"$line")"
 
-      kxue43::log_info "$command"
+      sei::log_info "$command"
     done
   else
     printf "\nOnly started %s port-forwarding:\n" "${#kprocs[@]}"
 
     for line in "${kprocs[@]}"; do
-      kxue43::log_error "$line"
+      sei::log_error "$line"
     done
 
     return 1
   fi
 }
 
-_kxue43_jarvis_pf::down() {
+_sei_jarvis_pf::down() {
   local namespace
-  if ! namespace="$(_kxue43_jarvis_pf::get_namespace "${1:-jarvis-demo}")"; then
+  if ! namespace="$(_sei_jarvis_pf::get_namespace "${1:-jarvis-demo}")"; then
     return 1
   fi
 
-  _kxue43_jarvis_pf::close_pf "$namespace"
+  _sei_jarvis_pf::close_pf "$namespace"
 }
 
-_kxue43_jarvis_pf::ls() {
+_sei_jarvis_pf::ls() {
   local namespace
-  if ! namespace="$(_kxue43_jarvis_pf::get_namespace "${1:-jarvis-demo}")"; then
+  if ! namespace="$(_sei_jarvis_pf::get_namespace "${1:-jarvis-demo}")"; then
     return 1
   fi
 
@@ -133,7 +133,7 @@ _kxue43_jarvis_pf::ls() {
   mapfile -t kprocs < <(pgrep -lf "kubectl port-forward -n $namespace pod/")
 
   if ((${#kprocs[@]} == 0)); then
-    kxue43::log_info "No existing port-forwarding for $namespace"
+    sei::log_info "No existing port-forwarding for $namespace"
 
     return 0
   fi
@@ -142,7 +142,7 @@ _kxue43_jarvis_pf::ls() {
 
   local line
   for line in "${kprocs[@]}"; do
-    kxue43::log_info "$line"
+    sei::log_info "$line"
   done
 }
 
@@ -183,7 +183,7 @@ EOF
       return 0
     fi
 
-    _kxue43_jarvis_pf::up "$@"
+    _sei_jarvis_pf::up "$@"
     ;;
   down)
     shift 1
@@ -204,7 +204,7 @@ EOF
       return 0
     fi
 
-    _kxue43_jarvis_pf::down "$@"
+    _sei_jarvis_pf::down "$@"
     ;;
   ls | list)
     shift 1
@@ -225,17 +225,17 @@ EOF
       return 0
     fi
 
-    _kxue43_jarvis_pf::ls "$@"
+    _sei_jarvis_pf::ls "$@"
     ;;
   *)
-    kxue43::log_error "Unknown subcommand $1"
+    sei::log_error "Unknown subcommand $1"
 
     return 1
     ;;
   esac
 }
 
-_kxue43_jarvis_pf::complete() {
+_sei_jarvis_pf::complete() {
   local -a opts
   opts=("'-h  (Show help message)'" "'up  (Set up port-forwarding)'" "'down  (Tear down port-forwarding)'" "'ls  (List port-forwarding)'")
 
@@ -264,6 +264,6 @@ _kxue43_jarvis_pf::complete() {
 
     return 0
   fi
-} && complete -o bashdefault -F _kxue43_jarvis_pf::complete jarvis-pf
+} && complete -o bashdefault -F _sei_jarvis_pf::complete jarvis-pf
 
-_kxue43_commands_list+=("jarvis-pf")
+_sei_commands_list+=("jarvis-pf")

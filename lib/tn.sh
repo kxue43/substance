@@ -1,17 +1,17 @@
-if [[ -n "${_kxue43_module_set_tn+x}" ]]; then
+if [[ -n "${_sei_module_set_tn+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_tn=1
+_sei_module_set_tn=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
 # Args:
 # - $1: Project directory to start nvim in.
 # - $2 (optional): Whether to start new Tmux session detached.
-_kxue43_tn::create_one() {
+_sei_tn::create_one() {
   if ! pushd "$1" &>/dev/null; then
-    kxue43::log_error "Failed to pushd into '$1'"
+    sei::log_error "Failed to pushd into '$1'"
 
     return 1
   fi
@@ -23,7 +23,7 @@ _kxue43_tn::create_one() {
   fi
 
   if ! popd &>/dev/null; then
-    kxue43::log_error "Failed to popd back to CWD"
+    sei::log_error "Failed to popd back to CWD"
 
     return 1
   fi
@@ -47,13 +47,13 @@ EOF
   fi
 
   if (($# == 0)); then
-    kxue43::log_error "tn requires at least one argument."
+    sei::log_error "tn requires at least one argument."
 
     return 1
   fi
 
   if (($# == 1)); then
-    _kxue43_tn::create_one "$1"
+    _sei_tn::create_one "$1"
 
     return 0
   fi
@@ -61,16 +61,16 @@ EOF
   local proj
 
   for proj in "$@"; do
-    _kxue43_tn::create_one "$proj" -d
+    _sei_tn::create_one "$proj" -d
   done
 
   tmux list-sessions -F '#{session_name}: #{session_windows}win'
 }
 
-_kxue43_tn::complete() {
+_sei_tn::complete() {
   compgen -V COMPREPLY -d -- "$2"
 
   return 0
-} && complete -o bashdefault -F _kxue43_tn::complete tn
+} && complete -o bashdefault -F _sei_tn::complete tn
 
-_kxue43_commands_list+=("tn")
+_sei_commands_list+=("tn")

@@ -1,12 +1,12 @@
 # Utility functions for both interactive shell and scripting.
 
-if [[ -n "${_kxue43_module_set_utils+x}" ]]; then
+if [[ -n "${_sei_module_set_utils+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_utils=1
+_sei_module_set_utils=1
 
-kxue43::log_error() {
+sei::log_error() {
   if [[ -t 2 ]]; then
     printf "\033[31m%s\033[0m\n" "$@" >&2
   else
@@ -14,7 +14,7 @@ kxue43::log_error() {
   fi
 }
 
-kxue43::log_info() {
+sei::log_info() {
   if [[ -t 1 ]]; then
     printf "\033[36m%s\033[0m\n" "$@"
   else
@@ -22,12 +22,12 @@ kxue43::log_info() {
   fi
 }
 
-kxue43::get_env_prefix() {
+sei::get_env_prefix() {
   local -n __prefix_var="$1"
 
   case "$(hostname)" in
   love66*)
-    __prefix_var=kxue43
+    __prefix_var=sei
     ;;
   fedora)
     __prefix_var=fedora
@@ -40,14 +40,14 @@ kxue43::get_env_prefix() {
     ;;
   *)
     if [[ "$(whoami)" == "vscode" ]]; then
-      __prefix_var=kxue43
+      __prefix_var=sei
     else
       __prefix_var=""
     fi
     ;;
   esac
 
-  if [[ -n "${KXUE43_WORK_MODE:+x}" ]]; then
-    __prefix_var="$KXUE43_WORK_MODE"
+  if [[ -n "${SEI_WORK_MODE:+x}" ]]; then
+    __prefix_var="$SEI_WORK_MODE"
   fi
 }

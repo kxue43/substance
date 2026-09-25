@@ -1,15 +1,15 @@
-if [[ -n "${_kxue43_module_set_commands+x}" ]]; then
+if [[ -n "${_sei_module_set_commands+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_commands=1
+_sei_module_set_commands=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/it-shell.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/acmd.sh"
 
 subp() {
-  git -C "$KXUE43_SUBSTANCE_DIR" pull
+  git -C "$SEI_SUBSTANCE_DIR" pull
 }
 
 set-aws-region() {
@@ -18,7 +18,7 @@ set-aws-region() {
   if [[ -n "${1:+x}" ]]; then
     region=$1
   else
-    region=$(kxue43::prompt_aws_region "$KXUE43_AWS_REGIONS")
+    region=$(sei::prompt_aws_region "$SEI_AWS_REGIONS")
   fi
 
   export AWS_DEFAULT_REGION=$region
@@ -37,7 +37,7 @@ use-role-profile() {
     return 0
   fi
 
-  AWS_PROFILE=$(kxue43::prompt_aws_profile "$KXUE43_AWS_PROFILE_PREFIX")
+  AWS_PROFILE=$(sei::prompt_aws_profile "$SEI_AWS_PROFILE_PREFIX")
   export AWS_PROFILE
 }
 
@@ -47,7 +47,7 @@ set-role-env() {
   if [[ -n "${1:+x}" ]]; then
     profile=$1
   else
-    profile=$(kxue43::prompt_aws_profile "$KXUE43_AWS_PROFILE_PREFIX")
+    profile=$(sei::prompt_aws_profile "$SEI_AWS_PROFILE_PREFIX")
   fi
 
   # Make sure system AWS CLI (guaranteed to be v2) is used. Sometimes a Python venv might have AWS CLI v1 installed.
@@ -79,11 +79,11 @@ gtc() {
 enter-work-mode() {
   # Enter work mode in the current shell and all sub-processes.
   # Current work mode env prefix is `ascd`.
-  KXUE43_WORK_MODE="ascd"
+  SEI_WORK_MODE="ascd"
 
-  export KXUE43_WORK_MODE
+  export SEI_WORK_MODE
 
-  kxue43::bash_post_init
+  sei::bash_post_init
 
   acmd -d
 }
@@ -96,7 +96,7 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
   set-jdk() {
     local jdk_version
 
-    jdk_version=$(kxue43::prompt_jdk_version)
+    jdk_version=$(sei::prompt_jdk_version)
 
     JAVA_HOME=$(/usr/libexec/java_home -v "$jdk_version")
     export JAVA_HOME

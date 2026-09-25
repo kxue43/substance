@@ -8,7 +8,7 @@
 
   ```bash
   mkdir -p ~/.config
-  git clone https://github.com/kxue43/substance ~/.config/substance
+  git clone https://github.com/satoseino/substance ~/.config/substance
   ~/.config/substance/set-up.sh
   ```
 

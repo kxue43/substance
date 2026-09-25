@@ -307,14 +307,14 @@ map({ "n" }, "<leader>dp", function()
   vim.fn.setreg("+", table.concat(lines, "\n"))
 end, { desc = "dedent the string in the plug register." })
 
-local kxue43_kpath_absolute = false
+local sei_kpath_absolute = false
 
 local function buf_path()
   local bufpath = vim.fn.resolve(vim.api.nvim_buf_get_name(0))
   if bufpath == "" then
     return nil
   end
-  if kxue43_kpath_absolute then
+  if sei_kpath_absolute then
     return bufpath
   end
   local git_root = vim.fs.root(bufpath, { ".git" })
@@ -324,9 +324,9 @@ end
 
 -- toggle absolute/relative path in <leader>ks and <leader>kb
 map({ "n" }, "<leader>kt", function()
-  kxue43_kpath_absolute = not kxue43_kpath_absolute
+  sei_kpath_absolute = not sei_kpath_absolute
   vim.notify(
-    "<leader>ks/<leader>kb now use " .. (kxue43_kpath_absolute and "absolute" or "relative") .. " path.",
+    "<leader>ks/<leader>kb now use " .. (sei_kpath_absolute and "absolute" or "relative") .. " path.",
     vim.log.levels.INFO
   )
 end, { desc = "toggle absolute/relative path in <leader>ks and <leader>kb." })

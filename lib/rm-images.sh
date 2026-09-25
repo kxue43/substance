@@ -1,17 +1,17 @@
-if [[ -n "${_kxue43_module_set_rm_images+x}" ]]; then
+if [[ -n "${_sei_module_set_rm_images+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_rm_images=1
+_sei_module_set_rm_images=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-_kxue43_rm_images::cdk() {
+_sei_rm_images::cdk() {
   local tags
   mapfile -t tags < <(docker images --filter "reference=cdkasset-*:latest" --format "{{.Repository}}:{{.Tag}}")
 
   if ((${#tags[@]} == 0)); then
-    kxue43::log_info "No existing CDK asset images."
+    sei::log_info "No existing CDK asset images."
 
     return 0
   fi
@@ -25,17 +25,17 @@ _kxue43_rm_images::cdk() {
   fi
 }
 
-_kxue43_rm_images::docker() {
+_sei_rm_images::docker() {
   local tags
   mapfile -t tags < <(docker images --format "{{.Repository}}:{{.Tag}}" | fzf -m --height=50% --layout=reverse)
 
   if ((${#tags[@]} == 0)); then
-    kxue43::log_info "No image selected."
+    sei::log_info "No image selected."
 
     return 0
   else
-    kxue43::log_info "The following images are selected:"
-    kxue43::log_info "${tags[@]}" "\n"
+    sei::log_info "The following images are selected:"
+    sei::log_info "${tags[@]}" "\n"
   fi
 
   docker image rm "${tags[@]}"
@@ -74,7 +74,7 @@ EOF
       return 0
     fi
 
-    _kxue43_rm_images::cdk
+    _sei_rm_images::cdk
     ;;
   docker)
     shift 1
@@ -92,17 +92,17 @@ EOF
       return 0
     fi
 
-    _kxue43_rm_images::docker
+    _sei_rm_images::docker
     ;;
   *)
-    kxue43::log_error "Unknown subcommand $1"
+    sei::log_error "Unknown subcommand $1"
 
     return 1
     ;;
   esac
 }
 
-_kxue43_rm_images::complete() {
+_sei_rm_images::complete() {
   local -a opts
   opts=("'-h  (Show help message)'" "'cdk  (Remove CDK asset images)'" "'docker  (Remove Docker images)'")
 
@@ -123,6 +123,6 @@ _kxue43_rm_images::complete() {
 
     return 0
   fi
-} && complete -o bashdefault -F _kxue43_rm_images::complete rm-images
+} && complete -o bashdefault -F _sei_rm_images::complete rm-images
 
-_kxue43_commands_list+=("rm-images")
+_sei_commands_list+=("rm-images")

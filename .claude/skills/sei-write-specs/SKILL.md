@@ -1,5 +1,5 @@
 ---
-name: kxue43-write-specs
+name: sei-write-specs
 description: "Write one or more technical spec files as Markdown, at caller-specified paths, using context already established in this session (typically invoked at the end of a design/planning conversation). Takes a path-to-topic mapping plus a shared prompt of overall instructions."
 disable-model-invocation: true
 argument-hint: "<path_mapping> <prompt>"

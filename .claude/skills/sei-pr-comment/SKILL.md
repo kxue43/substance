@@ -1,5 +1,5 @@
 ---
-name: kxue43-pr-comment
+name: sei-pr-comment
 description: "Emit a copy-pasteable GitHub PR review comment for a given finding label, wrapped in a fenced code block for easy copying in the terminal."
 disable-model-invocation: true
 argument-hint: "<finding-label>"

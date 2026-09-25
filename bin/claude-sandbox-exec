@@ -22,27 +22,27 @@ EOF
   fi
 
   if (($# == 0)); then
-    kxue43::log_error "The positional argument PROJECT is required."
+    sei::log_error "The positional argument PROJECT is required."
 
     return 1
   fi
 
   if ! docker --version &>/dev/null; then
-    kxue43::log_error "docker is not available."
+    sei::log_error "docker is not available."
 
     return 1
   fi
 
   local config_file="$HOME/.claude-headless.yaml"
   if [[ ! -r "$config_file" ]]; then
-    kxue43::log_error "The configuration file ~/.claude-headless.yaml does not exist."
+    sei::log_error "The configuration file ~/.claude-headless.yaml does not exist."
 
     return 1
   fi
 
   local project="$1"
   if [[ "$(yq ".projects.${project}" "$config_file")" == "null" ]]; then
-    kxue43::log_error "Project '${project}' does not exist in ~/.claude-headless.yaml."
+    sei::log_error "Project '${project}' does not exist in ~/.claude-headless.yaml."
 
     return 1
   fi
@@ -55,7 +55,7 @@ EOF
 
   local dockerfile_dir="$substance_dir/docker"
   if [[ ! -d "$dockerfile_dir" ]]; then
-    kxue43::log_error "The directory for Claude sandbox Dockerfiles doesn't exist."
+    sei::log_error "The directory for Claude sandbox Dockerfiles doesn't exist."
 
     return 1
   fi
@@ -71,12 +71,12 @@ EOF
 
   if [[ -z "$image_id" ]]; then
     if [[ ! -r "$dockerfile_dir/Dockerfile.${image}" ]]; then
-      kxue43::log_error "Dockerfile.${image} does not exist. Cannot build image."
+      sei::log_error "Dockerfile.${image} does not exist. Cannot build image."
 
       return 1
     fi
 
-    kxue43::log_info "Docker image '$image' does not exist. Building..."
+    sei::log_info "Docker image '$image' does not exist. Building..."
 
     if ! (cd "$dockerfile_dir" && docker build -t "$image" -f "Dockerfile.${image}" .); then
       return 1
@@ -84,36 +84,36 @@ EOF
   fi
 
   if [[ ! -d "$mount" ]]; then
-    kxue43::log_error "The mount point folder '$mount' does not exist."
+    sei::log_error "The mount point folder '$mount' does not exist."
 
     return 1
   fi
 
   if [[ "$workdir" != "null" ]] && [[ "$workdir" == /* ]]; then
-    kxue43::log_error "workdir must be relative to mount, but it is '$workdir'."
+    sei::log_error "workdir must be relative to mount, but it is '$workdir'."
 
     return 1
   fi
 
   if [[ "$workdir" != "null" ]] && [[ "$workdir" == *..* ]]; then
-    kxue43::log_error "workdir must not contain '..'."
+    sei::log_error "workdir must not contain '..'."
 
     return 1
   fi
 
   if [[ "$workdir" != "null" ]] && ! [[ -d "$mount/$workdir" ]]; then
-    kxue43::log_error "The workdir '$workdir' cannot be resolved against mount point '$mount'."
+    sei::log_error "The workdir '$workdir' cannot be resolved against mount point '$mount'."
 
     return 1
   fi
 
   if [[ "$prompt" == "null" ]]; then
-    kxue43::log_error "Prompt must not be empty."
+    sei::log_error "Prompt must not be empty."
 
     return 1
   fi
 
-  local workspace="/home/kxue/workspace"
+  local workspace="/home/satoseino/workspace"
 
   if [[ "$workdir" == "null" ]]; then
     workdir="$workspace"
@@ -122,8 +122,8 @@ EOF
   fi
 
   local token
-  if ! token="$(security find-generic-password -s "kxue43-claude-cli" -a "oauth-token-1y" -w)"; then
-    kxue43::log_error "Failed to get CLAUDE_CODE_OAUTH_TOKEN from KeyChain access."
+  if ! token="$(security find-generic-password -s "sei-claude-cli" -a "oauth-token-1y" -w)"; then
+    sei::log_error "Failed to get CLAUDE_CODE_OAUTH_TOKEN from KeyChain access."
 
     return 1
   fi

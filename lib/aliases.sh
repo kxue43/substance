@@ -1,8 +1,8 @@
-if [[ -n "${_kxue43_module_set_aliases+x}" ]]; then
+if [[ -n "${_sei_module_set_aliases+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_aliases=1
+_sei_module_set_aliases=1
 
 alias ls='ls --color=auto'
 

@@ -1,18 +1,18 @@
 # -----------------------------------------------------------------------
 # Locate substance directory
-if [[ -z "${KXUE43_SUBSTANCE_DIR:+x}" ]]; then
-  KXUE43_SUBSTANCE_DIR="$(cd "$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")" && pwd)"
+if [[ -z "${SEI_SUBSTANCE_DIR:+x}" ]]; then
+  SEI_SUBSTANCE_DIR="$(cd "$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")" && pwd)"
 
-  export KXUE43_SUBSTANCE_DIR
+  export SEI_SUBSTANCE_DIR
 fi
 # -----------------------------------------------------------------------
 # Source personal library functions.
-source "$KXUE43_SUBSTANCE_DIR/lib/it-shell.sh"
+source "$SEI_SUBSTANCE_DIR/lib/it-shell.sh"
 # -----------------------------------------------------------------------
 # Initialization
 
-kxue43::bash_init
-trap 'kxue43::bash_post_init; trap - RETURN' RETURN
+sei::bash_init
+trap 'sei::bash_post_init; trap - RETURN' RETURN
 # ------------------------------------------------------------------------
 # Environment variables
 
@@ -25,11 +25,11 @@ export GPG_TTY
 export EDITOR=vim
 # ------------------------------------------------------------------------
 # Load aliases for interactive use.
-source "$KXUE43_SUBSTANCE_DIR/lib/aliases.sh"
+source "$SEI_SUBSTANCE_DIR/lib/aliases.sh"
 # ------------------------------------------------------------------------
 # Load custom commands for interactive use.
-source "$KXUE43_SUBSTANCE_DIR/lib/commands.sh"
-source "$KXUE43_SUBSTANCE_DIR/lib/cplan.sh"
-source "$KXUE43_SUBSTANCE_DIR/lib/acmd.sh"
-source "$KXUE43_SUBSTANCE_DIR/lib/rm-images.sh"
+source "$SEI_SUBSTANCE_DIR/lib/commands.sh"
+source "$SEI_SUBSTANCE_DIR/lib/cplan.sh"
+source "$SEI_SUBSTANCE_DIR/lib/acmd.sh"
+source "$SEI_SUBSTANCE_DIR/lib/rm-images.sh"
 # ------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 ---
-name: kxue43-implement-spec
+name: sei-implement-spec
 description: "Implement a spec file on the current branch. Verifies the spec file exists, the current branch is not `main`, and the working tree is clean before implementing; explicitly grants permission to make git commits and use state-mutating git commands during the session. Accepts an optional `focus_prompt` argument for additional instructions."
 disable-model-invocation: true
 argument-hint: "<spec_path> [focus_prompt]"

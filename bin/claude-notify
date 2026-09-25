@@ -40,7 +40,7 @@ EOF
     -title "Claude Code" \
     -message "$message" \
     >/dev/null; then
-    kxue43::log_error "claude-notify: terminal-notifier failed"
+    sei::log_error "claude-notify: terminal-notifier failed"
     return 1
   fi
 }

@@ -1,18 +1,18 @@
 # Reusable functions for interactive shell (i.e. not scripting).
 
-if [[ -n "${_kxue43_module_set_it_shell+x}" ]]; then
+if [[ -n "${_sei_module_set_it_shell+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_it_shell=1
+_sei_module_set_it_shell=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-_kxue43_it_shell::prompt() {
+_sei_it_shell::prompt() {
   local chosen
 
   select chosen in "$@"; do
-    kxue43::log_info "Chose $chosen." >&2
+    sei::log_info "Chose $chosen." >&2
 
     break
   done
@@ -20,7 +20,7 @@ _kxue43_it_shell::prompt() {
   echo "$chosen"
 }
 
-kxue43::prompt_aws_profile() {
+sei::prompt_aws_profile() {
   local -a profiles
 
   mapfile -t profiles < <(grep "^\[profile $1" ~/.aws/config)
@@ -29,10 +29,10 @@ kxue43::prompt_aws_profile() {
 
   profiles=("${profiles[@]/%\]/}")
 
-  _kxue43_it_shell::prompt "${profiles[@]}"
+  _sei_it_shell::prompt "${profiles[@]}"
 }
 
-kxue43::prompt_aws_region() {
+sei::prompt_aws_region() {
   local -a regions
 
   if [[ -z "${1:+x}" ]]; then
@@ -41,24 +41,24 @@ kxue43::prompt_aws_region() {
     mapfile -t -d : regions <<<"$1"
   fi
 
-  _kxue43_it_shell::prompt "${regions[@]}"
+  _sei_it_shell::prompt "${regions[@]}"
 }
 
 # Only works on macOS.
-kxue43::prompt_jdk_version() {
+sei::prompt_jdk_version() {
   local -a versions
 
   mapfile -t versions < <(/usr/libexec/java_home -V 2>&1 | grep -Eo "^\s*\d+\.\d+\.\d+" | awk '{print $1}')
 
-  _kxue43_it_shell::prompt "${versions[@]}"
+  _sei_it_shell::prompt "${versions[@]}"
 }
 
-_kxue43_it_shell::set_path() {
+_sei_it_shell::set_path() {
   # For idempotency.
-  if [[ -z "${KXUE43_SHELL_INIT+x}" ]]; then
-    export KXUE43_SHELL_INIT=1
+  if [[ -z "${SEI_SHELL_INIT+x}" ]]; then
+    export SEI_SHELL_INIT=1
 
-    _kxue43_it_shell::ensure_path_components "/usr/local/bin"
+    _sei_it_shell::ensure_path_components "/usr/local/bin"
 
     local own_path="$HOME/go/bin:$HOME/.cargo/bin:$HOME/.local/bin"
 
@@ -75,7 +75,7 @@ _kxue43_it_shell::set_path() {
   fi
 }
 
-_kxue43_it_shell::ensure_path_components() {
+_sei_it_shell::ensure_path_components() {
   local component
 
   for component in "$@"; do
@@ -91,8 +91,8 @@ _kxue43_it_shell::ensure_path_components() {
   done
 }
 
-_kxue43_it_shell::enable_completion() {
-  export BASH_COMPLETION_USER_DIR="$KXUE43_SUBSTANCE_DIR:$HOME/.local/share/bash-completion"
+_sei_it_shell::enable_completion() {
+  export BASH_COMPLETION_USER_DIR="$SEI_SUBSTANCE_DIR:$HOME/.local/share/bash-completion"
 
   if [[ -x /opt/homebrew/bin/brew ]]; then
     source /opt/homebrew/etc/profile.d/bash_completion.sh
@@ -123,7 +123,7 @@ _kxue43_it_shell::enable_completion() {
   PS1='\[\033[94m\]\u@\t: \[\033[96m\]\w\[\033[93m\]$(__git_ps1 " (%s)")\n$(if [ $? -eq 0 ]; then echo -e "\[\033[92m\]\U2714"; else echo -e "\[\033[91m\]\U2718"; fi)\[\033[0m\]\$ '
 }
 
-_kxue43_it_shell::shell_integration() {
+_sei_it_shell::shell_integration() {
   export FZF_CTRL_T_OPTS="
   --walker-skip .git,.venv,node_modules,target
   --preview 'bat -n --color=always {}'
@@ -136,8 +136,8 @@ _kxue43_it_shell::shell_integration() {
   fi
 }
 
-_kxue43_it_shell::activate_fnm() {
-  if [[ -z "${KXUE43_SHELL_INIT+x}" ]]; then
+_sei_it_shell::activate_fnm() {
+  if [[ -z "${SEI_SHELL_INIT+x}" ]]; then
     eval "$(fnm env --use-on-cd --shell bash)"
   else
     # Trim the duplicate fnm item in the middle of PATH if exists.
@@ -148,7 +148,7 @@ _kxue43_it_shell::activate_fnm() {
   fi
 }
 
-_kxue43_it_shell::set_man_pager() {
+_sei_it_shell::set_man_pager() {
   export MANPAGER="sh -c 'col -b -x | nvim -c \"set ft=man nonu nomodifiable\" -R - '"
 
   # The MANPAGER above only works with backspace-based formatting,
@@ -158,39 +158,39 @@ _kxue43_it_shell::set_man_pager() {
   [[ "$(uname -s)" == "Linux" ]] && export GROFF_NO_SGR=1
 }
 
-kxue43::bash_init() {
+sei::bash_init() {
   # Used by the `acmd` interactive shell function
-  if [[ -z "${_kxue43_commands_list:+x}" ]]; then
-    _kxue43_commands_list=()
+  if [[ -z "${_sei_commands_list:+x}" ]]; then
+    _sei_commands_list=()
   fi
 
   # Perform initialization.
-  _kxue43_it_shell::set_path
+  _sei_it_shell::set_path
 
-  _kxue43_it_shell::activate_fnm
+  _sei_it_shell::activate_fnm
 
-  _kxue43_it_shell::enable_completion
+  _sei_it_shell::enable_completion
 
-  _kxue43_it_shell::shell_integration
+  _sei_it_shell::shell_integration
 
-  _kxue43_it_shell::set_man_pager
+  _sei_it_shell::set_man_pager
 }
 
-kxue43::bash_post_init() {
+sei::bash_post_init() {
   local prefix
 
-  kxue43::get_env_prefix "prefix"
+  sei::get_env_prefix "prefix"
 
   if [[ -z "$prefix" ]]; then
-    kxue43::log_error "Unrecognizable hostname '$(hostname)'. No env-specific .bashrc file for it"
+    sei::log_error "Unrecognizable hostname '$(hostname)'. No env-specific .bashrc file for it"
 
     return 1
-  elif [[ ! -r "$KXUE43_SUBSTANCE_DIR/profile/${prefix}.bashrc" ]]; then
-    kxue43::log_error "Env-specific .bashrc file '${prefix}.bashrc' does not exist on host '$(hostname)'."
+  elif [[ ! -r "$SEI_SUBSTANCE_DIR/profile/${prefix}.bashrc" ]]; then
+    sei::log_error "Env-specific .bashrc file '${prefix}.bashrc' does not exist on host '$(hostname)'."
 
     return 1
   fi
 
   # Source env-specific bashrc file.
-  source "$KXUE43_SUBSTANCE_DIR/profile/${prefix}.bashrc"
+  source "$SEI_SUBSTANCE_DIR/profile/${prefix}.bashrc"
 }

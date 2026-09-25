@@ -1,5 +1,5 @@
 ---
-name: kxue43-session-file
+name: sei-session-file
 description: "Create or load a session manifest file for structured research workflows. Subcommands: `new <path>` scaffolds a boilerplate session file; `load <path>` reads it and all listed spec files to prime context before beginning work."
 disable-model-invocation: true
 argument-hint: "new <rel-path> | load <rel-path>"

@@ -1,8 +1,8 @@
-if [[ -n "${_kxue43_module_set_jarvis_dc+x}" ]]; then
+if [[ -n "${_sei_module_set_jarvis_dc+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_jarvis_dc=1
+_sei_module_set_jarvis_dc=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/commands.sh"
@@ -60,11 +60,11 @@ EOF
         shift 1
         ;;
       --local-db)
-        compose_file="docker-compose.kxue43.yml"
+        compose_file="docker-compose.sei.yml"
         shift 1
         ;;
       *)
-        kxue43::log_error "Unknown option $1"
+        sei::log_error "Unknown option $1"
 
         return 1
         ;;
@@ -81,7 +81,7 @@ EOF
       )
 
       if ((${#services[@]} == 0)); then
-        kxue43::log_info "No service selected. Exit"
+        sei::log_info "No service selected. Exit"
 
         return 0
       fi
@@ -150,11 +150,11 @@ EOF
         return 0
         ;;
       --local-db)
-        compose_file="docker-compose.kxue43.yml"
+        compose_file="docker-compose.sei.yml"
         shift 1
         ;;
       *)
-        kxue43::log_error "Unknown option $1"
+        sei::log_error "Unknown option $1"
 
         return 1
         ;;
@@ -185,7 +185,7 @@ EOF
     container="$(docker ps --format '{{.Names}}' | fzf --height=50% --layout=reverse)"
 
     if [[ -z "$container" ]]; then
-      kxue43::log_info "No container selected. Exit"
+      sei::log_info "No container selected. Exit"
 
       return 0
     fi
@@ -193,14 +193,14 @@ EOF
     docker logs -f "$container"
     ;;
   *)
-    kxue43::log_error "Unknown subcommand $1"
+    sei::log_error "Unknown subcommand $1"
 
     return 1
     ;;
   esac
 }
 
-_kxue43_jarvis_dc::complete() {
+_sei_jarvis_dc::complete() {
   local -a opts
   opts=("'-h  (Show help message)'" "'up  (docker compose up)'" "'down  (docker compose down)'" "'logs  (docker logs -f)'")
 
@@ -249,6 +249,6 @@ _kxue43_jarvis_dc::complete() {
 
     return 0
   fi
-} && complete -o bashdefault -F _kxue43_jarvis_dc::complete jarvis-dc
+} && complete -o bashdefault -F _sei_jarvis_dc::complete jarvis-dc
 
-_kxue43_commands_list+=("jarvis-dc")
+_sei_commands_list+=("jarvis-dc")

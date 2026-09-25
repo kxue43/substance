@@ -22,7 +22,7 @@ EOF
   fi
 
   if (($# != 1)); then
-    kxue43::log_error "gt expects exactly one argument"
+    sei::log_error "gt expects exactly one argument"
 
     return 1
   fi

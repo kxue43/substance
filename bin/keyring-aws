@@ -20,7 +20,7 @@ _read_secret() {
     base64 -d < <(secret-tool lookup service "aws-$1" username "access-key")
     ;;
   *)
-    kxue43::log_error "Only macOS and Linux are supported."
+    sei::log_error "Only macOS and Linux are supported."
 
     return 1
     ;;
@@ -46,7 +46,7 @@ _write_secret() {
     secret-tool store --label="Password for 'access-key' on 'aws-$1'" service "aws-$1" username "access-key" <<<"$secret"
     ;;
   *)
-    kxue43::log_error "Only macOS and Linux are supported."
+    sei::log_error "Only macOS and Linux are supported."
 
     return 1
     ;;
@@ -71,7 +71,7 @@ EOF
   fi
 
   if (($# == 0)); then
-    kxue43::log_error "The positional argument PROFILE is required."
+    sei::log_error "The positional argument PROFILE is required."
 
     return 1
   fi
@@ -110,12 +110,12 @@ EOF
       access_key="$OPTARG"
       ;;
     \?)
-      kxue43::log_error "Invalid option: -$OPTARG"
+      sei::log_error "Invalid option: -$OPTARG"
 
       return 1
       ;;
     :)
-      kxue43::log_error "Option -$OPTARG requires an argument."
+      sei::log_error "Option -$OPTARG requires an argument."
 
       return 1
       ;;
@@ -125,7 +125,7 @@ EOF
   shift $((OPTIND - 1))
 
   if (($# == 0)); then
-    kxue43::log_error "The positional argument PROFILE is required."
+    sei::log_error "The positional argument PROFILE is required."
 
     return 1
   fi
@@ -163,7 +163,7 @@ EOF
     _get "$@"
     ;;
   *)
-    kxue43::log_error "Unknown command ${1}."
+    sei::log_error "Unknown command ${1}."
 
     return 1
     ;;

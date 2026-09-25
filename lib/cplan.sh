@@ -1,12 +1,12 @@
-if [[ -n "${_kxue43_module_set_cplan+x}" ]]; then
+if [[ -n "${_sei_module_set_cplan+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_cplan=1
+_sei_module_set_cplan=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
-_kxue43_cplan::ls() {
+_sei_cplan::ls() {
   local plans_dir="$HOME/.claude/plans"
   local term_width="${COLUMNS:-80}"
 
@@ -100,7 +100,7 @@ _kxue43_cplan::ls() {
   done
 }
 
-_kxue43_cplan::rm() {
+_sei_cplan::rm() {
   local -a plans
 
   mapfile -t plans < <(
@@ -109,7 +109,7 @@ _kxue43_cplan::rm() {
   )
 
   if ((${#plans[@]} == 0)); then
-    kxue43::log_info "No plan selected"
+    sei::log_info "No plan selected"
 
     return 0
   fi
@@ -117,7 +117,7 @@ _kxue43_cplan::rm() {
   rm "${plans[@]}"
 }
 
-_kxue43_cplan::pick() {
+_sei_cplan::pick() {
   local -n __plan_var="$1"
 
   __plan_var="$(
@@ -126,12 +126,12 @@ _kxue43_cplan::pick() {
   )"
 }
 
-_kxue43_cplan::cp() {
+_sei_cplan::cp() {
   local plan
-  _kxue43_cplan::pick "plan"
+  _sei_cplan::pick "plan"
 
   if [[ -z "$plan" ]]; then
-    kxue43::log_info "No plan selected"
+    sei::log_info "No plan selected"
 
     return 0
   fi
@@ -146,7 +146,7 @@ _kxue43_cplan::cp() {
     read -r -p "Enter the destination directory: " dest_dir
 
     if ! [[ -d "$dest_dir" ]]; then
-      kxue43::log_error "'$dest_dir' is not an existing directory"
+      sei::log_error "'$dest_dir' is not an existing directory"
 
       return 1
     fi
@@ -162,13 +162,13 @@ _kxue43_cplan::cp() {
   local filename
   read -r -p "Enter file name: " filename
 
-  kxue43::log_info "Copy $(basename "$plan") to $dest_dir/$filename"
+  sei::log_info "Copy $(basename "$plan") to $dest_dir/$filename"
 
   local reply
   read -r -p "Continue? [y/N]: " reply
 
   if [[ ! "${reply:-N}" =~ ^[Yy]$ ]]; then
-    kxue43::log_error "Exit without copying"
+    sei::log_error "Exit without copying"
 
     return 1
   fi
@@ -176,12 +176,12 @@ _kxue43_cplan::cp() {
   cp "$plan" "$dest_dir/$filename"
 }
 
-_kxue43_cplan::vi() {
+_sei_cplan::vi() {
   local plan
-  _kxue43_cplan::pick "plan"
+  _sei_cplan::pick "plan"
 
   if [[ -z "$plan" ]]; then
-    kxue43::log_info "No plan selected"
+    sei::log_info "No plan selected"
 
     return 0
   fi
@@ -208,26 +208,26 @@ EOF
   fi
   case "$1" in
   ls | list)
-    _kxue43_cplan::ls
+    _sei_cplan::ls
     ;;
   rm | remove)
-    _kxue43_cplan::rm
+    _sei_cplan::rm
     ;;
   cp | copy)
-    _kxue43_cplan::cp
+    _sei_cplan::cp
     ;;
   vi | nvim)
-    _kxue43_cplan::vi
+    _sei_cplan::vi
     ;;
   *)
-    kxue43::log_error "Unknown subcommand $1"
+    sei::log_error "Unknown subcommand $1"
 
     return 1
     ;;
   esac
 }
 
-_kxue43_cplan::complete() {
+_sei_cplan::complete() {
   local -a opts
   opts=("'-h  (Show help message)'" "'ls  (List plans)'" "'rm  (Remove plans)'" "'cp  (Copy a plan)'" "'vi  (Open a plan)'")
 
@@ -248,6 +248,6 @@ _kxue43_cplan::complete() {
 
     return 0
   fi
-} && complete -o bashdefault -F _kxue43_cplan::complete cplan
+} && complete -o bashdefault -F _sei_cplan::complete cplan
 
-_kxue43_commands_list+=("cplan")
+_sei_commands_list+=("cplan")

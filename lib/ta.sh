@@ -1,8 +1,8 @@
-if [[ -n "${_kxue43_module_set_ta+x}" ]]; then
+if [[ -n "${_sei_module_set_ta+x}" ]]; then
   return
 fi
 
-_kxue43_module_set_ta=1
+_sei_module_set_ta=1
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)/utils.sh"
 
@@ -24,7 +24,7 @@ EOF
   fi
 
   if (($# == 0)); then
-    kxue43::log_error "ta requires at least one argument."
+    sei::log_error "ta requires at least one argument."
 
     return 1
   fi
@@ -32,7 +32,7 @@ EOF
   tmux attach-session -t "$1"
 }
 
-_kxue43_ta::complete() {
+_sei_ta::complete() {
   if ! tmux list-sessions &>/dev/null; then
     return 0
   fi
@@ -45,6 +45,6 @@ _kxue43_ta::complete() {
 
     return 0
   fi
-} && complete -o bashdefault -F _kxue43_ta::complete ta
+} && complete -o bashdefault -F _sei_ta::complete ta
 
-_kxue43_commands_list+=("ta")
+_sei_commands_list+=("ta")

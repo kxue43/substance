@@ -1,5 +1,5 @@
 ---
-name: kxue43-pr-message
+name: sei-pr-message
 description: "Emit a brief, copy-pasteable GitHub PR message (title + description) summarizing the changes discussed in the current conversation, wrapped in a fenced code block for easy copying in the terminal."
 disable-model-invocation: true
 ---
