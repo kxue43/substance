@@ -29,4 +29,5 @@ exclude-signatures = [
     {signature = "1a24211be21e35d5b20a88000daed61423df7b6bc11d5bafaef7bf0dd2d37a07", reason = "Jarvis Registry skill ID is not credential"},
     {signature = "6b35104acf7ab1420f21e1fa26a9d988fb79cfe38efe3409ce1e9bdb56140ba0", reason = "made-up skill ID in spec test case is not credential"},
     {signature = "00ef010dfbd47da68bc3ccfe1d4e1b3a080e8e2a69c07327022a2bca88a8f31e", reason = "made-up skill ID in review report test case is not credential"},
+    {signature = "9c5a407d072dd958b40fdfa02258a8cbec4d2b0c2b9bb9f1d54fb09e47f2537b", reason = "GPG signing key ID is not credential"},
 ]

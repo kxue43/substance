@@ -1,7 +1,7 @@
 [user]
 	name = satoseino
-	email = kent.xue@ascendingdc.com
-	signingkey = 5EF2BE73370DCE7E808814DBC9EED408F4B6D021
+	email = 72355409+satoseino@users.noreply.github.com
+	signingkey = E85F342A435382B5DB8C10C941996E9C463CE073
 [commit]
 	gpgsign = true
 [tag]
